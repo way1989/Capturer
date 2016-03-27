@@ -3,10 +3,18 @@ package com.way.captain.service;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
@@ -23,6 +31,7 @@ import com.way.captain.floatview.FloatingViewListener;
 import com.way.captain.floatview.FloatingViewManager;
 import com.way.captain.fragment.SettingsFragment;
 import com.way.screenshot.TakeScreenshotActivity;
+import com.way.screenshot.TakeScreenshotService;
 import com.way.telecine.TelecineShortcutLaunchActivity;
 
 
@@ -30,9 +39,16 @@ import com.way.telecine.TelecineShortcutLaunchActivity;
  * ChatHead Service
  */
 public class ChatHeadService extends Service implements FloatingViewListener, View.OnClickListener,
-        View.OnLongClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
+        View.OnLongClickListener, SharedPreferences.OnSharedPreferenceChangeListener, SensorEventListener {
 
     private static final String TAG = "ChatHeadService";
+    private static final int MESSAGE_CENTER_SCREENSHOT = 0x000;
+    private static final int MESSAGE_NORMAL_SCREENSHOT = 0x001;
+    private static final int MESSAGE_RECORD_SCREENSHOT = 0x002;
+    private static final int MESSAGE_LONG_SCREENSHOT = 0x003;
+    private static final int MESSAGE_RECT_SCREENSHOT = 0x004;
+    private static final int MESSAGE_FREE_SCREENSHOT = 0x005;
+    private static final long DELAY_TIME = 300L;
 
     /**
      * 通知ID
@@ -44,6 +60,8 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
      * FloatingViewManager
      */
     //private FloatingViewManager mFloatingViewManager;
+    private static final int SPEED_SHRESHOLD = 45;// 这个值越大需要越大的力气来摇晃手机
+    private static final int UPTATE_INTERVAL_TIME = 50;
     /**
      * Vibrator
      */
@@ -51,10 +69,62 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
     private WindowManager mWindowManager;
     private FloatingView mFloatingView;
     private ImageView mIconView;
-
     private boolean mIsRunning;
     private SharedPreferences mPreferences;
+    private SensorManager sensorManager = null;
+    private Sensor sensor;
+    private Vibrator vibrator = null;
+    private boolean isRequest = false;
+    private float lastX;
+    private float lastY;
+    private float lastZ;
+    private long lastUpdateTime;
+    private FloatMenuDialog mFloatMenuDialog;
+    private Handler mHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case MESSAGE_CENTER_SCREENSHOT:
+                    Intent i = new Intent(ChatHeadService.this, MainActivity.class);
+                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                    startActivity(i);
+                    break;
+                case MESSAGE_NORMAL_SCREENSHOT:
+                    try {
+                        Intent screenRecordIntent = new Intent(ChatHeadService.this, TakeScreenshotActivity.class);
+                        screenRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                        startActivity(screenRecordIntent);
+                    } catch (ActivityNotFoundException e) {
+                    }
+                    break;
+                case MESSAGE_RECORD_SCREENSHOT:
+                    try {
+                        Intent screenRecordIntent = new Intent(ChatHeadService.this, TelecineShortcutLaunchActivity.class);
 
+                        screenRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                        startActivity(screenRecordIntent);
+                    } catch (ActivityNotFoundException e) {
+                    }
+                    break;
+                case MESSAGE_LONG_SCREENSHOT:
+                    try {
+                        Intent screenRecordIntent = new Intent(ChatHeadService.this, TakeScreenshotActivity.class);
+                        screenRecordIntent.setAction(TakeScreenshotService.ACTION_LONG_SCREENSHOT);
+                        screenRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                        startActivity(screenRecordIntent);
+                    } catch (ActivityNotFoundException e) {
+                    }
+                    break;
+                case MESSAGE_RECT_SCREENSHOT:
+                    break;
+                case MESSAGE_FREE_SCREENSHOT:
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
     @Override
     public void onCreate() {
         super.onCreate();
@@ -62,6 +132,15 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
         mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mPreferences.registerOnSharedPreferenceChangeListener(this);
+
+        initData();
+        if (sensorManager != null) {
+            sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        }
+        if (sensor != null) {
+            sensorManager.registerListener(this, sensor,
+                    SensorManager.SENSOR_DELAY_GAME);
+        }
     }
 
     /**
@@ -93,16 +172,16 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
 //        options.overMargin = (int) (16 * metrics.density);
 //        mFloatingViewManager.addViewToWindow(iconView, options);
 
-        mFloatingView = new FloatingView(this);
-        mFloatingView.setShape(FloatingViewManager.SHAPE_CIRCLE);
-        mFloatingView.setOverMargin((int) (16 * metrics.density));
-        mFloatingView.setInitCoords(metrics.widthPixels, metrics.heightPixels / 2);
-
-        mFloatingView.addView(mIconView);
-        mWindowManager.addView(mFloatingView, mFloatingView.getWindowLayoutParams());
+//        mFloatingView = new FloatingView(this);
+//        mFloatingView.setShape(FloatingViewManager.SHAPE_CIRCLE);
+//        mFloatingView.setOverMargin((int) (16 * metrics.density));
+//        mFloatingView.setInitCoords(metrics.widthPixels, metrics.heightPixels / 2);
+//
+//        mFloatingView.addView(mIconView);
+//        mWindowManager.addView(mFloatingView, mFloatingView.getWindowLayoutParams());
 
         // 常駐起動
-        //startForeground(NOTIFICATION_ID, createNotification());
+        startForeground(NOTIFICATION_ID, createNotification());
 
         return START_REDELIVER_INTENT;
     }
@@ -114,6 +193,7 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
     public void onDestroy() {
         destroy();
         super.onDestroy();
+        sensorManager.unregisterListener(this);
     }
 
     /**
@@ -170,23 +250,49 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
         return builder.build();
     }
 
-
     @Override
     public void onClick(final View v) {
         mVibrator.vibrate(30);
+        if (mFloatMenuDialog != null && mFloatMenuDialog.isShowing()) {
+            mFloatMenuDialog.cancel();
+        }
+        switch (v.getId()) {
+            case R.id.menu_center:
+                mHandler.removeMessages(MESSAGE_CENTER_SCREENSHOT);
+                mHandler.sendEmptyMessageDelayed(MESSAGE_CENTER_SCREENSHOT, DELAY_TIME);
+                break;
+            case R.id.menu_one:
+                mHandler.removeMessages(MESSAGE_NORMAL_SCREENSHOT);
+                mHandler.sendEmptyMessageDelayed(MESSAGE_NORMAL_SCREENSHOT, DELAY_TIME);
+                break;
+            case R.id.menu_two:
+                mHandler.removeMessages(MESSAGE_RECORD_SCREENSHOT);
+                mHandler.sendEmptyMessageDelayed(MESSAGE_RECORD_SCREENSHOT, DELAY_TIME);
 
-        v.animate().alpha(0).withEndAction(new Runnable() {
-            @Override
-            public void run() {
-//                mFloatingView.setDraggable(false);
-                v.setVisibility(View.GONE);
-                PreferenceManager.getDefaultSharedPreferences(ChatHeadService.this).edit()
-                        .putBoolean(SettingsFragment.HIDE_FLOATVIEW_KEY, true).apply();
-            }
-        });
-        Intent i = new Intent(ChatHeadService.this, TelecineShortcutLaunchActivity.class);
-        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(i);
+                break;
+            case R.id.menu_three:
+                mHandler.removeMessages(MESSAGE_LONG_SCREENSHOT);
+                mHandler.sendEmptyMessageDelayed(MESSAGE_LONG_SCREENSHOT, DELAY_TIME);
+                break;
+            case R.id.menu_four:
+                break;
+            case R.id.menu_five:
+                break;
+            default:
+//                v.animate().alpha(0).withEndAction(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        v.setVisibility(View.GONE);
+//                        PreferenceManager.getDefaultSharedPreferences(ChatHeadService.this).edit()
+//                                .putBoolean(SettingsFragment.HIDE_FLOATVIEW_KEY, true).apply();
+//                    }
+//                });
+//                Intent i = new Intent(ChatHeadService.this, TelecineShortcutLaunchActivity.class);
+//                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                startActivity(i);
+                break;
+        }
+
     }
 
     @Override
@@ -219,4 +325,63 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
             }
         }
     }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        long currentUpdateTime = System.currentTimeMillis();
+        long timeInterval = currentUpdateTime - lastUpdateTime;
+        if (timeInterval < UPTATE_INTERVAL_TIME) {
+            return;
+        }
+        lastUpdateTime = currentUpdateTime;
+
+        float x = event.values[0];
+        float y = event.values[1];
+        float z = event.values[2];
+
+        float deltaX = x - lastX;
+        float deltaY = y - lastY;
+        float deltaZ = z - lastZ;
+
+        lastX = x;
+        lastY = y;
+        lastZ = z;
+
+        double speed = (Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ
+                * deltaZ) / timeInterval) * 100;
+        if (speed >= SPEED_SHRESHOLD && !isRequest) {
+            vibrator.vibrate(300);
+            onShake();
+        }
+    }
+
+    private void onShake() {
+        isRequest = true;
+        showDialog();
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    public void initData() {
+        sensorManager = (SensorManager) this
+                .getSystemService(Context.SENSOR_SERVICE);
+        vibrator = (Vibrator) this.getSystemService(Service.VIBRATOR_SERVICE);
+    }
+
+    private void showDialog() {
+        if (mFloatMenuDialog == null)
+            mFloatMenuDialog = new FloatMenuDialog(this, R.style.Theme_Dialog);
+        mFloatMenuDialog.setOnClickListener(this);
+        mFloatMenuDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                isRequest = false;
+            }
+        });
+        mFloatMenuDialog.show();
+    }
+
 }

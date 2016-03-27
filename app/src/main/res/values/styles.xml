@@ -55,4 +55,18 @@
     <style name="PromoScreenTextStyle.CenterAligned">
         <item name="android:textAlignment">center</item>
     </style>
+    <style name="Item_Tumblr">
+        <item name="android:layout_width">@dimen/item_circle_size_tumblr</item>
+        <item name="android:layout_height">@dimen/item_circle_size_tumblr</item>
+    </style>
+    <style name="Theme_Dialog" parent="@android:style/Theme.DeviceDefault.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
 </resources>

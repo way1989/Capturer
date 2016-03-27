@@ -93,9 +93,10 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
         }
     };
 
-    public static Intent newIntent(Context context, int resultCode, Intent data) {
+    public static Intent newIntent(Context context, int resultCode, Intent data, boolean isLongScreenshot) {
         Intent intent = new Intent(context, TakeScreenshotService.class);
-        intent.setAction(ACTION_LONG_SCREENSHOT);
+        if(isLongScreenshot)
+            intent.setAction(ACTION_LONG_SCREENSHOT);
         intent.putExtra(EXTRA_RESULT_CODE, resultCode);
         intent.putExtra(EXTRA_DATA, data);
         return intent;

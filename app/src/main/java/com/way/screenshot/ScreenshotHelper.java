@@ -21,14 +21,14 @@ final class ScreenshotHelper {
         Log.i("TakeScreenshotService", "fireScreenCaptureIntent...");
     }
 
-    static boolean handleActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
+    static boolean handleActivityResult(Activity activity, int requestCode, int resultCode, Intent data, boolean isLongScreenshot) {
         Log.i("TakeScreenshotService", "handleActivityResult... requestCode = " + requestCode);
         if (requestCode != CREATE_SCREENSHOT) {
             return false;
         }
         if (resultCode == Activity.RESULT_OK) {
             Log.d("TakeScreenshotService", "Acquired permission to screen capture. Starting service.");
-            activity.startService(TakeScreenshotService.newIntent(activity, resultCode, data));
+            activity.startService(TakeScreenshotService.newIntent(activity, resultCode, data, isLongScreenshot));
         } else {
             Log.d("TakeScreenshotService", "Failed to acquire permission to screen capture.");
             return false;

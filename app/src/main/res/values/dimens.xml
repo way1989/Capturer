@@ -37,4 +37,9 @@
     <dimen name="no_results_text_main">20.0sp</dimen>
     <dimen name="no_results_text_secondary">14.0sp</dimen>
     <integer name="standard_notification_panel_layout_gravity">0x31</integer><!-- top|center_horizontal -->
+
+    <dimen name="layout_radius_tumblr">96dp</dimen>
+    <dimen name="layout_child_offset_tumblr">72dp</dimen>
+    <dimen name="item_circle_size_tumblr">48dp</dimen>
+    <dimen name="item_font_size_tumblr">16sp</dimen>
 </resources>

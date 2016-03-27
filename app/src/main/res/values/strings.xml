@@ -110,4 +110,9 @@
 
     <string name="scroll_screenshot_toast_title">Long screenshot is working</string>
     <string name="scroll_screenshot_toast_text">Tap the screen to end the long screenshot</string>
+    <string name="long_screenshot">Long</string>
+    <string name="free_screenshot">Free</string>
+    <string name="rect_screenshot">Rect</string>
+    <string name="record_screenshot">Recrod</string>
+    <string name="normal_screen_shot">Normal</string>
 </resources>

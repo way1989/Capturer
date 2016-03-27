@@ -126,6 +126,7 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
     public void onDestroy() {
         super.onDestroy();
         Log.i(TAG, TAG + " onDestroy...");
+        dismissLongScreenshotToast();
         if (mImageReader != null)
             mImageReader.close();
         if (mProjection != null)

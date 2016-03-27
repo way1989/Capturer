@@ -45,6 +45,7 @@ import android.os.Environment;
 import android.os.Process;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -71,7 +72,7 @@ class SaveImageInBackgroundData {
     Context context;
     Bitmap image;
     Uri imageUri;
-    Runnable finisher;
+    GlobalScreenshot.Callback finisher;
     int iconSize;
     int result;
     int previewWidth;
@@ -282,7 +283,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
     @Override
     protected void onPostExecute(SaveImageInBackgroundData params) {
         if (isCancelled()) {
-            params.finisher.run();
+            params.finisher.onSaveFinish(null);
             params.clearImage();
             params.clearContext();
             return;
@@ -320,7 +321,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             n.flags &= ~Notification.FLAG_NO_CLEAR;
             mNotificationManager.notify(mNotificationId, n);
         }
-        params.finisher.run();
+        params.finisher.onSaveFinish(params.imageUri);
         params.clearContext();
     }
 }
@@ -347,7 +348,7 @@ class GlobalScreenshot {
     private final int mPreviewWidth;
     private final int mPreviewHeight;
 
-    private Context mContext;
+    private TakeScreenshotService mContext;
     private WindowManager mWindowManager;
     private WindowManager.LayoutParams mWindowLayoutParams;
     private NotificationManager mNotificationManager;
@@ -370,11 +371,12 @@ class GlobalScreenshot {
     private AsyncTask<SaveImageInBackgroundData, Void, SaveImageInBackgroundData> mSaveInBgTask;
 
     private MediaActionSound mCameraSound;
+    private int mRotation = -1;
 
     /**
      * @param context everything needs a context :(
      */
-    public GlobalScreenshot(Context context) {
+    public GlobalScreenshot(TakeScreenshotService context) {
         Resources r = context.getResources();
         mContext = context;
         LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -452,10 +454,24 @@ class GlobalScreenshot {
         nManager.notify(SCREENSHOT_NOTIFICATION_ID, n);
     }
 
+    public static Bitmap resizeBitmap(Bitmap bitmap, float scale) {
+        Log.i(TAG, "resizeBitmap....");
+        if (bitmap == null || bitmap.isRecycled())
+            return null;
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+
+        Matrix matrix = new Matrix();
+        matrix.postScale(scale, scale);
+
+        Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+        return resizedBitmap;
+    }
+
     /**
      * Creates a new worker thread and saves the screenshot to the media store.
      */
-    private void saveScreenshotInWorkerThread(Runnable finisher) {
+    private void saveScreenshotInWorkerThread(Callback finisher) {
         SaveImageInBackgroundData data = new SaveImageInBackgroundData();
         data.context = mContext;
         data.image = mScreenBitmap;
@@ -488,13 +504,14 @@ class GlobalScreenshot {
     /**
      * Takes a screenshot of the current display and shows an animation.
      */
-    void takeScreenshot(Bitmap bitmap, Runnable finisher, boolean isFullScreen) {
+    void takeScreenshot(Bitmap bitmap, Runnable finisher, Callback callback, boolean isLongScreenshot) {
         // We need to orient the screenshot correctly (and the Surface api seems
         // to take screenshots
         // only in the natural orientation of the device :!)
         mDisplay.getRealMetrics(mDisplayMetrics);
         float[] dims = {mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels};
-        float degrees = getDegreesForRotation(mDisplay.getRotation());
+        mRotation = mDisplay.getRotation();
+        float degrees = getDegreesForRotation(mRotation);
         boolean requiresRotation = (degrees > 0);
         if (requiresRotation) {
             // Get the dimensions of the device in its native orientation
@@ -511,7 +528,7 @@ class GlobalScreenshot {
         mScreenBitmap = bitmap;
         if (mScreenBitmap == null) {
             notifyScreenshotError(mContext, mNotificationManager);
-            finisher.run();
+            callback.onSaveFinish(null);
             return;
         }
 
@@ -534,16 +551,33 @@ class GlobalScreenshot {
         mScreenBitmap.setHasAlpha(false);
         mScreenBitmap.prepareToDraw();
 
-        // Start the post-screenshot animation
-        startAnimation(finisher, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels, isFullScreen);
+        if (isLongScreenshot)
+            finisher.run();
+        else
+            // Start the post-screenshot animation
+            startAnimation(callback, false);
     }
 
     /**
      * Starts the animation after taking the screenshot
      */
-    private void startAnimation(final Runnable finisher, int w, int h, boolean isFullScreen) {
+    private void startAnimation(final Callback finisher, final boolean scrollScreenshot) {
+        int w = mDisplayMetrics.widthPixels;
+        int h = mDisplayMetrics.heightPixels;
         // Add the view for the animation
-        mScreenshotView.setImageBitmap(mScreenBitmap);
+        Bitmap screenBitmapPreView = mScreenBitmap;
+        if (scrollScreenshot) {
+            mDisplay.getRealMetrics(mDisplayMetrics);
+
+            int count = mScreenBitmap.getHeight() / mDisplayMetrics.heightPixels;
+            count = Math.max(1, Math.min(5, count));
+            screenBitmapPreView = resizeBitmap(mScreenBitmap, 1.00f / count);
+            Log.i("broncho", "mScreenBitmap.getHeight() = " + mScreenBitmap.getHeight()
+                    + ", mDisplayMetrics.heightPixels = " + mDisplayMetrics.heightPixels
+                    + ", count = " + count + ", 1.00f / count = " + (1.00f / count));
+
+        }
+        mScreenshotView.setImageBitmap(screenBitmapPreView);
         mScreenshotLayout.requestFocus();
 
         // Setup the animation with the screenshot just taken
@@ -554,10 +588,16 @@ class GlobalScreenshot {
 
         mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
         ValueAnimator screenshotDropInAnim = createScreenshotDropInAnimation();
-        ValueAnimator screenshotFadeOutAnim = createScreenshotDropOutAnimation(w, h, isFullScreen);
+        ValueAnimator screenshotFadeOutAnim = createScreenshotDropOutAnimation(w, h, false);
         mScreenshotAnimation = new AnimatorSet();
         mScreenshotAnimation.playSequentially(screenshotDropInAnim, screenshotFadeOutAnim);
         mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                super.onAnimationStart(animation);
+                finisher.onCaptureFinish(true, scrollScreenshot);
+            }
+
             @Override
             public void onAnimationEnd(Animator animation) {
                 // Save the screenshot once we have a bit of time now
@@ -714,5 +754,63 @@ class GlobalScreenshot {
             });
         }
         return anim;
+    }
+
+    public void takeScreenshotByScroll(Bitmap newBitmap, Runnable finisher, Callback callback) {
+        if (mScreenBitmap == null || mScreenBitmap.isRecycled()) {
+            notifyScreenshotError(mContext, mNotificationManager);
+            callback.onSaveFinish(null);
+            return;
+        }
+        // We need to orient the screenshot correctly (and the Surface api seems to take screenshots
+        // only in the natural orientation of the device :!)
+        mDisplay.getRealMetrics(mDisplayMetrics);
+        float[] dims = {mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels};
+        int rotation = mDisplay.getRotation();
+        if (rotation != mRotation) {
+            startAnimation(callback, true);
+            return;
+        }
+        float degrees = getDegreesForRotation(mDisplay.getRotation());
+        boolean requiresRotation = (degrees > 0);
+        if (requiresRotation) {
+            // Get the dimensions of the device in its native orientation
+            mDisplayMatrix.reset();
+            mDisplayMatrix.preRotate(-degrees);
+            mDisplayMatrix.mapPoints(dims);
+            dims[0] = Math.abs(dims[0]);
+            dims[1] = Math.abs(dims[1]);
+        }
+
+        // Take the screenshot
+        //mScreenBitmap = SurfaceControl.screenshot((int) dims[0], (int) dims[1]);
+        //Bitmap newBitmap = getScreenshot((int) dims[0], (int) dims[1]);
+        if (newBitmap == null || newBitmap.isRecycled()) {
+            startAnimation(callback, true);
+            return;
+        }
+        //tmp save the last bitmap
+        Bitmap oldBitmap = mScreenBitmap;
+        //collage a new bitmap
+        Bitmap collageBitmap = LongScreenshotUtil.getInstance(mContext.getApplicationContext()).collageLongBitmap(oldBitmap, newBitmap);
+        if (collageBitmap == null || collageBitmap.isRecycled()) {
+            startAnimation(callback, true);
+            return;
+        }
+        mScreenBitmap.recycle();
+        mScreenBitmap = collageBitmap;
+
+        if (mContext.getCurrentScrollCount() >= TakeScreenshotService.MAX_MOVE_TIMES) {
+            // Start the post-screenshot animation
+            startAnimation(callback, true);
+        } else {
+            finisher.run();
+        }
+    }
+
+    public interface Callback {
+        void onCaptureFinish(boolean succeed, boolean scrollScreenshot);
+
+        void onSaveFinish(Uri uri);
     }
 }

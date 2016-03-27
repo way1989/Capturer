@@ -36,4 +36,5 @@
     <dimen name="no_results_text_padding_bottom">16.0dip</dimen>
     <dimen name="no_results_text_main">20.0sp</dimen>
     <dimen name="no_results_text_secondary">14.0sp</dimen>
+    <integer name="standard_notification_panel_layout_gravity">0x31</integer><!-- top|center_horizontal -->
 </resources>

@@ -1,5 +1,6 @@
 package com.way.captain.service;
 
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -28,7 +29,6 @@ import com.way.captain.R;
 import com.way.captain.activity.MainActivity;
 import com.way.captain.floatview.FloatingView;
 import com.way.captain.floatview.FloatingViewListener;
-import com.way.captain.floatview.FloatingViewManager;
 import com.way.captain.fragment.SettingsFragment;
 import com.way.screenshot.TakeScreenshotActivity;
 import com.way.screenshot.TakeScreenshotService;
@@ -60,7 +60,7 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
      * FloatingViewManager
      */
     //private FloatingViewManager mFloatingViewManager;
-    private static final int SPEED_SHRESHOLD = 45;// 这个值越大需要越大的力气来摇晃手机
+    private static final int SPEED_SHRESHOLD = 100;// 这个值越大需要越大的力气来摇晃手机
     private static final int UPTATE_INTERVAL_TIME = 50;
     /**
      * Vibrator
@@ -71,16 +71,15 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
     private ImageView mIconView;
     private boolean mIsRunning;
     private SharedPreferences mPreferences;
-    private SensorManager sensorManager = null;
-    private Sensor sensor;
-    private Vibrator vibrator = null;
+    private SensorManager mSensorManager = null;
+    private Sensor mSensor;
     private boolean isRequest = false;
     private float lastX;
     private float lastY;
     private float lastZ;
     private long lastUpdateTime;
     private FloatMenuDialog mFloatMenuDialog;
-    private Handler mHandler = new Handler(){
+    private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -125,22 +124,12 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
             }
         }
     };
+    private KeyguardManager mKeyguardManager;
+
     @Override
     public void onCreate() {
         super.onCreate();
-        mWindowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-        mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        mPreferences.registerOnSharedPreferenceChangeListener(this);
-
         initData();
-        if (sensorManager != null) {
-            sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        }
-        if (sensor != null) {
-            sensorManager.registerListener(this, sensor,
-                    SensorManager.SENSOR_DELAY_GAME);
-        }
     }
 
     /**
@@ -193,7 +182,7 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
     public void onDestroy() {
         destroy();
         super.onDestroy();
-        sensorManager.unregisterListener(this);
+        mSensorManager.unregisterListener(this);
     }
 
     /**
@@ -235,7 +224,7 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
     private Notification createNotification() {
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setWhen(System.currentTimeMillis());
-        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setSmallIcon(R.drawable.theme_captain);
         builder.setContentTitle(getString(R.string.chathead_content_title));
         builder.setContentText(getString(R.string.chathead_content_text));
         builder.setOngoing(true);
@@ -254,7 +243,7 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
     public void onClick(final View v) {
         mVibrator.vibrate(30);
         if (mFloatMenuDialog != null && mFloatMenuDialog.isShowing()) {
-            mFloatMenuDialog.cancel();
+            mFloatMenuDialog.dismiss();
         }
         switch (v.getId()) {
             case R.id.menu_center:
@@ -349,8 +338,8 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
 
         double speed = (Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ
                 * deltaZ) / timeInterval) * 100;
-        if (speed >= SPEED_SHRESHOLD && !isRequest) {
-            vibrator.vibrate(300);
+        if (speed >= SPEED_SHRESHOLD && !isRequest && !mKeyguardManager.isKeyguardLocked()) {
+            mVibrator.vibrate(300);
             onShake();
         }
     }
@@ -366,9 +355,18 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
     }
 
     public void initData() {
-        sensorManager = (SensorManager) this
+        mKeyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        mWindowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        mPreferences.registerOnSharedPreferenceChangeListener(this);
+        mSensorManager = (SensorManager) this
                 .getSystemService(Context.SENSOR_SERVICE);
-        vibrator = (Vibrator) this.getSystemService(Service.VIBRATOR_SERVICE);
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        if (mSensor != null) {
+            mSensorManager.registerListener(this, mSensor,
+                    SensorManager.SENSOR_DELAY_GAME);
+        }
     }
 
     private void showDialog() {

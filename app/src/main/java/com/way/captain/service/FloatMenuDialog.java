@@ -79,8 +79,14 @@ public class FloatMenuDialog extends Dialog {
         hideMenu(mArcLayout, mCenterItem);
     }
 
-    private void superCancel() {
-        super.cancel();
+    @Override
+    public void dismiss() {
+        hideMenu(mArcLayout, mCenterItem);
+        //super.dismiss();
+    }
+
+    private void superDimiss() {
+        super.dismiss();
     }
 
     private void showMenu(ArcLayout arcLayout, View centerItem) {
@@ -109,13 +115,13 @@ public class FloatMenuDialog extends Dialog {
 
 
         AnimatorSet animSet = new AnimatorSet();
-        //animSet.playSequentially(animList);
-        animSet.playTogether(animList);
+        animSet.playSequentially(animList);
+        //animSet.playTogether(animList);
         animSet.start();
         animSet.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                superCancel();
+                superDimiss();
             }
 
         });
@@ -164,7 +170,7 @@ public class FloatMenuDialog extends Dialog {
                 item.setTranslationY(0f);
             }
         });
-        anim.setDuration(10);
+        anim.setDuration(50);
         return anim;
     }
 
@@ -202,7 +208,7 @@ public class FloatMenuDialog extends Dialog {
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 //menuLayout.setVisibility(View.INVISIBLE);
-                superCancel();
+                superDimiss();
             }
         });
         animSet.start();

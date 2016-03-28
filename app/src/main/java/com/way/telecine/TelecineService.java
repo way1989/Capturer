@@ -149,6 +149,12 @@ public final class TelecineService extends Service {
         }
         Log.d("way", "Starting up!");
         running = true;
+
+        if(intent == null){
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
         if (!hasAvailableSpace()) {
             Toast.makeText(this, R.string.not_enough_storage, Toast.LENGTH_LONG).show();
             return START_NOT_STICKY;

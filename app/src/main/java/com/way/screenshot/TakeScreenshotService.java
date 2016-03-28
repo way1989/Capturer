@@ -144,6 +144,10 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
         }
         Log.d(TAG, "Starting up!");
         mIsRunning = true;
+        if(intent == null){
+            stopSelf();
+            return START_NOT_STICKY;
+        }
 
         final int resultCode = intent.getIntExtra(EXTRA_RESULT_CODE, 0);
         final Intent data = intent.getParcelableExtra(EXTRA_DATA);

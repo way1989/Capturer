@@ -115,9 +115,24 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
                     } catch (ActivityNotFoundException e) {
                     }
                     break;
-                case MESSAGE_RECT_SCREENSHOT:
-                    break;
+
                 case MESSAGE_FREE_SCREENSHOT:
+                    try {
+                        Intent screenRecordIntent = new Intent(ChatHeadService.this, com.isseiaoki.simplecropview.TakeScreenshotActivity.class);
+                        screenRecordIntent.setAction(com.isseiaoki.simplecropview.TakeScreenshotService.ACTION_FREE_SCREENSHOT);
+                        screenRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                        startActivity(screenRecordIntent);
+                    } catch (ActivityNotFoundException e) {
+                    }
+                    break;
+                case MESSAGE_RECT_SCREENSHOT:
+                    try {
+                        Intent screenRecordIntent = new Intent(ChatHeadService.this, com.isseiaoki.simplecropview.TakeScreenshotActivity.class);
+                        screenRecordIntent.setAction(com.isseiaoki.simplecropview.TakeScreenshotService.ACTION_RECT_SCREENSHOT);
+                        screenRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                        startActivity(screenRecordIntent);
+                    } catch (ActivityNotFoundException e) {
+                    }
                     break;
                 default:
                     break;
@@ -264,8 +279,12 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
                 mHandler.sendEmptyMessageDelayed(MESSAGE_LONG_SCREENSHOT, DELAY_TIME);
                 break;
             case R.id.menu_four:
+                mHandler.removeMessages(MESSAGE_FREE_SCREENSHOT);
+                mHandler.sendEmptyMessageDelayed(MESSAGE_FREE_SCREENSHOT, DELAY_TIME);
                 break;
             case R.id.menu_five:
+                mHandler.removeMessages(MESSAGE_RECT_SCREENSHOT);
+                mHandler.sendEmptyMessageDelayed(MESSAGE_RECT_SCREENSHOT, DELAY_TIME);
                 break;
             default:
 //                v.animate().alpha(0).withEndAction(new Runnable() {

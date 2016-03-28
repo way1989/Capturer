@@ -82,6 +82,14 @@
             </intent-filter>
         </receiver>
 
+        <activity
+            android:name="com.isseiaoki.simplecropview.TakeScreenshotActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.Telecine.Transparent" />
+
+        <service android:name="com.isseiaoki.simplecropview.TakeScreenshotService" />
     </application>
 
 </manifest>

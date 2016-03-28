@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">FirUpgrade</string>
     <string name="progress_dialog_title">Check Update</string>
     <string name="progress_dialog_message">Checking...</string>
     <string name="new_version_dialog_title">Find New Version%s,Update Now?</string>

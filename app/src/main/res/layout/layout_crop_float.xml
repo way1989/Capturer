@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.isseiaoki.simplecropview.CropImageView
+        android:id="@+id/cropImageView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        custom:backgroundColor="@color/base"
+        custom:cropMode="ratio_free"
+        custom:frameColor="@color/frame"
+        custom:frameStrokeWeight="1dp"
+        custom:guideColor="@color/guide"
+        custom:guideShowMode="show_on_touch"
+        custom:guideStrokeWeight="1dp"
+        custom:handleColor="@color/handle"
+        custom:handleShowMode="show_always"
+        custom:handleSize="8dp"
+        custom:minFrameSize="50dp"
+        custom:overlayColor="@color/overlay"
+        custom:touchPadding="8dp" />
+
+    <Button
+        android:id="@+id/crop_ok_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@android:string/ok" />
+</FrameLayout>

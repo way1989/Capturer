@@ -214,11 +214,21 @@ public class TakeScreenshotService extends Service {
                 //stopSelf();
                 //showRectCropLayout(mScreenShotBitmap);
                 if (isFreeCrop)
-                    showFreeCropLayout(mScreenShotBitmap);
+                    showFreeCropLayout(removeNavigationBar(mScreenShotBitmap));
                 else
-                    showRectCropLayout(mScreenShotBitmap);
+                    showRectCropLayout(removeNavigationBar(mScreenShotBitmap));
             }
         }, false);
+    }
+
+    private Bitmap removeNavigationBar(Bitmap bitmap) {
+        int navigationHeight = getNavigationBarHeight();
+        Log.i("broncho", "navigationHeight = " + navigationHeight);
+        if (navigationHeight == 0)
+            return bitmap;
+        Bitmap newBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
+                bitmap.getHeight() - navigationHeight);
+        return newBitmap;
     }
 
     public int getNavigationBarHeight() {

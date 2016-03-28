@@ -60,7 +60,7 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
      * FloatingViewManager
      */
     //private FloatingViewManager mFloatingViewManager;
-    private static final int SPEED_SHRESHOLD = 100;// 这个值越大需要越大的力气来摇晃手机
+    private static final int SPEED_SHRESHOLD = 60;// 这个值越大需要越大的力气来摇晃手机
     private static final int UPTATE_INTERVAL_TIME = 50;
     /**
      * Vibrator

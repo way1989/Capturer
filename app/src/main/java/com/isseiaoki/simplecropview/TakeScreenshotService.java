@@ -10,7 +10,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.hardware.display.DisplayManager;
@@ -203,7 +202,7 @@ public class TakeScreenshotService extends Service {
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
         Log.i("broncho", "getImage: imageWidth = " + imageWidth + ", imageHeight = " + imageHeight
-                +", mScreenWidth = " + mScreenWidth + ", mScreenHeight = " + mScreenHeight);
+                + ", mScreenWidth = " + mScreenWidth + ", mScreenHeight = " + mScreenHeight);
         Image.Plane[] planes = image.getPlanes();
         ByteBuffer byteBuffer = planes[0].getBuffer();
         int pixelStride = planes[0].getPixelStride();
@@ -233,7 +232,7 @@ public class TakeScreenshotService extends Service {
             public void run() {
                 //stopSelf();
                 //showRectCropLayout(mScreenShotBitmap);
-                if(mScreenShotBitmap == null || mScreenShotBitmap.isRecycled())
+                if (mScreenShotBitmap == null || mScreenShotBitmap.isRecycled())
                     return;
                 if (isFreeCrop)
                     showFreeCropLayout(removeNavigationBar(mScreenShotBitmap));
@@ -244,32 +243,53 @@ public class TakeScreenshotService extends Service {
     }
 
     private Bitmap removeNavigationBar(Bitmap bitmap) {
-        int navigationHeight = getNavigationBarHeight();
-        Log.i("broncho", "navigationHeight = " + navigationHeight);
-        if (navigationHeight == 0)
+        boolean hasNavigationBar = hasNavigationBar();
+        if (!hasNavigationBar)
             return bitmap;
+
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
-        if (height > width)
+
+        if (height > width) {//竖屏情况
+            int navigationHeight = getNavigationBarHeight();
+            if (navigationHeight == 0)
+                return bitmap;
             return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
                     bitmap.getHeight() - navigationHeight);
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth() - navigationHeight,
+        }
+
+        //横屏
+        int navigationWidth = getNavigationBarWidth();
+        if (navigationWidth == 0)
+            return bitmap;
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth() - navigationWidth,
                 bitmap.getHeight());
+
     }
 
-    public int getNavigationBarHeight() {
+    private boolean hasNavigationBar() {
         boolean hasMenukey = ViewConfiguration.get(getApplicationContext()).hasPermanentMenuKey();
         boolean hasBackkey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
-        if (!hasMenukey && !hasBackkey) {
-            Resources resources = getResources();
-            int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
-            if (resourceId > 0) {
-                return resources.getDimensionPixelSize(resourceId);
-            }
-            return 0;
-        } else {
-            return 0;
+        return !hasMenukey && !hasBackkey;
+    }
+
+    private int getNavigationBarHeight() {
+        Resources resources = getResources();
+        int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            return resources.getDimensionPixelSize(resourceId);
         }
+        return 0;
+    }
+
+    private int getNavigationBarWidth() {
+        Resources resources = getResources();
+        int resourceId = resources.getIdentifier("navigation_bar_width", "dimen", "android");
+        if (resourceId > 0) {
+            return resources.getDimensionPixelSize(resourceId);
+        }
+        return 0;
+
     }
 
     private void showRectCropLayout(Bitmap bitmap) {

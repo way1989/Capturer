@@ -12,39 +12,39 @@
         app:arc_origin="center"
         app:arc_radius="@dimen/layout_radius_tumblr">
 
-        <Button
-            android:id="@+id/menu_one"
+        <ImageView
+            android:id="@+id/menu_normal_screenshot"
             style="@style/Item_Tumblr"
             android:background="@drawable/tumblr_orange_oval"
             android:text="@string/normal_screen_shot" />
 
-        <Button
-            android:id="@+id/menu_two"
+        <ImageView
+            android:id="@+id/menu_screenrecord"
             style="@style/Item_Tumblr"
             android:background="@drawable/tumblr_green_oval"
             android:text="@string/record_screenshot" />
 
-        <Button
-            android:id="@+id/menu_three"
+        <ImageView
+            android:id="@+id/menu_long_screenshot"
             style="@style/Item_Tumblr"
             android:background="@drawable/tumblr_grey_oval"
             android:text="@string/long_screenshot" />
 
-        <Button
-            android:id="@+id/menu_four"
+        <ImageView
+            android:id="@+id/menu_free_screenshot"
             style="@style/Item_Tumblr"
             android:background="@drawable/tumblr_blue_oval"
-            android:text="@string/free_screenshot"  />
+            android:text="@string/free_screenshot" />
 
-        <Button
-            android:id="@+id/menu_five"
+        <ImageView
+            android:id="@+id/menu_rect_screenshot"
             style="@style/Item_Tumblr"
             android:background="@drawable/tumblr_teal_oval"
-            android:text="@string/rect_screenshot"  />
+            android:text="@string/rect_screenshot" />
     </com.ogaclejapan.arclayout.ArcLayout>
 
-    <ImageButton
-        android:id="@+id/menu_center"
+    <ImageView
+        android:id="@+id/menu_screnshot_center"
         style="@style/Item_Tumblr"
         android:layout_gravity="center"
         android:background="@drawable/tumblr_red_oval"

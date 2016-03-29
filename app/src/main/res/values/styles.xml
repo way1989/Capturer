@@ -58,6 +58,7 @@
     <style name="Item_Tumblr">
         <item name="android:layout_width">@dimen/item_circle_size_tumblr</item>
         <item name="android:layout_height">@dimen/item_circle_size_tumblr</item>
+        <item name="android:padding">8dp</item>
     </style>
     <style name="Theme_Dialog" parent="@android:style/Theme.DeviceDefault.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>

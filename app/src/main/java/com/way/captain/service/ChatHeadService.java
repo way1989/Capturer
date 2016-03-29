@@ -28,7 +28,6 @@ import android.widget.ImageView;
 import com.way.captain.R;
 import com.way.captain.activity.MainActivity;
 import com.way.captain.floatview.FloatingView;
-import com.way.captain.floatview.FloatingViewListener;
 import com.way.captain.fragment.SettingsFragment;
 import com.way.screenshot.TakeScreenshotActivity;
 import com.way.screenshot.TakeScreenshotService;
@@ -38,7 +37,7 @@ import com.way.telecine.TelecineShortcutLaunchActivity;
 /**
  * ChatHead Service
  */
-public class ChatHeadService extends Service implements FloatingViewListener, View.OnClickListener,
+public class ChatHeadService extends Service implements View.OnClickListener,
         View.OnLongClickListener, SharedPreferences.OnSharedPreferenceChangeListener, SensorEventListener {
 
     private static final String TAG = "ChatHeadService";
@@ -59,7 +58,6 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
     /**
      * FloatingViewManager
      */
-    //private FloatingViewManager mFloatingViewManager;
     private static final int SPEED_SHRESHOLD = 60;// 这个值越大需要越大的力气来摇晃手机
     private static final int UPTATE_INTERVAL_TIME = 50;
     /**
@@ -159,30 +157,17 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
 
         final DisplayMetrics metrics = new DisplayMetrics();
         mWindowManager.getDefaultDisplay().getMetrics(metrics);
-        //final LayoutInflater inflater = LayoutInflater.from(this);
-        //final ImageView iconView = (ImageView) inflater.inflate(R.layout.widget_chathead, null, false);
-        mIconView = new ImageView(this);
+
+/*        mIconView = new ImageView(this);
         mIconView.setId(R.id.fab);
         mIconView.setImageResource(R.drawable.theme_captain);
         mIconView.setOnClickListener(this);
         mIconView.setOnLongClickListener(this);
-
-
-//        mFloatingViewManager = new FloatingViewManager(this, this);
-//        mFloatingViewManager.setFixedTrashIconImage(R.drawable.ic_trash_fixed);
-//        mFloatingViewManager.setActionTrashIconImage(R.drawable.ic_trash_action);
-//        final FloatingViewManager.Options options = new FloatingViewManager.Options();
-//        options.shape = FloatingViewManager.SHAPE_CIRCLE;
-//        options.overMargin = (int) (16 * metrics.density);
-//        mFloatingViewManager.addViewToWindow(iconView, options);
-
-//        mFloatingView = new FloatingView(this);
-//        mFloatingView.setShape(FloatingViewManager.SHAPE_CIRCLE);
-//        mFloatingView.setOverMargin((int) (16 * metrics.density));
-//        mFloatingView.setInitCoords(metrics.widthPixels, metrics.heightPixels / 2);
-//
-//        mFloatingView.addView(mIconView);
-//        mWindowManager.addView(mFloatingView, mFloatingView.getWindowLayoutParams());
+        mFloatingView = new FloatingView(this);
+        mFloatingView.setOverMargin((int) (16 * metrics.density));
+        mFloatingView.setInitCoords(metrics.widthPixels, metrics.heightPixels / 2);
+        mFloatingView.addView(mIconView);
+        mWindowManager.addView(mFloatingView, mFloatingView.getWindowLayoutParams());*/
 
         // 常駐起動
         startForeground(NOTIFICATION_ID, createNotification());
@@ -209,21 +194,9 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onFinishFloatingView() {
-        stopSelf();
-    }
-
-    /**
      * View
      */
     private void destroy() {
-        /*if (mFloatingViewManager != null) {
-            mFloatingViewManager.removeAllViewToWindow();
-            mFloatingViewManager = null;
-        }*/
         mPreferences.unregisterOnSharedPreferenceChangeListener(this);
         if (mFloatingView != null) {
             mIsRunning = false;
@@ -246,7 +219,7 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
         builder.setPriority(NotificationCompat.PRIORITY_MIN);
         builder.setCategory(NotificationCompat.CATEGORY_SERVICE);
 
-        // PendingIntent作成
+        // PendingIntent
         final Intent notifyIntent = new Intent(this, MainActivity.class);
         PendingIntent notifyPendingIntent = PendingIntent.getActivity(this, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(notifyPendingIntent);
@@ -261,28 +234,28 @@ public class ChatHeadService extends Service implements FloatingViewListener, Vi
             mFloatMenuDialog.dismiss();
         }
         switch (v.getId()) {
-            case R.id.menu_center:
+            case R.id.menu_screnshot_center:
                 mHandler.removeMessages(MESSAGE_CENTER_SCREENSHOT);
                 mHandler.sendEmptyMessageDelayed(MESSAGE_CENTER_SCREENSHOT, DELAY_TIME);
                 break;
-            case R.id.menu_one:
+            case R.id.menu_normal_screenshot:
                 mHandler.removeMessages(MESSAGE_NORMAL_SCREENSHOT);
                 mHandler.sendEmptyMessageDelayed(MESSAGE_NORMAL_SCREENSHOT, DELAY_TIME);
                 break;
-            case R.id.menu_two:
+            case R.id.menu_screenrecord:
                 mHandler.removeMessages(MESSAGE_RECORD_SCREENSHOT);
                 mHandler.sendEmptyMessageDelayed(MESSAGE_RECORD_SCREENSHOT, DELAY_TIME);
 
                 break;
-            case R.id.menu_three:
+            case R.id.menu_long_screenshot:
                 mHandler.removeMessages(MESSAGE_LONG_SCREENSHOT);
                 mHandler.sendEmptyMessageDelayed(MESSAGE_LONG_SCREENSHOT, DELAY_TIME);
                 break;
-            case R.id.menu_four:
+            case R.id.menu_free_screenshot:
                 mHandler.removeMessages(MESSAGE_FREE_SCREENSHOT);
                 mHandler.sendEmptyMessageDelayed(MESSAGE_FREE_SCREENSHOT, DELAY_TIME);
                 break;
-            case R.id.menu_five:
+            case R.id.menu_rect_screenshot:
                 mHandler.removeMessages(MESSAGE_RECT_SCREENSHOT);
                 mHandler.sendEmptyMessageDelayed(MESSAGE_RECT_SCREENSHOT, DELAY_TIME);
                 break;

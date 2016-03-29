@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.preference.PreferenceManager;
 
+import com.joanzapata.iconify.Iconify;
+import com.joanzapata.iconify.fonts.MaterialModule;
 import com.squareup.leakcanary.LeakCanary;
 import com.way.captain.fragment.SettingsFragment;
 import com.way.captain.service.ChatHeadService;
@@ -28,7 +30,7 @@ public class App extends Application {
             FIR.init(this);
         mContext = this;
         LeakCanary.install(this);
-
+        Iconify.with(new MaterialModule());
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsFragment.ATOUCH_KEY, true))
             startService(new Intent(this, ChatHeadService.class));
     }

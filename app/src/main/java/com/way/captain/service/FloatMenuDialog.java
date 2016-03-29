@@ -6,6 +6,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
@@ -14,8 +15,10 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnticipateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
-import android.widget.Button;
+import android.widget.ImageView;
 
+import com.joanzapata.iconify.IconDrawable;
+import com.joanzapata.iconify.fonts.MaterialIcons;
 import com.ogaclejapan.arclayout.ArcLayout;
 import com.way.captain.R;
 import com.way.screenshot.ShellCmdUtils;
@@ -28,7 +31,7 @@ import java.util.List;
  */
 public class FloatMenuDialog extends Dialog {
     private ArcLayout mArcLayout;
-    private View mCenterItem;
+    private ImageView mCenterItem;
     private View.OnClickListener mListener;
 
     public FloatMenuDialog(Context context, int themeResId) {
@@ -46,7 +49,7 @@ public class FloatMenuDialog extends Dialog {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.float_dialog_menu);
         mArcLayout = (ArcLayout) findViewById(R.id.arc_layout);
-        mCenterItem = findViewById(R.id.menu_center);
+        mCenterItem = (ImageView) findViewById(R.id.menu_screnshot_center);
         mArcLayout.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
@@ -55,18 +58,37 @@ public class FloatMenuDialog extends Dialog {
                 return true;
             }
         });
+        mCenterItem.setImageDrawable(new IconDrawable(this.getContext().getApplicationContext(),
+                MaterialIcons.md_home).color(Color.WHITE).actionBarSize());
         mCenterItem.setOnClickListener(mListener);
         for (int i = 0, size = mArcLayout.getChildCount(); i < size; i++) {
-            Button button = (Button) mArcLayout.getChildAt(i);
-            /*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP && i < 3) {
-                button.setVisibility(View.GONE);
-                continue;
-            }*/
-            if(i == 2 &&!ShellCmdUtils.isDeviceRoot()){
-                button.setVisibility(View.GONE);
-                continue;
+            ImageView button = (ImageView) mArcLayout.getChildAt(i);
+            switch (button.getId()) {
+                case R.id.menu_normal_screenshot:
+                    button.setImageDrawable(new IconDrawable(this.getContext().getApplicationContext(),
+                            MaterialIcons.md_cast_connected).color(Color.WHITE).actionBarSize());
+                    break;
+                case R.id.menu_screenrecord:
+                    button.setImageDrawable(new IconDrawable(this.getContext().getApplicationContext(),
+                            MaterialIcons.md_theaters).color(Color.WHITE).actionBarSize());
+                    break;
+                case R.id.menu_long_screenshot:
+                    if (!ShellCmdUtils.isDeviceRoot()) {
+                        button.setVisibility(View.GONE);
+                        continue;
+                    }
+                    button.setImageDrawable(new IconDrawable(this.getContext().getApplicationContext(),
+                            MaterialIcons.md_view_day).color(Color.WHITE).actionBarSize());
+                    break;
+                case R.id.menu_free_screenshot:
+                    button.setImageDrawable(new IconDrawable(this.getContext().getApplicationContext(),
+                            MaterialIcons.md_crop_free).color(Color.WHITE).actionBarSize());
+                    break;
+                case R.id.menu_rect_screenshot:
+                    button.setImageDrawable(new IconDrawable(this.getContext().getApplicationContext(),
+                            MaterialIcons.md_crop).color(Color.WHITE).actionBarSize());
+                    break;
             }
-            //button.setColorFilter(Color.WHITE);
             button.setOnClickListener(mListener);
         }
     }
@@ -151,7 +173,7 @@ public class FloatMenuDialog extends Dialog {
                 AnimatorUtils.translationY(dy, 0f)
         );
 
-        anim.setInterpolator(new OvershootInterpolator());
+        anim.setInterpolator(new DecelerateInterpolator());
         anim.setDuration(50);
         return anim;
     }
@@ -168,9 +190,7 @@ public class FloatMenuDialog extends Dialog {
                 AnimatorUtils.translationY(0f, dy)
         );
 
-        anim.setInterpolator(new AccelerateInterpolator(
-
-        ));
+        anim.setInterpolator(new AccelerateInterpolator());
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {

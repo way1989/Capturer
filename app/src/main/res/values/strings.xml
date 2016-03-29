@@ -48,20 +48,20 @@
     <string name="screenshot_delete_action">Delete</string>
     <string name="screenshot_delete_confirmation">Screenshot deleted.</string>
     <string name="screen_shot">Take Screenshot</string>
-    <string name="chathead_content_title">captain</string>
-    <string name="chathead_content_text">the captain is running</string>
+    <string name="chathead_content_title">Captain is running</string>
+    <string name="chathead_content_text">Please shake your device...</string>
     <string name="shipped_ffmpeg_version" translatable="false">n2.4.2</string>
     <string name="video_size_percentage_summary">select the size of screen record</string>
     <string name="countdown_summary">wait three seconds when begin take a screen record</string>
     <string name="show_touches_summary">show a touch indicator when take a screen record</string>
-    <string name="use_atouch">Assistive Touch</string>
+    <string name="use_atouch">Shake</string>
     <string name="about_menu">About</string>
     <string name="settings_self_title" translatable="false">way</string>
     <string name="settings_author_title">Author</string>
     <string name="settings_version_title">Version</string>
     <string name="settings_happen_category">Trigger Method</string>
     <string name="advance_category">Advance settings</string>
-    <string name="use_atouch_summary">Use assistive touch to start screen record</string>
+    <string name="use_atouch_summary">Shake your device to show main menu</string>
     <string name="boot_auto">Auto Launch</string>
     <string name="boot_auto_summary">Auto launch Captain after reboot</string>
     <string name="snack_bar_action_undo">UNDO</string>

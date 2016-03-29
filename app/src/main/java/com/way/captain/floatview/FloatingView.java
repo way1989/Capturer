@@ -178,10 +178,7 @@ public class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreD
      * ドラッグ可能フラグ
      */
     private boolean mIsDraggable;
-    /**
-     * 形を表す係数
-     */
-    private float mShape;
+
     /**
      * 画面端をオーバーするマージン
      */
@@ -200,7 +197,7 @@ public class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreD
     /**
      * 移動方向
      */
-    private int mMoveDirection;
+    private boolean mIsMoveToEdge;
 
     /**
      * コンストラクタ
@@ -225,7 +222,7 @@ public class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreD
         mAnimationHandler = new FloatingAnimationHandler(this);
         mLongPressHandler = new LongPressHandler(this);
         mMoveEdgeInterpolator = new OvershootInterpolator(MOVE_TO_EDGE_OVERSHOOT_TENSION);
-        mMoveDirection = FloatingViewManager.MOVE_DIRECTION_DEFAULT;
+        mIsMoveToEdge = true;
 
         mMoveLimitRect = new Rect();
         mPositionLimitRect = new Rect();
@@ -268,7 +265,7 @@ public class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreD
     public boolean onPreDraw() {
         getViewTreeObserver().removeOnPreDrawListener(this);
         // 画面端に移動しない場合は指定座標に移動
-        if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_NONE) {
+        if (mIsMoveToEdge) {
             mParams.x = mInitX;
             mParams.y = mInitY;
             moveTo(mInitX, mInitY, mInitX, mInitY, false);
@@ -311,7 +308,7 @@ public class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreD
         // 縦横切替の場合
         if (oldScreenWidth != newScreenWidth || oldScreenHeight != newScreenHeight) {
             // 画面端に移動する場合は現在の位置から左右端を設定
-            if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_DEFAULT) {
+            if (mIsMoveToEdge) {
                 // 右半分にある場合
                 if (mParams.x > (newScreenWidth - width) / 2) {
                     mParams.x = mPositionLimitRect.right;
@@ -320,14 +317,6 @@ public class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreD
                 else {
                     mParams.x = mPositionLimitRect.left;
                 }
-            }
-            // 左端に移動
-            else if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_LEFT) {
-                mParams.x = mPositionLimitRect.left;
-            }
-            // 右端に移動
-            else if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_RIGHT) {
-                mParams.x = mPositionLimitRect.right;
             }
             // 画面端に移動しない場合は画面座標の比率から計算
             else {
@@ -503,17 +492,9 @@ public class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreD
         final int currentY = getYByTouch();
         final int goalPositionX;
         // 画面端に移動する場合は画面端の座標を設定
-        if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_DEFAULT) {
+        if (mIsMoveToEdge) {
             final boolean isMoveRightEdge = currentX > (mMetrics.widthPixels - getWidth()) / 2;
             goalPositionX = isMoveRightEdge ? mPositionLimitRect.right : mPositionLimitRect.left;
-        }
-        // 左端への移動
-        else if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_LEFT) {
-            goalPositionX = mPositionLimitRect.left;
-        }
-        // 右端への移動
-        else if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_RIGHT) {
-            goalPositionX = mPositionLimitRect.right;
         }
         // 画面端に移動しない場合は、現在の座標のまま
         else {
@@ -612,24 +593,6 @@ public class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreD
     }
 
     /**
-     * Viewの形を取得します。
-     *
-     * @return SHAPE_CIRCLE or SHAPE_RECTANGLE
-     */
-    public float getShape() {
-        return mShape;
-    }
-
-    /**
-     * Viewの形を表す定数
-     *
-     * @param shape SHAPE_CIRCLE or SHAPE_RECTANGLE
-     */
-    public void setShape(float shape) {
-        mShape = shape;
-    }
-
-    /**
      * 画面端をオーバーするマージンです。
      *
      * @param margin マージン
@@ -639,24 +602,15 @@ public class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreD
     }
 
     /**
-     * 移動方向を設定します。
-     *
-     * @param moveDirection 移動方向
+     * @param isMoveToEdge
      */
-    public void setMoveDirection(int moveDirection) {
-        // デフォルトから変更されていたら画面端に移動しない
-        if (mInitX != DEFAULT_X || mInitY != DEFAULT_Y) {
-            mMoveDirection = FloatingViewManager.MOVE_DIRECTION_NONE;
-        } else {
-            mMoveDirection = moveDirection;
-        }
+    public void setIsMoveToEdge(boolean isMoveToEdge) {
+        mIsMoveToEdge = isMoveToEdge;
     }
 
     /**
-     * 初期座標を設定します。
-     *
-     * @param x FloatingViewの初期X座標
-     * @param y FloatingViewの初期Y座標
+     * @param x FloatingView
+     * @param y FloatingView
      */
     public void setInitCoords(int x, int y) {
         mInitX = x;
@@ -664,9 +618,7 @@ public class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreD
     }
 
     /**
-     * Window上での描画領域を取得します。
-     *
-     * @param outRect 変更を加えるRect
+     * @param outRect
      */
     public void getWindowDrawingRect(Rect outRect) {
         final int currentX = getXByTouch();
@@ -675,32 +627,29 @@ public class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreD
     }
 
     /**
-     * WindowManager.LayoutParamsを取得します。
+     * WindowManager.LayoutParams
      */
     public WindowManager.LayoutParams getWindowLayoutParams() {
         return mParams;
     }
 
     /**
-     * タッチ座標から算出されたFloatingViewのX座標
-     *
-     * @return FloatingViewのX座標
+     * @return FloatingView X
      */
     private int getXByTouch() {
         return (int) (mScreenTouchX - mLocalTouchX);
     }
 
     /**
-     * タッチ座標から算出されたFloatingViewのY座標
+     * FloatingView Y
      *
-     * @return FloatingViewのY座標
+     * @return FloatingView Y
      */
     private int getYByTouch() {
         return (int) (mMetrics.heightPixels - (mScreenTouchY - mLocalTouchY + getHeight()));
     }
 
     /**
-     * 通常状態に変更します。
      */
     void setNormal() {
         mAnimationHandler.setState(STATE_NORMAL);
@@ -708,10 +657,8 @@ public class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreD
     }
 
     /**
-     * 重なった状態に変更します。
-     *
-     * @param centerX 対象の中心座標X
-     * @param centerY 対象の中心座標Y
+     * @param centerX 対象中心X
+     * @param centerY 対象中心Y
      */
     void setIntersecting(int centerX, int centerY) {
         mAnimationHandler.setState(STATE_INTERSECTING);
@@ -719,7 +666,6 @@ public class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreD
     }
 
     /**
-     * 終了状態に変更します。
      */
     void setFinishing() {
         mAnimationHandler.setState(STATE_FINISHING);

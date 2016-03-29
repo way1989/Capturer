@@ -1,5 +1,7 @@
 package com.way.screenshot;
 
+import android.util.Log;
+
 import java.io.DataOutputStream;
 import java.io.OutputStream;
 
@@ -7,7 +9,18 @@ import java.io.OutputStream;
  * Created by android on 16-3-8.
  */
 public class ShellCmdUtils {
-
+    private static final String TAG = "ShellCmdUtils";
+    public static boolean isDeviceRoot(){
+        try{
+            Process process =  Runtime.getRuntime().exec("su");
+            Log.i(TAG, "isDeviceRoot: process = " + process + ", process.getOutputStream() = " + process.getOutputStream());
+            if(process != null && process.getOutputStream() != null)
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return false;
+    }
     public static boolean execShellCmd(String cmd) {
         try {
             Process process = Runtime.getRuntime().exec("su");

@@ -18,6 +18,7 @@ import android.widget.Button;
 
 import com.ogaclejapan.arclayout.ArcLayout;
 import com.way.captain.R;
+import com.way.screenshot.ShellCmdUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +62,10 @@ public class FloatMenuDialog extends Dialog {
                 button.setVisibility(View.GONE);
                 continue;
             }*/
+            if(i == 2 &&!ShellCmdUtils.isDeviceRoot()){
+                button.setVisibility(View.GONE);
+                continue;
+            }
             //button.setColorFilter(Color.WHITE);
             button.setOnClickListener(mListener);
         }

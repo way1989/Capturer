@@ -1,19 +1,19 @@
 apply plugin: 'com.android.application'
 //应用插件
 //apply plugin: 'com.bugtags.library.plugin'
-//apply plugin: 'im.fir.plugin.gradle'//必填
-//fir {
-//    //必填 上传 fir.im apk 字段，否则无法上传 APP 到 fir.im
-//    apiToken API_TOKEN
-//
-//    //可选 上传fir.im 中显示的changelog
-//    changeLog '第一个正式版本发布'
-//}
-////可选 如需实现自动上传符号表到 BugHD 功能，为必填项
-//bughd {
-//    projectId PROJECT_ID
-//    apiToken API_TOKEN
-//}
+apply plugin: 'im.fir.plugin.gradle'//必填
+fir {
+    //必填 上传 fir.im apk 字段，否则无法上传 APP 到 fir.im
+    apiToken API_TOKEN
+
+    //可选 上传fir.im 中显示的changelog
+    changeLog CHANGE_LOG
+}
+//可选 如需实现自动上传符号表到 BugHD 功能，为必填项
+bughd {
+    projectId BUGHD_PROJECT_ID
+    apiToken BUGHD_API_TOKEN
+}
 
 def buildTime() {
     return new Date().format("yyyyMMdd", TimeZone.getTimeZone("UTC"))
@@ -27,8 +27,8 @@ android {
         applicationId "com.way.captain"
         minSdkVersion 21
         targetSdkVersion 23
-        versionCode 600000
-        versionName "6.0.00.00"
+        versionCode 600001
+        versionName "6.0.00.01"
     }
     signingConfigs {
         release {

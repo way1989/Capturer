@@ -3,6 +3,9 @@
 buildscript {
     repositories {
         jcenter()
+        maven {
+            url "http://maven.bughd.com/public"
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.0.0-beta7'
@@ -13,7 +16,7 @@ buildscript {
         //classpath 'com.bugtags.library:bugtags-gradle:latest.integration'
 
         //添加fir插件依赖
-        //classpath 'im.fir:gradle-fir-publisher:1.0.2'
+        classpath 'im.fir:gradle-fir-publisher:1.0.2'
     }
 }
 

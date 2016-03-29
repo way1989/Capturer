@@ -249,6 +249,9 @@ public class FreeCropView extends ViewGroup {
             canvas.save();
             canvas.clipPath(drawStroke.getPath(), Region.Op.DIFFERENCE);
             canvas.drawColor(0x88000000);
+            mGesturePaint.setStrokeWidth(mGestureStrokeWidth);
+            mGesturePaint.setColor(Color.parseColor("#88ffffff"));
+            canvas.drawPath(mPath, mGesturePaint);// 画手势轨迹
             canvas.restore();
 
         } else {
@@ -313,6 +316,7 @@ public class FreeCropView extends ViewGroup {
     private void touchDown(MotionEvent event) {
         Log.i(TAG, "onTouchEvent touchDown  = ");
         mIsListeningForGestures = true;
+        if(mListener != null) mListener.onStart();
 
         float x = event.getX();
         float y = event.getY();
@@ -411,6 +415,8 @@ public class FreeCropView extends ViewGroup {
 
     private void touchUp(MotionEvent event, boolean cancel) {
         mIsListeningForGestures = false;
+        if(mListener != null) mListener.onEnd();
+
         drawStroke = new GestureStroke(mStrokeBuffer);
         clipStroke = new ClipStroke(mImageRect, mStrokeBuffer);
         // A gesture wasn't started or was cancelled
@@ -492,5 +498,14 @@ public class FreeCropView extends ViewGroup {
 
             invalidate();
         }
+    }
+
+    private OnStateListener mListener;
+    public void setOnStateListener(OnStateListener listener){
+        mListener = listener;
+    }
+    public interface OnStateListener{
+        public void onStart();
+        public void onEnd();
     }
 }

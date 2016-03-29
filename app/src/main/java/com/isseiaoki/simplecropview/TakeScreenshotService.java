@@ -30,6 +30,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.way.captain.R;
@@ -279,10 +280,10 @@ public class TakeScreenshotService extends Service {
                 mScreenshot.saveScreenshotInWorkerThread(cropImageView.getCroppedBitmap(), new Runnable() {
                     @Override
                     public void run() {
-                        dismissRectCropLayout();
                         stopSelf();
                     }
                 });
+                dismissRectCropLayout();
             }
         });
 
@@ -339,17 +340,31 @@ public class TakeScreenshotService extends Service {
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
         }
         final FreeCropView freeCropView = (FreeCropView) mFreeCropDialog.findViewById(R.id.free_crop_view);
+        final Button confirmBtn = (Button) mFreeCropDialog.findViewById(R.id.free_crop_ok_btn);
         freeCropView.setFreeCropBitmap(bitmap);
-        mFreeCropDialog.findViewById(R.id.free_crop_ok_btn).setOnClickListener(new View.OnClickListener() {
+        freeCropView.setOnStateListener(new FreeCropView.OnStateListener() {
+            @Override
+            public void onStart() {
+                confirmBtn.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onEnd() {
+                confirmBtn.setVisibility(View.VISIBLE);
+            }
+        });
+        confirmBtn.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
                 mScreenshot.saveScreenshotInWorkerThread(freeCropView.getFreeCropBitmap(), new Runnable() {
                     @Override
                     public void run() {
-                        dismissFreeCropLayout();
                         stopSelf();
                     }
                 });
+                dismissFreeCropLayout();
+
             }
         });
 

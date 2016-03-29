@@ -274,9 +274,9 @@ public class TakeScreenshotService extends Service {
         }
         final CropImageView cropImageView = (CropImageView) mRectCropDialog.findViewById(R.id.cropImageView);
         cropImageView.setImageBitmap(bitmap);
-        mRectCropDialog.findViewById(R.id.crop_ok_btn).setOnClickListener(new View.OnClickListener() {
+        cropImageView.setOnDoubleTapListener(new CropImageView.OnDoubleTapListener() {
             @Override
-            public void onClick(View v) {
+            public void onDoubleTab() {
                 mScreenshot.saveScreenshotInWorkerThread(cropImageView.getCroppedBitmap(), new Runnable() {
                     @Override
                     public void run() {
@@ -286,6 +286,12 @@ public class TakeScreenshotService extends Service {
                 dismissRectCropLayout();
             }
         });
+//        mRectCropDialog.findViewById(R.id.crop_ok_btn).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//            }
+//        });
 
         if (!mRectCropDialog.isShowing())
             mRectCropDialog.show();

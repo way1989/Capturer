@@ -22,12 +22,12 @@
         custom:overlayColor="@color/overlay"
         custom:touchPadding="8dp" />
 
-    <Button
+<!--    <Button
         android:id="@+id/crop_ok_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
-        android:text="@android:string/ok" />
+        android:text="@android:string/ok" />-->
 </FrameLayout>

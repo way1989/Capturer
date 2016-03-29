@@ -19,6 +19,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -392,12 +393,33 @@ public class CropImageView extends ImageView {
     }
 
     // Touch Event /////////////////////////////////////////////////////////////////////////////////
-
+    private long lastUpdateTime;
+    private static final int UPTATE_INTERVAL_TIME = 400;
+    private OnDoubleTapListener mListener;
+    public void setOnDoubleTapListener(OnDoubleTapListener listener){
+        mListener = listener;
+    }
+    public interface OnDoubleTapListener {
+        public void onDoubleTab();
+    }
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (!mIsInitialized) return false;
         if (!mIsCropEnabled) return false;
         if (!mIsEnabled) return false;
+        if(mListener != null)
+        if(event.getAction() == MotionEvent.ACTION_DOWN){
+            long currentUpdateTime = System.currentTimeMillis();
+            long timeInterval = currentUpdateTime - lastUpdateTime;
+            Log.i("broncho", "MotionEvent.ACTION_DOWN... timeInterval = " + timeInterval);
+
+            if (timeInterval < UPTATE_INTERVAL_TIME) {
+                Log.i("broncho", "double click...");
+                mListener.onDoubleTab();
+                return true;
+            }
+            lastUpdateTime = currentUpdateTime;
+        }
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 onDown(event);

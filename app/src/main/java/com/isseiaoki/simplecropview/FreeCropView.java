@@ -167,9 +167,11 @@ public class FreeCropView extends ViewGroup {
      * @return 自由裁剪最终结果
      */
     public Bitmap getFreeCropBitmap() {
-        if (mBaseBitmap == null || mPath.isEmpty()) {
+        if (mBaseBitmap == null) {
             return null;
         }
+        if(mPath == null || mPath.isEmpty())
+            return mBaseBitmap;
         Bitmap resizeBitmap = resizeBitmap(mBaseBitmap, mScale);
         Bitmap bitmap = Bitmap.createBitmap(resizeBitmap.getWidth(), resizeBitmap.getHeight(), Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);

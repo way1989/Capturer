@@ -5,13 +5,16 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.VirtualDisplay;
 import android.media.Image;
 import android.media.ImageReader;
 import android.media.projection.MediaProjection;
@@ -30,7 +33,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.way.captain.R;
@@ -62,6 +64,7 @@ public class TakeScreenshotService extends Service {
     private int mScreenHeight;
     private MediaProjection mProjection;
     private MediaProjectionManager mProjectionManager;
+    private VirtualDisplay mVirtualDisplay;
     private Handler mHandler = new Handler(Looper.getMainLooper());
     private ImageReader mImageReader;
     private WindowManager mWindowManager;
@@ -111,6 +114,17 @@ public class TakeScreenshotService extends Service {
         mWindowManager = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
 
         mScreenshot = new GlobalScreenshot(TakeScreenshotService.this);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        updateFreeCropLayoutWidth();
+        updateRectCropLayoutWidth();
+        if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+        } else {
+        }
+
     }
 
     @Override
@@ -166,7 +180,7 @@ public class TakeScreenshotService extends Service {
         mScreenWidth = displayMetrics.widthPixels;
         mScreenHeight = displayMetrics.heightPixels;
         mImageReader = ImageReader.newInstance(mScreenWidth, mScreenHeight, PixelFormat.RGBA_8888, 1);// 只获取一张图片
-        mProjection.createVirtualDisplay(DISPLAY_NAME, mScreenWidth, mScreenHeight, displayMetrics.densityDpi,
+        mVirtualDisplay = mProjection.createVirtualDisplay(DISPLAY_NAME, mScreenWidth, mScreenHeight, displayMetrics.densityDpi,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION, mImageReader.getSurface(), null, null);
         mImageReader.setOnImageAvailableListener(mListener, null);
         mHandler.postDelayed(mScreenshotTimeout, 5000L);// 设置截屏超时时间
@@ -181,11 +195,15 @@ public class TakeScreenshotService extends Service {
     }
 
     private void getImage() {
+
         Image image = mImageReader.acquireLatestImage();
         if (image == null) {
             throw new NullPointerException("image is null...");
         }
+        int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
+        Log.i("broncho", "getImage: imageWidth = " + imageWidth + ", imageHeight = " + imageHeight
+                +", mScreenWidth = " + mScreenWidth + ", mScreenHeight = " + mScreenHeight);
         Image.Plane[] planes = image.getPlanes();
         ByteBuffer byteBuffer = planes[0].getBuffer();
         int pixelStride = planes[0].getPixelStride();
@@ -201,6 +219,7 @@ public class TakeScreenshotService extends Service {
             mImageReader.close();
         if (mProjection != null)
             mProjection.stop();
+        mVirtualDisplay.release();
         takeScreenshot();
     }
 
@@ -214,6 +233,8 @@ public class TakeScreenshotService extends Service {
             public void run() {
                 //stopSelf();
                 //showRectCropLayout(mScreenShotBitmap);
+                if(mScreenShotBitmap == null || mScreenShotBitmap.isRecycled())
+                    return;
                 if (isFreeCrop)
                     showFreeCropLayout(removeNavigationBar(mScreenShotBitmap));
                 else
@@ -227,9 +248,13 @@ public class TakeScreenshotService extends Service {
         Log.i("broncho", "navigationHeight = " + navigationHeight);
         if (navigationHeight == 0)
             return bitmap;
-        Bitmap newBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
-                bitmap.getHeight() - navigationHeight);
-        return newBitmap;
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        if (height > width)
+            return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
+                    bitmap.getHeight() - navigationHeight);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth() - navigationHeight,
+                bitmap.getHeight());
     }
 
     public int getNavigationBarHeight() {
@@ -277,7 +302,7 @@ public class TakeScreenshotService extends Service {
         cropImageView.setOnDoubleTapListener(new CropImageView.OnDoubleTapListener() {
             @Override
             public void onDoubleTab() {
-                mScreenshot.saveScreenshotInWorkerThread(cropImageView.getCroppedBitmap(), new Runnable() {
+                mScreenshot.startAnimation(cropImageView.getCroppedBitmap(), new Runnable() {
                     @Override
                     public void run() {
                         stopSelf();
@@ -346,12 +371,13 @@ public class TakeScreenshotService extends Service {
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
         }
         final FreeCropView freeCropView = (FreeCropView) mFreeCropDialog.findViewById(R.id.free_crop_view);
-        final Button confirmBtn = (Button) mFreeCropDialog.findViewById(R.id.free_crop_ok_btn);
+        final View confirmBtn = mFreeCropDialog.findViewById(R.id.free_crop_ok_btn);
         freeCropView.setFreeCropBitmap(bitmap);
         freeCropView.setOnStateListener(new FreeCropView.OnStateListener() {
             @Override
             public void onStart() {
                 confirmBtn.setVisibility(View.GONE);
+                mFreeCropDialog.findViewById(R.id.free_crop_toast).setVisibility(View.GONE);
             }
 
             @Override
@@ -363,7 +389,7 @@ public class TakeScreenshotService extends Service {
 
             @Override
             public void onClick(View v) {
-                mScreenshot.saveScreenshotInWorkerThread(freeCropView.getFreeCropBitmap(), new Runnable() {
+                mScreenshot.startAnimation(freeCropView.getFreeCropBitmap(), new Runnable() {
                     @Override
                     public void run() {
                         stopSelf();

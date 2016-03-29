@@ -115,4 +115,5 @@
     <string name="rect_screenshot">Rect</string>
     <string name="record_screenshot">Recrod</string>
     <string name="normal_screen_shot">Normal</string>
+    <string name="free_crop_toast">Slide select picture taken part in need.</string>
 </resources>

@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnticipateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
@@ -81,6 +82,7 @@ public class FloatMenuDialog extends Dialog {
 
     @Override
     public void dismiss() {
+        //hideMenu();
         hideMenu(mArcLayout, mCenterItem);
         //super.dismiss();
     }
@@ -144,7 +146,7 @@ public class FloatMenuDialog extends Dialog {
                 AnimatorUtils.translationY(dy, 0f)
         );
 
-        anim.setInterpolator(new DecelerateInterpolator());
+        anim.setInterpolator(new OvershootInterpolator());
         anim.setDuration(50);
         return anim;
     }
@@ -161,7 +163,9 @@ public class FloatMenuDialog extends Dialog {
                 AnimatorUtils.translationY(0f, dy)
         );
 
-        anim.setInterpolator(new DecelerateInterpolator());
+        anim.setInterpolator(new AccelerateInterpolator(
+
+        ));
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -170,7 +174,7 @@ public class FloatMenuDialog extends Dialog {
                 item.setTranslationY(0f);
             }
         });
-        anim.setDuration(50);
+        anim.setDuration(10);
         return anim;
     }
 

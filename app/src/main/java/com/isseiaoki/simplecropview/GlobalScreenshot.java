@@ -355,7 +355,7 @@ class GlobalScreenshot {
     private DisplayMetrics mDisplayMetrics;
     private Matrix mDisplayMatrix;
 
-    private Bitmap mScreenBitmap;
+    //private Bitmap mScreenBitmap;
     private View mScreenshotLayout;
     private ImageView mBackgroundView;
     private ImageView mScreenshotView;
@@ -455,7 +455,7 @@ class GlobalScreenshot {
     /**
      * Creates a new worker thread and saves the screenshot to the media store.
      */
-    public void saveScreenshotInWorkerThread(Bitmap bitmap, Runnable finisher) {
+    private void saveScreenshotInWorkerThread(Bitmap bitmap, Runnable finisher) {
         SaveImageInBackgroundData data = new SaveImageInBackgroundData();
         data.context = mContext;
         data.image = bitmap;
@@ -494,50 +494,50 @@ class GlobalScreenshot {
         // to take screenshots
         // only in the natural orientation of the device :!)
         mDisplay.getRealMetrics(mDisplayMetrics);
-        float[] dims = {mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels};
-        float degrees = getDegreesForRotation(mDisplay.getRotation());
-        boolean requiresRotation = (degrees > 0);
-        if (requiresRotation) {
-            // Get the dimensions of the device in its native orientation
-            mDisplayMatrix.reset();
-            mDisplayMatrix.preRotate(-degrees);
-            mDisplayMatrix.mapPoints(dims);
-            dims[0] = Math.abs(dims[0]);
-            dims[1] = Math.abs(dims[1]);
-        }
+//        float[] dims = {mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels};
+//        float degrees = getDegreesForRotation(mDisplay.getRotation());
+//        boolean requiresRotation = (degrees > 0);
+//        if (requiresRotation) {
+//            // Get the dimensions of the device in its native orientation
+//            mDisplayMatrix.reset();
+//            mDisplayMatrix.preRotate(-degrees);
+//            mDisplayMatrix.mapPoints(dims);
+//            dims[0] = Math.abs(dims[0]);
+//            dims[1] = Math.abs(dims[1]);
+//        }
 
         // Take the screenshot
         // mScreenBitmap = SurfaceControl.screenshot((int) dims[0], (int)
         // dims[1]);
-        mScreenBitmap = bitmap;
-        if (mScreenBitmap == null) {
+        //mScreenBitmap = bitmap;
+        if (bitmap == null) {
             notifyScreenshotError(mContext, mNotificationManager);
             finisher.run();
             return;
         }
 
-        if (requiresRotation) {
-            // Rotate the screenshot to the current orientation
-            Bitmap ss = Bitmap.createBitmap(mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels,
-                    Bitmap.Config.ARGB_8888);
-            Canvas c = new Canvas(ss);
-            c.translate(ss.getWidth() / 2, ss.getHeight() / 2);
-            c.rotate(degrees);
-            c.translate(-dims[0] / 2, -dims[1] / 2);
-            c.drawBitmap(mScreenBitmap, 0, 0, null);
-            c.setBitmap(null);
-            // Recycle the previous bitmap
-            mScreenBitmap.recycle();
-            mScreenBitmap = ss;
-        }
+//        if (requiresRotation) {
+//            // Rotate the screenshot to the current orientation
+//            Bitmap ss = Bitmap.createBitmap(mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels,
+//                    Bitmap.Config.ARGB_8888);
+//            Canvas c = new Canvas(ss);
+//            c.translate(ss.getWidth() / 2, ss.getHeight() / 2);
+//            c.rotate(degrees);
+//            c.translate(-dims[0] / 2, -dims[1] / 2);
+//            c.drawBitmap(mScreenBitmap, 0, 0, null);
+//            c.setBitmap(null);
+//            // Recycle the previous bitmap
+//            mScreenBitmap.recycle();
+//            mScreenBitmap = ss;
+//        }
 
         // Optimizations
-        mScreenBitmap.setHasAlpha(false);
-        mScreenBitmap.prepareToDraw();
+        bitmap.setHasAlpha(false);
+        bitmap.prepareToDraw();
 
         // Start the post-screenshot animation
         if (isShowAnim)
-            startAnimation(finisher, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels, false);
+            startAnimation(bitmap, finisher);
         else
             finisher.run();
     }
@@ -545,9 +545,9 @@ class GlobalScreenshot {
     /**
      * Starts the animation after taking the screenshot
      */
-    private void startAnimation(final Runnable finisher, int w, int h, boolean isFullScreen) {
+    public void startAnimation(final Bitmap bitmap, final Runnable finisher) {
         // Add the view for the animation
-        mScreenshotView.setImageBitmap(mScreenBitmap);
+        mScreenshotView.setImageBitmap(bitmap);
         mScreenshotLayout.requestFocus();
 
         // Setup the animation with the screenshot just taken
@@ -558,18 +558,18 @@ class GlobalScreenshot {
 
         mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
         ValueAnimator screenshotDropInAnim = createScreenshotDropInAnimation();
-        ValueAnimator screenshotFadeOutAnim = createScreenshotDropOutAnimation(w, h, isFullScreen);
+        ValueAnimator screenshotFadeOutAnim = createScreenshotDropOutAnimation(mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels, false);
         mScreenshotAnimation = new AnimatorSet();
         mScreenshotAnimation.playSequentially(screenshotDropInAnim, screenshotFadeOutAnim);
         mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 // Save the screenshot once we have a bit of time now
-                saveScreenshotInWorkerThread(mScreenBitmap, finisher);
+                saveScreenshotInWorkerThread(bitmap, finisher);
                 mWindowManager.removeView(mScreenshotLayout);
 
                 // Clear any references to the bitmap
-                mScreenBitmap = null;
+                //mScreenBitmap = null;
                 mScreenshotView.setImageBitmap(null);
             }
         });

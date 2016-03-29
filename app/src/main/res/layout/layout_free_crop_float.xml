@@ -6,17 +6,41 @@
     <com.isseiaoki.simplecropview.FreeCropView
         android:id="@+id/free_crop_view"
         android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <RelativeLayout
+        android:id="@+id/free_crop_toast"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        />
-    <!--android:foreground="@color/overlay"-->
+        android:background="@color/overlay">
 
+        <ImageView
+            android:id="@+id/free_crop_toast_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginBottom="20dp"
+            android:src="@drawable/free_crop_toast" />
 
-    <Button
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/free_crop_toast_icon"
+            android:gravity="center"
+            android:shadowColor="@android:color/black"
+            android:shadowRadius="2"
+            android:text="@string/free_crop_toast"
+            android:textColor="@android:color/white" />
+    </RelativeLayout>
+
+    <ImageButton
         android:id="@+id/free_crop_ok_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
-        android:text="@android:string/ok" />
+        android:background="@drawable/selectable_background_dark"
+        android:padding="16dp"
+        android:src="@drawable/btn_selected" />
 </FrameLayout>

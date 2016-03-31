@@ -18,7 +18,6 @@ import com.way.captain.R;
 import com.way.captain.fragment.BaseFragment;
 import com.way.captain.fragment.GifFragment;
 import com.way.captain.fragment.VideoFragment;
-import com.way.captain.permissions.Nammu;
 import com.way.captain.utils.OsUtil;
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -53,7 +52,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             return;
         }
         setContentView(R.layout.activity_main);
-        Nammu.init(getApplicationContext());
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 

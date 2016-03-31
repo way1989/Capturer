@@ -25,13 +25,15 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import com.way.captain.screenshot.crop.TakeCropScreenshotService;
 import com.way.captain.R;
 import com.way.captain.activity.MainActivity;
-import com.way.captain.floatview.FloatingView;
+import com.way.captain.widget.FloatMenuDialog;
+import com.way.captain.widget.floatview.FloatingView;
 import com.way.captain.fragment.SettingsFragment;
-import com.way.screenshot.TakeScreenshotActivity;
-import com.way.screenshot.TakeScreenshotService;
-import com.way.telecine.TelecineShortcutLaunchActivity;
+import com.way.captain.screenshot.TakeScreenshotActivity;
+import com.way.captain.screenshot.TakeScreenshotService;
+import com.way.captain.screenrecord.ScreenRecordShortcutLaunchActivity;
 
 
 /**
@@ -97,7 +99,7 @@ public class ChatHeadService extends Service implements View.OnClickListener,
                     break;
                 case MESSAGE_RECORD_SCREENSHOT:
                     try {
-                        Intent screenRecordIntent = new Intent(ChatHeadService.this, TelecineShortcutLaunchActivity.class);
+                        Intent screenRecordIntent = new Intent(ChatHeadService.this, ScreenRecordShortcutLaunchActivity.class);
 
                         screenRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                         startActivity(screenRecordIntent);
@@ -116,8 +118,8 @@ public class ChatHeadService extends Service implements View.OnClickListener,
 
                 case MESSAGE_FREE_SCREENSHOT:
                     try {
-                        Intent screenRecordIntent = new Intent(ChatHeadService.this, com.isseiaoki.simplecropview.TakeScreenshotActivity.class);
-                        screenRecordIntent.setAction(com.isseiaoki.simplecropview.TakeScreenshotService.ACTION_FREE_SCREENSHOT);
+                        Intent screenRecordIntent = new Intent(ChatHeadService.this, com.way.captain.screenshot.crop.TakeScreenshotActivity.class);
+                        screenRecordIntent.setAction(TakeCropScreenshotService.ACTION_FREE_SCREENSHOT);
                         screenRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                         startActivity(screenRecordIntent);
                     } catch (ActivityNotFoundException e) {
@@ -125,8 +127,8 @@ public class ChatHeadService extends Service implements View.OnClickListener,
                     break;
                 case MESSAGE_RECT_SCREENSHOT:
                     try {
-                        Intent screenRecordIntent = new Intent(ChatHeadService.this, com.isseiaoki.simplecropview.TakeScreenshotActivity.class);
-                        screenRecordIntent.setAction(com.isseiaoki.simplecropview.TakeScreenshotService.ACTION_RECT_SCREENSHOT);
+                        Intent screenRecordIntent = new Intent(ChatHeadService.this, com.way.captain.screenshot.crop.TakeScreenshotActivity.class);
+                        screenRecordIntent.setAction(TakeCropScreenshotService.ACTION_RECT_SCREENSHOT);
                         screenRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                         startActivity(screenRecordIntent);
                     } catch (ActivityNotFoundException e) {
@@ -268,7 +270,7 @@ public class ChatHeadService extends Service implements View.OnClickListener,
 //                                .putBoolean(SettingsFragment.HIDE_FLOATVIEW_KEY, true).apply();
 //                    }
 //                });
-//                Intent i = new Intent(ChatHeadService.this, TelecineShortcutLaunchActivity.class);
+//                Intent i = new Intent(ChatHeadService.this, ScreenRecordShortcutLaunchActivity.class);
 //                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //                startActivity(i);
                 break;

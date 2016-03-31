@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#42000000"
+    >
     <item android:state_pressed="true">
         <layer-list>
             <item>
@@ -19,4 +21,4 @@
             <solid android:color="@color/tumblr_red" />
         </shape>
     </item>
-</selector>
+</ripple>

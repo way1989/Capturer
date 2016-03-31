@@ -3,7 +3,6 @@ package com.way.captain.service;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
@@ -21,6 +20,8 @@ import com.joanzapata.iconify.IconDrawable;
 import com.joanzapata.iconify.fonts.MaterialIcons;
 import com.ogaclejapan.arclayout.ArcLayout;
 import com.way.captain.R;
+import com.way.captain.utils.AnimatorUtils;
+import com.way.captain.utils.ViewUtils;
 import com.way.screenshot.ShellCmdUtils;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class FloatMenuDialog extends Dialog {
     private ArcLayout mArcLayout;
     private ImageView mCenterItem;
     private View.OnClickListener mListener;
+    private boolean isHideAnimPlaying;
 
     public FloatMenuDialog(Context context, int themeResId) {
         super(context, themeResId);
@@ -96,21 +98,18 @@ public class FloatMenuDialog extends Dialog {
     @Override
     public void show() {
         super.show();
-        //showMenu();
-        showMenu(mArcLayout, mCenterItem);
+        showMenu();
     }
 
     @Override
     public void cancel() {
         //super.cancel();
-        //hideMenu();
-        hideMenu(mArcLayout, mCenterItem);
+        dismiss();
     }
 
     @Override
     public void dismiss() {
-        //hideMenu();
-        hideMenu(mArcLayout, mCenterItem);
+        hideMenu();
         //super.dismiss();
     }
 
@@ -118,171 +117,154 @@ public class FloatMenuDialog extends Dialog {
         super.dismiss();
     }
 
-    private void showMenu(ArcLayout arcLayout, View centerItem) {
+    private void showMenu() {
+        //中心button动画
+        mCenterItem.setScaleX(0f);
+        mCenterItem.setScaleY(0f);
+        mCenterItem.setAlpha(0f);
+        Animator animator = AnimatorUtils.of(mCenterItem, AnimatorUtils.ofAlpha(0f, 1f), AnimatorUtils.ofScaleX(0f, 1f), AnimatorUtils.ofScaleY(0f, 1f));
+        animator.setInterpolator(new DecelerateInterpolator());
+        animator.setDuration(100L);
 
+        //周围button动画数组
         List<Animator> animList = new ArrayList<>();
-
-        animList.add(createShowItemAnimator(centerItem, centerItem));
-
-        for (int i = 0, len = arcLayout.getChildCount(); i < len; i++) {
-            animList.add(createShowItemAnimator(centerItem, arcLayout.getChildAt(i)));
+        for (int i = 0, len = mArcLayout.getChildCount(); i < len; i++) {
+            animList.add(createShowItemAnimator(mArcLayout.getChildAt(i), (i + 1) * 100));
         }
 
-        AnimatorSet animSet = new AnimatorSet();
-        animSet.playSequentially(animList);
-        animSet.start();
-    }
-
-    private void hideMenu(ArcLayout arcLayout, View centerItem) {
-        List<Animator> animList = new ArrayList<>();
-
-        for (int i = arcLayout.getChildCount() - 1; i >= 0; i--) {
-            animList.add(createHideItemAnimator(centerItem, arcLayout.getChildAt(i)));
-        }
-
-        animList.add(createHideItemAnimator(centerItem, centerItem));
-
-
-        AnimatorSet animSet = new AnimatorSet();
-        animSet.playSequentially(animList);
-        //animSet.playTogether(animList);
-        animSet.start();
-        animSet.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                superDimiss();
-            }
-
-        });
-    }
-
-    private Animator createShowItemAnimator(View centerItem, View item) {
-        float dx = centerItem.getX() - item.getX();
-        float dy = centerItem.getY() - item.getY();
-
-        item.setScaleX(0f);
-        item.setScaleY(0f);
-        item.setTranslationX(dx);
-        item.setTranslationY(dy);
-
-        Animator anim = ObjectAnimator.ofPropertyValuesHolder(
-                item,
-                AnimatorUtils.scaleX(0f, 1f),
-                AnimatorUtils.scaleY(0f, 1f),
-                AnimatorUtils.translationX(dx, 0f),
-                AnimatorUtils.translationY(dy, 0f)
-        );
-
-        anim.setInterpolator(new DecelerateInterpolator());
-        anim.setDuration(50);
-        return anim;
-    }
-
-    private Animator createHideItemAnimator(View centerItem, final View item) {
-        final float dx = centerItem.getX() - item.getX();
-        final float dy = centerItem.getY() - item.getY();
-
-        Animator anim = ObjectAnimator.ofPropertyValuesHolder(
-                item,
-                AnimatorUtils.scaleX(1f, 0f),
-                AnimatorUtils.scaleY(1f, 0f),
-                AnimatorUtils.translationX(0f, dx),
-                AnimatorUtils.translationY(0f, dy)
-        );
-
-        anim.setInterpolator(new AccelerateInterpolator());
-        anim.addListener(new AnimatorListenerAdapter() {
+        //总动画
+        final AnimatorSet animSet = new AnimatorSet();
+        animSet.setInterpolator(new OvershootInterpolator());
+        animSet.playTogether(animList);
+        animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                item.setTranslationX(0f);
-                item.setTranslationY(0f);
+                animSet.start();//中心动画结束后，开始周围button动画
             }
         });
-        anim.setDuration(10);
-        return anim;
-    }
-
-
-    private void showMenu() {
-        //menuLayout.setVisibility(View.VISIBLE);
-
-        List<Animator> animList = new ArrayList<>();
-
-        for (int i = 0, len = mArcLayout.getChildCount(); i < len; i++) {
-            animList.add(createShowItemAnimator(mArcLayout.getChildAt(i)));
-        }
-
-        AnimatorSet animSet = new AnimatorSet();
-        animSet.setDuration(400);
-        animSet.setInterpolator(new OvershootInterpolator());
-        animSet.playTogether(animList);
-        animSet.start();
+        animator.start();//中心动画开始播放
     }
 
     private void hideMenu() {
+        if (isHideAnimPlaying) return;
+        isHideAnimPlaying = true;//标记为动画开始
 
+        //周围button动画数组
         List<Animator> animList = new ArrayList<>();
-
         for (int i = mArcLayout.getChildCount() - 1; i >= 0; i--) {
-            animList.add(createHideItemAnimator(mArcLayout.getChildAt(i)));
+            animList.add(createHideItemAnimator(mArcLayout.getChildAt(i), (i + 1) * 100L));
         }
+        //中心button动画
+        final Animator animator = AnimatorUtils.of(mCenterItem, AnimatorUtils.ofAlpha(1f, 0f), AnimatorUtils.ofScaleX(1f, 0f), AnimatorUtils.ofScaleY(1f, 0f));
+        animator.setDuration(100L);
+        animator.setInterpolator(new AccelerateInterpolator());
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                isHideAnimPlaying = false;
+                superDimiss();//中心button动画结束，整个过程结束，dialog消失
+            }
+        });
 
+        //总动画
         AnimatorSet animSet = new AnimatorSet();
-        animSet.setDuration(400);
         animSet.setInterpolator(new AnticipateInterpolator());
         animSet.playTogether(animList);
         animSet.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                //menuLayout.setVisibility(View.INVISIBLE);
-                superDimiss();
+                animator.start();//周围button动画播完之后再播中心button动画
             }
         });
         animSet.start();
 
+
     }
 
-    private Animator createShowItemAnimator(View item) {
+    private Animator createShowItemAnimator(View item, long duration) {
 
-        float dx = mCenterItem.getX() - item.getX();
-        float dy = mCenterItem.getY() - item.getY();
 
-        item.setRotation(0f);
-        item.setTranslationX(dx);
-        item.setTranslationY(dy);
+        final float centerX = ViewUtils.getCenterX(mCenterItem);
+        final float centerY = ViewUtils.getCenterY(mCenterItem);
+        final float x = centerX - ViewUtils.getCenterX(item);
+        final float y = centerY - ViewUtils.getCenterY(item);
 
-        Animator anim = ObjectAnimator.ofPropertyValuesHolder(
+        item.setTranslationX(x);
+        item.setTranslationY(y);
+        item.setAlpha(0f);
+        item.setScaleX(0f);
+        item.setScaleY(0f);
+
+        Animator anim = AnimatorUtils.of(
                 item,
-                AnimatorUtils.rotation(0f, 720f),
-                AnimatorUtils.translationX(dx, 0f),
-                AnimatorUtils.translationY(dy, 0f)
+                AnimatorUtils.ofTranslationX(x, 0f),
+                AnimatorUtils.ofTranslationY(y, 0f),
+                AnimatorUtils.ofAlpha(0f, 1f),
+                AnimatorUtils.ofScaleX(0f, 1f),
+                AnimatorUtils.ofScaleY(0f, 1f)
         );
-
+        anim.setDuration(duration);
         return anim;
+
+
+//
+//        float dx = mCenterItem.getX() - item.getX();
+//        float dy = mCenterItem.getY() - item.getY();
+//
+//        item.setRotation(0f);
+//        item.setTranslationX(dx);
+//        item.setTranslationY(dy);
+//
+//        Animator anim = ObjectAnimator.ofPropertyValuesHolder(
+//                item,
+//                AnimatorUtils.rotation(0f, 720f),
+//                AnimatorUtils.translationX(dx, 0f),
+//                AnimatorUtils.translationY(dy, 0f)
+//        );
+//
+//        return anim;
     }
 
-    private Animator createHideItemAnimator(final View item) {
-        float dx = mCenterItem.getX() - item.getX();
-        float dy = mCenterItem.getY() - item.getY();
+    private Animator createHideItemAnimator(final View item, long duration) {
+        final float centerX = ViewUtils.getCenterX(mCenterItem);
+        final float centerY = ViewUtils.getCenterY(mCenterItem);
+        final float x = centerX - ViewUtils.getCenterX(item);
+        final float y = centerY - ViewUtils.getCenterY(item);
 
-        Animator anim = ObjectAnimator.ofPropertyValuesHolder(
+        Animator anim = AnimatorUtils.of(
                 item,
-                AnimatorUtils.rotation(720f, 0f),
-                AnimatorUtils.translationX(0f, dx),
-                AnimatorUtils.translationY(0f, dy)
+                AnimatorUtils.ofTranslationX(0f, x),
+                AnimatorUtils.ofTranslationY(0f, y),
+                AnimatorUtils.ofAlpha(1f, 0f),
+                AnimatorUtils.ofScaleX(1f, 0f),
+                AnimatorUtils.ofScaleY(1f, 0f)
         );
-
-        anim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                item.setTranslationX(0f);
-                item.setTranslationY(0f);
-            }
-        });
+        anim.setDuration(duration);
 
         return anim;
+
+//        float dx = mCenterItem.getX() - item.getX();
+//        float dy = mCenterItem.getY() - item.getY();
+//
+//        Animator anim = ObjectAnimator.ofPropertyValuesHolder(
+//                item,
+//                AnimatorUtils.rotation(720f, 0f),
+//                AnimatorUtils.translationX(0f, dx),
+//                AnimatorUtils.translationY(0f, dy)
+//        );
+
+//        anim.addListener(new AnimatorListenerAdapter() {
+//            @Override
+//            public void onAnimationEnd(Animator animation) {
+//                super.onAnimationEnd(animation);
+//                item.setTranslationX(0f);
+//                item.setTranslationY(0f);
+//            }
+//        });
+//
+//        return anim;
     }
 }

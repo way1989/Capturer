@@ -21,6 +21,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
@@ -394,7 +395,7 @@ public class CropImageView extends ImageView {
 
     // Touch Event /////////////////////////////////////////////////////////////////////////////////
     private long lastUpdateTime;
-    private static final int UPTATE_INTERVAL_TIME = 400;
+    private static final int UPTATE_INTERVAL_TIME = ViewConfiguration.getDoubleTapTimeout();
     private OnDoubleTapListener mListener;
     public void setOnDoubleTapListener(OnDoubleTapListener listener){
         mListener = listener;

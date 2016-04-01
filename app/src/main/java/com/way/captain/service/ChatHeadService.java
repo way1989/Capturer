@@ -49,7 +49,7 @@ public class ChatHeadService extends Service implements View.OnClickListener,
     private static final int MESSAGE_LONG_SCREENSHOT = 0x003;
     private static final int MESSAGE_RECT_SCREENSHOT = 0x004;
     private static final int MESSAGE_FREE_SCREENSHOT = 0x005;
-    private static final long DELAY_TIME = 300L;
+    private static final long DELAY_TIME = 500L;
 
     /**
      * 通知ID

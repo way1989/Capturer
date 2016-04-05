@@ -20,7 +20,6 @@ public class TakeScreenshotActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (!CropScreenshotHelper.handleActivityResult(this, requestCode, resultCode, data, mAction)) {
             super.onActivityResult(requestCode, resultCode, data);
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(SettingsFragment.HIDE_FLOATVIEW_KEY, false).apply();
 
         }
         finish();

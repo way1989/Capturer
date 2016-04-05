@@ -27,8 +27,8 @@ android {
         applicationId "com.way.captain"
         minSdkVersion 21
         targetSdkVersion 23
-        versionCode 600002
-        versionName "6.0.00.02"
+        versionCode 600003
+        versionName "6.0.00.03"
     }
     signingConfigs {
         release {

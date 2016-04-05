@@ -134,7 +134,6 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
             mImageReader.close();
         if (mProjection != null)
             mProjection.stop();
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(SettingsFragment.HIDE_FLOATVIEW_KEY, false).apply();
     }
 
     @Override

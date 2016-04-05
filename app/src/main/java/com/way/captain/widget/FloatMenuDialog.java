@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * Created by way on 16/3/27.
  */
-public class FloatMenuDialog extends Dialog {
+public class FloatMenuDialog extends Dialog implements View.OnClickListener{
     private ArcLayout mArcLayout;
     private ImageView mCenterItem;
     private View.OnClickListener mListener;
@@ -62,7 +62,7 @@ public class FloatMenuDialog extends Dialog {
         });
         mCenterItem.setImageDrawable(new IconDrawable(this.getContext().getApplicationContext(),
                 MaterialIcons.md_home).color(Color.WHITE).actionBarSize());
-        mCenterItem.setOnClickListener(mListener);
+        mCenterItem.setOnClickListener(this);
         for (int i = 0, size = mArcLayout.getChildCount(); i < size; i++) {
             ImageView button = (ImageView) mArcLayout.getChildAt(i);
             switch (button.getId()) {
@@ -91,7 +91,7 @@ public class FloatMenuDialog extends Dialog {
                             MaterialIcons.md_crop).color(Color.WHITE).actionBarSize());
                     break;
             }
-            button.setOnClickListener(mListener);
+            button.setOnClickListener(this);
         }
     }
 
@@ -165,6 +165,10 @@ public class FloatMenuDialog extends Dialog {
                 super.onAnimationEnd(animation);
                 isHideAnimPlaying = false;
                 superDimiss();//中心button动画结束，整个过程结束，dialog消失
+                if(mListener != null && mClickView != null){
+                    mListener.onClick(mClickView);
+                    mClickView = null;
+                }
             }
         });
 
@@ -225,5 +229,11 @@ public class FloatMenuDialog extends Dialog {
         anim.setDuration(duration);
 
         return anim;
+    }
+    private View mClickView;
+    @Override
+    public void onClick(View v) {
+        mClickView = v;
+        dismiss();
     }
 }

@@ -9,7 +9,7 @@ import com.joanzapata.iconify.Iconify;
 import com.joanzapata.iconify.fonts.MaterialModule;
 import com.squareup.leakcanary.LeakCanary;
 import com.way.captain.fragment.SettingsFragment;
-import com.way.captain.service.ChatHeadService;
+import com.way.captain.service.ShakeService;
 
 import im.fir.sdk.FIR;
 
@@ -32,6 +32,6 @@ public class App extends Application {
         LeakCanary.install(this);
         Iconify.with(new MaterialModule());
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsFragment.ATOUCH_KEY, true))
-            startService(new Intent(this, ChatHeadService.class));
+            startService(new Intent(this, ShakeService.class));
     }
 }

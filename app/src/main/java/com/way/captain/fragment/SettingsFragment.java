@@ -15,14 +15,13 @@ import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 
 import com.way.captain.R;
-import com.way.captain.service.ChatHeadService;
+import com.way.captain.service.ShakeService;
 import com.way.captain.utils.AppUtils;
 
 /**
  * Created by android on 16-2-4.
  */
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
-    public static final String HIDE_FLOATVIEW_KEY = "key_hide_floatview";
     public static final String VIDEO_SIZE_KEY = "key_video_size_percentage";
     public static final String VIDEO_STOP_METHOD_KEY = "key_video_stop_method";
     public static final String SHOW_COUNTDOWN_KEY = "key_three_second_countdown";
@@ -62,9 +61,9 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             case ATOUCH_KEY:
                 SwitchPreference switchPreference = (SwitchPreference) preference;
                 if (switchPreference.isChecked())
-                    mContext.startService(new Intent(mContext, ChatHeadService.class));
+                    mContext.startService(new Intent(mContext, ShakeService.class));
                 else
-                    mContext.stopService(new Intent(mContext, ChatHeadService.class));
+                    mContext.stopService(new Intent(mContext, ShakeService.class));
                 break;
 
         }

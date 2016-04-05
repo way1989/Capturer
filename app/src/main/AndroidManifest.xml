@@ -69,7 +69,7 @@
             android:name=".screenshot.DeleteScreenshot"
             android:exported="true" />
         <service
-            android:name="com.way.captain.service.ChatHeadService"
+            android:name=".service.ShakeService"
             android:exported="false" />
         <activity
             android:name="com.way.captain.activity.SettingsActivity"

@@ -21,13 +21,13 @@ import android.media.projection.MediaProjectionManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.Window;
@@ -35,7 +35,6 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.way.captain.R;
-import com.way.captain.fragment.SettingsFragment;
 import com.way.captain.widget.freecrop.FreeCropView;
 import com.way.captain.widget.rectcrop.CropImageView;
 
@@ -44,7 +43,7 @@ import java.nio.ByteBuffer;
 public class TakeCropScreenshotService extends Service {
     public static final String ACTION_FREE_SCREENSHOT = "com.way.ACTION_FREE_SCREENSHOT";
     public static final String ACTION_RECT_SCREENSHOT = "com.way.ACTION_RECT_SCREENSHOT";
-    private static final String TAG = "TakeCropScreenshotService";
+    private static final String TAG = "CropScreenshotService";
     private static final String DISPLAY_NAME = "Screenshot";
     private static final String EXTRA_RESULT_CODE = "result-code";
     private static final String EXTRA_DATA = "data";
@@ -139,7 +138,6 @@ public class TakeCropScreenshotService extends Service {
             mImageReader.close();
         if (mProjection != null)
             mProjection.stop();
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(SettingsFragment.HIDE_FLOATVIEW_KEY, false).apply();
     }
 
     @Override
@@ -333,12 +331,14 @@ public class TakeCropScreenshotService extends Service {
                 dismissRectCropLayout();
             }
         });
-//        mRectCropDialog.findViewById(R.id.crop_ok_btn).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//            }
-//        });
+        final View toastView = mRectCropDialog.findViewById(R.id.crop_toast);
+        toastView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                toastView.setVisibility(View.GONE);
+                return true;
+            }
+        });
 
         if (!mRectCropDialog.isShowing())
             mRectCropDialog.show();

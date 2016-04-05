@@ -99,4 +99,5 @@
     <string name="free_screenshot">自由</string>
     <string name="rect_screenshot">区域</string>
     <string name="free_crop_toast">滑动选取需要截取的部分,点击按钮保存</string>
+    <string name="crop_toast">双击确认选择区域并保存</string>
 </resources>

@@ -19,7 +19,6 @@ public final class ScreenRecordShortcutLaunchActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (!CaptureHelper.handleActivityResult(this, requestCode, resultCode, data)) {
             super.onActivityResult(requestCode, resultCode, data);
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(SettingsFragment.HIDE_FLOATVIEW_KEY, false).apply();
         }
         finish();
     }

@@ -179,7 +179,6 @@ public final class ScreenRecordService extends Service {
     public void onDestroy() {
         recordingSession.destroy();
         super.onDestroy();
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(SettingsFragment.HIDE_FLOATVIEW_KEY, false).apply();
     }
 
     @Override

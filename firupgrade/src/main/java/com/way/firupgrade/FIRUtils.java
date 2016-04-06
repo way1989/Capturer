@@ -1,6 +1,5 @@
 package com.way.firupgrade;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -15,41 +14,54 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import im.fir.sdk.FIR;
-import im.fir.sdk.VersionCheckCallback;
-
 public class FIRUtils {
+    private static final String mBaseUrl = "http://api.fir.im/apps/latest/%1$s?api_token=%2$s";
 
     public final static void checkForUpdate(final Activity context, final boolean isShowToast) {
         if (context == null)
             return;
-        String api_token = context.getResources().getString(R.string.api_token);
-        if (TextUtils.isEmpty(api_token))
-            throw new NullPointerException("api_token must not null");
+        final String api_token = context.getResources().getString(R.string.api_token);
+        final String app_id = context.getResources().getString(R.string.app_id);
 
+        if (TextUtils.isEmpty(api_token) || TextUtils.isEmpty(app_id))
+            throw new NullPointerException("api_token or app_id must not null");
+        final String url = String.format(mBaseUrl, app_id, api_token);
+        if (TextUtils.isEmpty(url))
+            throw new NullPointerException("url must not null");
+        Log.i("broncho", "url = " + url);
         final Resources resources = context.getResources();
         final ProgressDialog progressDialog = new ProgressDialog(context);
         progressDialog.setIndeterminate(true);
         progressDialog.setCancelable(true);
         progressDialog.setTitle(R.string.progress_dialog_title);
         progressDialog.setMessage(resources.getString(R.string.progress_dialog_message));
-
-        FIR.checkForUpdateInFIR(api_token, new VersionCheckCallback() {
-
-            @SuppressLint("StringFormatInvalid")
+        RequestQueue requestQueue = Volley.newRequestQueue(context);
+        JsonObjectRequest jr = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
-            public void onSuccess(String versionJson) {
-                final AppVersion appVersion = getAppVersion(versionJson);
+            public void onResponse(JSONObject response) {
+                Log.i("broncho", "response = " + response);
+                if (progressDialog != null && progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                }
+
+                final AppVersion appVersion = getAppVersion(response);
                 if (appVersion == null) {
                     Toast.makeText(context, R.string.latest_version, Toast.LENGTH_SHORT).show();
                     return;
                 }
                 int appVersionCode = getVersionCode(context);
                 String appVersionName = getVersionName(context);
-                if (appVersionCode != appVersion.getVersionCode()
+                if (appVersionCode < appVersion.getVersionCode()
                         && !TextUtils.equals(appVersionName, appVersion.getVersionName())) {
                     new AlertDialog.Builder(context).setTitle(resources.getString(R.string.new_version_dialog_title, appVersion.getVersionName()))
                             .setMessage(resources.getString(R.string.new_version_dialog_message, appVersion.getChangeLog()))
@@ -67,39 +79,33 @@ public class FIRUtils {
                 }
             }
 
-            @Override
-            public void onStart() {
-                if (isShowToast && progressDialog != null && !progressDialog.isShowing())
-                    progressDialog.show();
-            }
 
+        }, new Response.ErrorListener() {
             @Override
-            public void onFinish() {
+            public void onErrorResponse(VolleyError error) {
+                Log.i("broncho", "error = " + error);
                 if (progressDialog != null && progressDialog.isShowing()) {
                     progressDialog.dismiss();
                 }
-            }
-
-            @Override
-            public void onFail(Exception exception) {
                 if (isShowToast)
                     Toast.makeText(context, R.string.net_error, Toast.LENGTH_SHORT).show();
             }
-
         });
+        requestQueue.add(jr);
+        if (isShowToast && progressDialog != null && !progressDialog.isShowing())
+            progressDialog.show();
+
     }
 
-    private static AppVersion getAppVersion(String versionJson) {
-        if (TextUtils.isEmpty(versionJson))
-            return null;
+    private static AppVersion getAppVersion(JSONObject versionJson) {
+
         try {
-            JSONObject jsonObject = new JSONObject(versionJson);
-            String versionName = jsonObject.getString("versionShort");
-            int versionCode = jsonObject.getInt("version");
-            String changeLog = jsonObject.getString("changelog");
-            String updateUrl = jsonObject.getString("install_url");
-            long fileSize = jsonObject.getJSONObject("binary").getInt("fsize");
-            long updateTime = jsonObject.getLong("updated_at");
+            String versionName = versionJson.getString("versionShort");
+            int versionCode = versionJson.getInt("version");
+            String changeLog = versionJson.getString("changelog");
+            String updateUrl = versionJson.getString("install_url");
+            long fileSize = versionJson.getJSONObject("binary").getInt("fsize");
+            long updateTime = versionJson.getLong("updated_at");
             AppVersion appVersion = new AppVersion(versionCode, versionName, changeLog,
                     updateUrl, fileSize, updateTime);
             return appVersion;

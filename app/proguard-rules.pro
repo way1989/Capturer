@@ -15,13 +15,14 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+#BUGTAG start
 -keepattributes LineNumberTable,SourceFile
 
 -keep class com.bugtags.library.** {*;}
 -dontwarn org.apache.http.**
--dontwarn android.net.http.AndroidHttpClient.**
--dontwarn com.bugtags.library.vender.**
+-dontwarn android.net.http.AndroidHttpClient
 -dontwarn com.bugtags.library.**
+#BUGTAG end
 -dontwarn com.alexvasilkov.android.**
 
 #-dontwarn com.github.hiteshsondhi88.libffmpeg.**

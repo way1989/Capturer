@@ -84,7 +84,7 @@
         </receiver>
 
         <activity
-            android:name=".screenshot.crop.TakeScreenshotActivity"
+            android:name=".screenshot.crop.TakeCropScreenshotActivity"
             android:excludeFromRecents="true"
             android:exported="true"
             android:taskAffinity=""

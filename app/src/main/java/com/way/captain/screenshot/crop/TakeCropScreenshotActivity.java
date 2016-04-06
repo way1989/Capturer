@@ -7,7 +7,7 @@ import android.preference.PreferenceManager;
 
 import com.way.captain.fragment.SettingsFragment;
 
-public class TakeScreenshotActivity extends Activity {
+public class TakeCropScreenshotActivity extends Activity {
     private String mAction;
     @Override
     protected void onCreate(Bundle savedInstanceState) {

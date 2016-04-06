@@ -53,7 +53,7 @@ public class LongScreenshotUtil {
     private int mNewBitmapStartY = 0;
 
     private LongScreenshotUtil(Context context) {
-        mTopNotCompareHeight = DensityUtil.dip2px(context, 104);//顶部不用对比的高度，即长截屏提示界面的高度。
+        mTopNotCompareHeight = DensityUtil.dip2px(context, 88);//顶部不用对比的高度，即长截屏提示界面的高度。
         mBottomNotCompareHeightMargin = DensityUtil.dip2px(context, 48);//底部不用对比的高度，在第一次对比的高度上再加上一些偏移
         mBorderNotCompareWidth = DensityUtil.dip2px(context, 16);//每行像素对比时，两边不用对比的宽度，去除滚动条之类的干扰
     }

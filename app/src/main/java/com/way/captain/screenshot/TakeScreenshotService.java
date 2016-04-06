@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.VirtualDisplay;
 import android.media.Image;
 import android.media.ImageReader;
 import android.media.projection.MediaProjection;
@@ -20,23 +21,24 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.way.captain.R;
-import com.way.captain.fragment.SettingsFragment;
 import com.way.captain.utils.DensityUtil;
 
 import java.nio.ByteBuffer;
 
-public class TakeScreenshotService extends Service implements ImageReader.OnImageAvailableListener, View.OnClickListener, GlobalScreenshot.Callback {
+public class TakeScreenshotService extends Service implements ImageReader.OnImageAvailableListener,
+        View.OnClickListener, GlobalScreenshot.Callback {
     public static final int MAX_MOVE_TIMES = 20;
     public static final String ACTION_LONG_SCREENSHOT = "com.way.ACTION_LONG_SCREENSHOT";
     private static final String TAG = "CropScreenshotService";
@@ -60,8 +62,11 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
     private int mScreenHeight;
     private MediaProjection mProjection;
     private MediaProjectionManager mProjectionManager;
+    private VirtualDisplay mVirtualDisplay;
     private ImageReader mImageReader;
     private boolean mIsLongScreenshot;
+    private WindowManager mWindowManager;
+    private View mLongScreensshotToast;
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -75,17 +80,15 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
                         stopSelf();
                         return;
                     }
-                    //takeScreenshotByScroll();
                     startCapture();
                     break;
 
                 case TAKE_SCREENSHOT_MESSAGE:
-                    //takeScreenshot();
                     startCapture();
                     break;
                 case OUT_TIME_MESSAGE:
-                    Toast.makeText(TakeScreenshotService.this, R.string.screenshot_failed_title, Toast.LENGTH_SHORT).show();
-
+                    Toast.makeText(TakeScreenshotService.this, R.string.screenshot_failed_title,
+                            Toast.LENGTH_SHORT).show();
                     Log.i(TAG, TAG + " take screenshot out of time...");
                     stopSelf();
                     break;
@@ -97,7 +100,7 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
 
     public static Intent newIntent(Context context, int resultCode, Intent data, boolean isLongScreenshot) {
         Intent intent = new Intent(context, TakeScreenshotService.class);
-        if(isLongScreenshot)
+        if (isLongScreenshot)
             intent.setAction(ACTION_LONG_SCREENSHOT);
         intent.putExtra(EXTRA_RESULT_CODE, resultCode);
         intent.putExtra(EXTRA_DATA, data);
@@ -118,6 +121,7 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, TAG + " onCreate...");
+        mWindowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
         // Dismiss the notification that brought us here.
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -132,8 +136,11 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
         dismissLongScreenshotToast();
         if (mImageReader != null)
             mImageReader.close();
-        if (mProjection != null)
+        if (mVirtualDisplay != null)
+            mVirtualDisplay.release();
+        if (mProjection != null) {
             mProjection.stop();
+        }
     }
 
     @Override
@@ -145,7 +152,7 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
         }
         Log.d(TAG, "Starting up!");
         mIsRunning = true;
-        if(intent == null){
+        if (intent == null) {
             stopSelf();
             return START_NOT_STICKY;
         }
@@ -172,7 +179,7 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
         mScreenWidth = displayMetrics.widthPixels;
         mScreenHeight = displayMetrics.heightPixels;
         mImageReader = ImageReader.newInstance(mScreenWidth, mScreenHeight, PixelFormat.RGBA_8888, 1);// 只获取一张图片
-        mProjection.createVirtualDisplay(DISPLAY_NAME, mScreenWidth, mScreenHeight, displayMetrics.densityDpi,
+        mVirtualDisplay = mProjection.createVirtualDisplay(DISPLAY_NAME, mScreenWidth, mScreenHeight, displayMetrics.densityDpi,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION, mImageReader.getSurface(), null, null);
         mImageReader.setOnImageAvailableListener(this, null);
         mHandler.removeMessages(OUT_TIME_MESSAGE);
@@ -206,8 +213,6 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
         image.close();
         if (mImageReader != null)
             mImageReader.close();
-//        if (mProjection != null)
-//            mProjection.stop();
         if (mCurrentScrollCount == 0) {
             mScreenshot.takeScreenshot(bitmap, new Runnable() {
                 @Override
@@ -225,7 +230,6 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
                 @Override
                 public void run() {
                     if (mCurrentScrollCount >= MAX_MOVE_TIMES) {
-                        //takeScreenshotByScroll();
                         mHandler.removeMessages(SCROLL_MESSAGE);
                         mHandler.sendEmptyMessageDelayed(SCROLL_MESSAGE, CMD_WAIT_ENOUGH_TIME);
                         return;
@@ -248,11 +252,11 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
     private void scrollToNextScreen() {
 
         int screenShowHeight = DensityUtil.getDisplayHeight(this);
-        int cmd_start_y = screenShowHeight / 2;
-        int cmd_end_y = cmd_start_y - DensityUtil.dip2px(this, CMD_MOVE_Y_HEIGHT);
+        int cmdStartY = screenShowHeight / 2;
+        int cmdEndY = cmdStartY - DensityUtil.dip2px(this, CMD_MOVE_Y_HEIGHT);
 
-        ShellCmdUtils.execShellCmd(ShellCmdUtils.getSwipeCmd(CMD_START_MOVE_X, cmd_start_y,
-                CMD_START_MOVE_X, cmd_end_y, CMD_SWIPE_TIME));
+        ShellCmdUtils.execShellCmd(ShellCmdUtils.getSwipeCmd(CMD_START_MOVE_X, cmdStartY,
+                CMD_START_MOVE_X, cmdEndY, CMD_SWIPE_TIME));
 
         mHandler.removeMessages(SCROLL_MESSAGE);
         mHandler.sendEmptyMessageDelayed(SCROLL_MESSAGE, CMD_WAIT_ENOUGH_TIME);
@@ -265,7 +269,9 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
             mDialog = new Dialog(this);
             final Window window = mDialog.getWindow();
             window.requestFeature(Window.FEATURE_NO_TITLE);
-            mDialog.setContentView(R.layout.toast_dialog);
+            final View rootView = new FrameLayout(this);
+            rootView.setId(R.id.toast_dialog_bg_container);
+            mDialog.setContentView(rootView);
             mDialog.create();
 
             final WindowManager.LayoutParams lp = window.getAttributes();
@@ -275,6 +281,7 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
             lp.format = PixelFormat.TRANSLUCENT;
             lp.setTitle(TAG);
             window.setAttributes(lp);
+            addLongScreenshotToast();
             updateLongScreenshotWidth();
 
             window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -284,19 +291,35 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
-            mDialog.findViewById(R.id.toast_dialog_bg_container).setOnClickListener(this);
+            rootView.setOnClickListener(this);
         }
         if (!mDialog.isShowing())
             mDialog.show();
     }
 
+    private void addLongScreenshotToast() {
+        mLongScreensshotToast = LayoutInflater.from(this).inflate(R.layout.long_screenshot_toast, null);
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT, 0, 0, WindowManager.LayoutParams.TYPE_TOAST,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                        | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
+                PixelFormat.TRANSLUCENT);
+        layoutParams.y = 0;
+        layoutParams.windowAnimations = R.style.VolumePanelAnimation;
+        layoutParams.gravity = getResources().getInteger(
+                R.integer.standard_notification_panel_layout_gravity);
+        layoutParams.width = DensityUtil.getDisplayWidth(this);
+        layoutParams.height = DensityUtil.dip2px(this, 88);
+        mWindowManager.addView(mLongScreensshotToast, layoutParams);
+    }
+
     private void updateLongScreenshotWidth() {
         if (mDialog != null) {
-            WindowManager windowManager =
-                    (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
-            Display display = windowManager.getDefaultDisplay();
-            int screenShowWidth = display.getWidth();
-            int screenShowHeight = display.getHeight();
+            int screenShowWidth = DensityUtil.getDisplayWidth(this);
+            int screenShowHeight = DensityUtil.getDisplayHeight(this);
             final Resources res = getResources();
             final WindowManager.LayoutParams lp = mDialog.getWindow().getAttributes();
             lp.width = screenShowWidth - 2 * (CMD_START_MOVE_X + 1);
@@ -310,6 +333,10 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
     private void dismissLongScreenshotToast() {
         if (mDialog != null && mDialog.isShowing())
             mDialog.dismiss();
+        if (mLongScreensshotToast != null) {
+            mWindowManager.removeViewImmediate(mLongScreensshotToast);
+            mLongScreensshotToast = null;
+        }
     }
 
     @Override

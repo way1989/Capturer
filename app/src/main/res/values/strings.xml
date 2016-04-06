@@ -109,11 +109,11 @@
     <string name="video_stop_method_summary">Show float stop view</string>
 
     <string name="scroll_screenshot_toast_title">Long screenshot is working</string>
-    <string name="scroll_screenshot_toast_text">Tap the screen to end the long screenshot</string>
+    <string name="scroll_screenshot_toast_text">Tap the screen to stop it</string>
     <string name="long_screenshot">Long</string>
     <string name="free_screenshot">Free</string>
     <string name="rect_screenshot">Rect</string>
-    <string name="record_screenshot">Recrod</string>
+    <string name="record_screenshot">Record</string>
     <string name="normal_screen_shot">Normal</string>
     <string name="free_crop_toast">Slide select picture taken part in need.</string>
     <string name="crop_toast">Double tap to get the result</string>

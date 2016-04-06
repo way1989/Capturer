@@ -70,4 +70,10 @@
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:backgroundDimEnabled">true</item>
     </style>
+
+    <!-- Window animations used for volume panel. -->
+    <style name="VolumePanelAnimation">
+        <item name="android:windowEnterAnimation">@anim/popup_enter_material</item>
+        <item name="android:windowExitAnimation">@anim/popup_exit_material</item>
+    </style>
 </resources>

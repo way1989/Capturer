@@ -32,5 +32,6 @@
     <string name="screenshot_saved_text">觸摸可查看您的熒幕截圖</string>
     <string name="screenshot_failed_title">無法抓取熒幕截圖。</string>
     <string name="screenshot_failed_text">"無法進行熒幕截圖，原因可能是存儲空間不足，或者該應用或您所屬的單位不允許執行此操作。"</string>
+    <string name="next_with_arrow"></string>
 
 </resources>

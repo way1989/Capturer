@@ -15,35 +15,29 @@
         android:layout_gravity="bottom|end"
         android:layout_marginBottom="24dp"
         android:layout_marginEnd="24dp"
-        android:shadowColor="@android:color/black"
-        android:shadowRadius="2"
-        android:text="@android:string/ok" />
+        android:text="@android:string/ok"
+        android:visibility="gone" />
 
-    <RelativeLayout
+    <FrameLayout
         android:id="@+id/free_crop_toast"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/overlay">
 
-        <ImageView
-            android:id="@+id/free_crop_toast_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_marginBottom="20dp"
-            android:src="@drawable/free_crop_toast" />
-
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/free_crop_toast_icon"
+            android:layout_gravity="center"
+            android:layout_marginEnd="24dp"
+            android:layout_marginStart="24dp"
+            android:drawableTop="@drawable/free_crop_toast"
             android:gravity="center"
             android:shadowColor="@android:color/black"
             android:shadowRadius="2"
             android:text="@string/free_crop_toast"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/white" />
-    </RelativeLayout>
+    </FrameLayout>
 
 
 </FrameLayout>

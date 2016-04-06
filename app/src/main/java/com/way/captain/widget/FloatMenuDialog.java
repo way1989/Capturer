@@ -7,6 +7,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -20,9 +21,9 @@ import com.joanzapata.iconify.IconDrawable;
 import com.joanzapata.iconify.fonts.MaterialIcons;
 import com.ogaclejapan.arclayout.ArcLayout;
 import com.way.captain.R;
+import com.way.captain.screenshot.ShellCmdUtils;
 import com.way.captain.utils.AnimatorUtils;
 import com.way.captain.utils.ViewUtils;
-import com.way.captain.screenshot.ShellCmdUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +31,12 @@ import java.util.List;
 /**
  * Created by way on 16/3/27.
  */
-public class FloatMenuDialog extends Dialog implements View.OnClickListener{
+public class FloatMenuDialog extends Dialog implements View.OnClickListener {
     private ArcLayout mArcLayout;
     private ImageView mCenterItem;
     private View.OnClickListener mListener;
     private boolean isHideAnimPlaying;
+    private View mClickView;
 
     public FloatMenuDialog(Context context, int themeResId) {
         super(context, themeResId);
@@ -103,14 +105,12 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener{
 
     @Override
     public void cancel() {
-        //super.cancel();
         dismiss();
     }
 
     @Override
     public void dismiss() {
         hideMenu();
-        //super.dismiss();
     }
 
     private void superDimiss() {
@@ -165,7 +165,8 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener{
                 super.onAnimationEnd(animation);
                 isHideAnimPlaying = false;
                 superDimiss();//中心button动画结束，整个过程结束，dialog消失
-                if(mListener != null && mClickView != null){
+                if (mListener != null && mClickView != null) {
+                    ((Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE)).vibrate(30);
                     mListener.onClick(mClickView);
                     mClickView = null;
                 }
@@ -230,7 +231,7 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener{
 
         return anim;
     }
-    private View mClickView;
+
     @Override
     public void onClick(View v) {
         mClickView = v;

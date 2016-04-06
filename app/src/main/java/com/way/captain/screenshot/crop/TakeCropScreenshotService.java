@@ -35,6 +35,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.way.captain.R;
+import com.way.captain.utils.DensityUtil;
 import com.way.captain.widget.freecrop.FreeCropView;
 import com.way.captain.widget.rectcrop.CropImageView;
 
@@ -173,7 +174,6 @@ public class TakeCropScreenshotService extends Service {
     }
 
     private void startCapture() {
-
         DisplayMetrics displayMetrics = new DisplayMetrics();
         mWindowManager.getDefaultDisplay().getRealMetrics(displayMetrics);
         mScreenWidth = displayMetrics.widthPixels;
@@ -230,8 +230,6 @@ public class TakeCropScreenshotService extends Service {
         mScreenshot.takeScreenshot(mScreenShotBitmap, new Runnable() {
             @Override
             public void run() {
-                //stopSelf();
-                //showRectCropLayout(mScreenShotBitmap);
                 if (mScreenShotBitmap == null || mScreenShotBitmap.isRecycled())
                     return;
                 if (isFreeCrop)
@@ -346,11 +344,8 @@ public class TakeCropScreenshotService extends Service {
 
     private void updateRectCropLayoutWidth() {
         if (mRectCropDialog != null) {
-            WindowManager windowManager =
-                    (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
-            Display display = windowManager.getDefaultDisplay();
-            int screenShowWidth = display.getWidth();
-            int screenShowHeight = display.getHeight();
+            int screenShowWidth = DensityUtil.getDisplayWidth(this);
+            int screenShowHeight = DensityUtil.getDisplayHeight(this);
             final Resources res = getResources();
             final WindowManager.LayoutParams lp = mRectCropDialog.getWindow().getAttributes();
             lp.width = screenShowWidth;
@@ -428,11 +423,8 @@ public class TakeCropScreenshotService extends Service {
 
     private void updateFreeCropLayoutWidth() {
         if (mFreeCropDialog != null) {
-            WindowManager windowManager =
-                    (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
-            Display display = windowManager.getDefaultDisplay();
-            int screenShowWidth = display.getWidth();
-            int screenShowHeight = display.getHeight();
+            int screenShowWidth = DensityUtil.getDisplayWidth(this);
+            int screenShowHeight = DensityUtil.getDisplayHeight(this);
             final Resources res = getResources();
             final WindowManager.LayoutParams lp = mFreeCropDialog.getWindow().getAttributes();
             lp.width = screenShowWidth;

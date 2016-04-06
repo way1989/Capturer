@@ -36,7 +36,7 @@
     <string name="about_menu">关于</string>
     <string name="action_settings">设置</string>
     <string name="advance_category">高级设置</string>
-    <string name="chathead_content_text">试试摇摇你的手机...</string>
+    <string name="chathead_content_text">试试摇一摇你的手机...</string>
     <string name="chathead_content_title">Captain正在运行</string>
     <string name="countdown_summary">录屏前倒计时3秒</string>
     <string name="settings_author_title">作者</string>
@@ -59,11 +59,11 @@
     <string name="float_record_hd_quality">高清</string>
     <string name="float_record_normal_quality">标清</string>
     <string name="float_record_start">REC</string>
-    <string name="settings_with_arrow"><![CDATA["设置 >"]]></string>
-    <string name="enable_permission_procedure"><![CDATA["您可以在“设置”>“应用”>“Captain”>“权限”中更改权限。"]]></string>
+    <string name="settings_with_arrow">"设置 >"</string>
+    <string name="enable_permission_procedure">"您可以在“设置”>“应用”>“Captain”>“权限”中更改权限。"</string>
     <string name="enable_permission_procedure_description">"您可以依次触摸“设置”、“应用”、“Captain”和“权限”来更改权限。"</string>
     <string name="exit">退出</string>
-    <string name="next_with_arrow"><![CDATA["下一步 >"]]></string>
+    <string name="next_with_arrow">"下一步 >"</string>
     <string name="required_permissions_promo">"“Captain”应用需要获得“读写存储设备权限。"</string>
     <string name="snack_bar_action_undo">撤销</string>
     <string name="snack_bar_text_item_removed">删除了一项内容</string>
@@ -100,4 +100,7 @@
     <string name="rect_screenshot">区域</string>
     <string name="free_crop_toast">滑动选取需要截取的部分,点击按钮保存</string>
     <string name="crop_toast">双击确认选择区域并保存</string>
+    <string name="not_enough_storage">设备存储空间不够</string>
+    <string name="scroll_screenshot_toast_text">点击屏幕立即结束</string>
+    <string name="scroll_screenshot_toast_title">正在长截屏</string>
 </resources>

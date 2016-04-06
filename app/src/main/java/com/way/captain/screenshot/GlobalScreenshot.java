@@ -791,8 +791,14 @@ class GlobalScreenshot {
         }
         //tmp save the last bitmap
         Bitmap oldBitmap = mScreenBitmap;
-        //collage a new bitmap
-        Bitmap collageBitmap = LongScreenshotUtil.getInstance(mContext.getApplicationContext()).collageLongBitmap(oldBitmap, newBitmap);
+        Bitmap collageBitmap = null;
+        try {
+            //collage a new bitmap
+            collageBitmap = LongScreenshotUtil.getInstance(mContext.getApplicationContext())
+                    .collageLongBitmap(oldBitmap, newBitmap);
+        } catch (OutOfMemoryError e) {
+            //out of memory, so stop it.
+        }
         if (collageBitmap == null || collageBitmap.isRecycled()) {
             startAnimation(callback, true);
             return;

@@ -21,6 +21,7 @@ import com.way.captain.activity.MainActivity;
 import com.way.captain.screenrecord.ScreenRecordShortcutLaunchActivity;
 import com.way.captain.screenshot.TakeScreenshotActivity;
 import com.way.captain.screenshot.TakeScreenshotService;
+import com.way.captain.screenshot.crop.TakeCropScreenshotActivity;
 import com.way.captain.screenshot.crop.TakeCropScreenshotService;
 import com.way.captain.widget.FloatMenuDialog;
 
@@ -54,9 +55,18 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
         initData();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    public void initData() {
+        mKeyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        mSensorManager = (SensorManager) this
+                .getSystemService(Context.SENSOR_SERVICE);
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        if (mSensor != null) {
+            mSensorManager.registerListener(this, mSensor,
+                    SensorManager.SENSOR_DELAY_GAME);
+        }
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (mIsRunning) {
@@ -67,9 +77,6 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
         return START_REDELIVER_INTENT;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -77,18 +84,12 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
         mSensorManager.unregisterListener(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
 
 
-    /**
-     * 通知を表示します。
-     */
     private Notification createNotification() {
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setWhen(System.currentTimeMillis());
@@ -109,7 +110,6 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
 
     @Override
     public void onClick(final View v) {
-        mVibrator.vibrate(30);
         switch (v.getId()) {
             case R.id.menu_screnshot_center:
                 try {
@@ -148,7 +148,7 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
                 break;
             case R.id.menu_free_screenshot:
                 try {
-                    Intent screenRecordIntent = new Intent(ShakeService.this, com.way.captain.screenshot.crop.TakeScreenshotActivity.class);
+                    Intent screenRecordIntent = new Intent(ShakeService.this, TakeCropScreenshotActivity.class);
                     screenRecordIntent.setAction(TakeCropScreenshotService.ACTION_FREE_SCREENSHOT);
                     screenRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                     startActivity(screenRecordIntent);
@@ -157,7 +157,7 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
                 break;
             case R.id.menu_rect_screenshot:
                 try {
-                    Intent screenRecordIntent = new Intent(ShakeService.this, com.way.captain.screenshot.crop.TakeScreenshotActivity.class);
+                    Intent screenRecordIntent = new Intent(ShakeService.this, TakeCropScreenshotActivity.class);
                     screenRecordIntent.setAction(TakeCropScreenshotService.ACTION_RECT_SCREENSHOT);
                     screenRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                     startActivity(screenRecordIntent);
@@ -202,18 +202,6 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
-    }
-
-    public void initData() {
-        mKeyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-        mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        mSensorManager = (SensorManager) this
-                .getSystemService(Context.SENSOR_SERVICE);
-        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        if (mSensor != null) {
-            mSensorManager.registerListener(this, mSensor,
-                    SensorManager.SENSOR_DELAY_GAME);
-        }
     }
 
     private void showDialog() {

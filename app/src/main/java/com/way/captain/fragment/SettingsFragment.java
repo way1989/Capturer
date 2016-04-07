@@ -17,6 +17,7 @@ import android.preference.SwitchPreference;
 import com.way.captain.R;
 import com.way.captain.service.ShakeService;
 import com.way.captain.utils.AppUtils;
+import com.way.firupgrade.FIRUtils;
 
 /**
  * Created by android on 16-2-4.
@@ -65,7 +66,12 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                 else
                     mContext.stopService(new Intent(mContext, ShakeService.class));
                 break;
-
+            case "key_version":
+                //if(true) throw new NullPointerException("test");
+                FIRUtils.checkForUpdate(getActivity(), true);
+                break;
+            default:
+                break;
         }
         return super.onPreferenceTreeClick(preferenceScreen, preference);
     }

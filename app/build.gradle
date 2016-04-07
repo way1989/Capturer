@@ -21,7 +21,7 @@ bugtags {
 }
 
 def buildTime() {
-    return new Date().format("yyyyMMdd", TimeZone.getTimeZone("UTC"))
+    return new Date().format("yyyyMMdd", TimeZone.getTimeZone("GMT+8:00"))
 }
 
 android {
@@ -32,8 +32,8 @@ android {
         applicationId "com.way.captain"
         minSdkVersion 21
         targetSdkVersion 23
-        versionCode 600004
-        versionName "6.0.00.04"
+        versionCode 600005
+        versionName "6.0.00.05"
     }
     signingConfigs {
         release {

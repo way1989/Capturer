@@ -28,8 +28,9 @@ public class App extends Application {
 //        BTGInvocationEventNone    // 静默模式，只收集 Crash 信息（如果允许）
 //        BTGInvocationEventShake   // 通过摇一摇呼出 Bugtags
 //        BTGInvocationEventBubble  // 通过悬浮小球呼出 Bugtags
-        if (BuildConfig.BUGTAG_ENABLED)
-            Bugtags.start(getString(R.string.bugtag_app_key), this, BuildConfig.DEBUG ? Bugtags.BTGInvocationEventBubble : Bugtags.BTGInvocationEventNone);
+        //BugtagsOptions options = new BugtagsOptions.Builder().trackingCrashLog(true).build();
+        Bugtags.start(getString(R.string.bugtag_app_key), this,
+                BuildConfig.DEBUG ? Bugtags.BTGInvocationEventBubble : Bugtags.BTGInvocationEventNone);
         mContext = this;
         LeakCanary.install(this);
         Iconify.with(new MaterialModule());

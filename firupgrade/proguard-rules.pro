@@ -15,3 +15,6 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+-keepattributes LineNumberTable,SourceFile
+-dontwarn com.android.volley.**
+-keep class com.way.firupgrade.**{*;}

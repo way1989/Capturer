@@ -6,8 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 
 import com.bugtags.library.Bugtags;
-
-//import com.bugtags.library.Bugtags;
+import com.way.firupgrade.FIRUtils;
 
 /**
  * Created by android on 16-3-5.
@@ -16,6 +15,7 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FIRUtils.checkForUpdate(this, false);
     }
 
     @Override

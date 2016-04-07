@@ -18,7 +18,7 @@ android {
         release {
             resValue "string", "api_token", API_TOKEN
             resValue "string", "app_id", APP_ID
-            minifyEnabled false
+            minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

@@ -51,7 +51,7 @@ public class PermissionCheckActivity extends BaseActivity {
         }
 
         setContentView(R.layout.permission_check_activity);
-        getWindow().setStatusBarColor(getResources().getColor(R.color.primary_normal));
+        getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimary));
 
         findViewById(R.id.exit).setOnClickListener(new OnClickListener() {
             @Override

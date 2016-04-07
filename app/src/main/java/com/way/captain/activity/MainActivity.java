@@ -49,6 +49,16 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             startActivity(new Intent(MainActivity.this, SettingsActivity.class));
         }
     };
+    Runnable navigateChangeMode = new Runnable() {
+        public void run() {
+            int uiMode = getResources().getConfiguration().uiMode;
+            boolean isCurrentNightMode = (uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+            Log.i("way", "isCurrentNightMode = " + isCurrentNightMode);
+            getDelegate().setLocalNightMode(isCurrentNightMode ? AppCompatDelegate.MODE_NIGHT_NO : AppCompatDelegate.MODE_NIGHT_YES);
+            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean(App.KEY_NIGHT_MODE, !isCurrentNightMode).apply();
+            recreate();
+        }
+    };
     private NavigationView mNavigationView;
     private DrawerLayout mDrawerLayout;
     private BaseFragment mFragment;
@@ -86,8 +96,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // if (mFragment != null && mFragment.onFloatButtonClick())
-                //     return;
 //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
             }
@@ -107,12 +115,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         boolean isCurrentNightMode = (uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
         item.setTitle(isCurrentNightMode ? R.string.nav_day_mode : R.string.nav_night_mode);
         Log.i("way", "onCreate isCurrentNightMode = " + isCurrentNightMode);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
     }
 
     @Override
@@ -165,13 +167,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         } else if (id == R.id.nav_videos) {
             if (mFragment == null || !(mFragment instanceof VideoFragment))
                 mNavigationView.postDelayed(navigateVideos, 350);
-        } else if(id == R.id. nav_night_mode) {
-            int uiMode = getResources().getConfiguration().uiMode;
-            boolean isCurrentNightMode = (uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
-            Log.i("way", "isCurrentNightMode = " + isCurrentNightMode);
-            getDelegate().setLocalNightMode(isCurrentNightMode ? AppCompatDelegate.MODE_NIGHT_NO : AppCompatDelegate.MODE_NIGHT_YES);
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(App.KEY_NIGHT_MODE, !isCurrentNightMode).apply();
-            recreate();
+        } else if (id == R.id.nav_night_mode) {
+            mNavigationView.postDelayed(navigateChangeMode, 350);
+
         } else if (id == R.id.nav_share) {
             mNavigationView.postDelayed(navigateShare, 350);
         } else if (id == R.id.nav_feedback) {

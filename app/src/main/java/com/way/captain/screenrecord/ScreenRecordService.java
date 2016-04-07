@@ -67,7 +67,7 @@ public final class ScreenRecordService extends Service {
             //String subtitle = context.getString(R.string.notification_recording_subtitle);
             Notification.Builder builder  = new Notification.Builder(context) //
                     .setContentTitle(title)/*.setContentText(subtitle)*/.setSmallIcon(R.drawable.ic_videocam_white_24dp)
-                    .setColor(context.getResources().getColor(R.color.primary_normal)).setAutoCancel(true)
+                    .setColor(context.getResources().getColor(R.color.colorPrimary)).setAutoCancel(true)
                     .setPriority(Notification.PRIORITY_MIN);
             Intent stopIntent = new Intent("com.way.stop");
             stopIntent.putExtra("id", NOTIFICATION_ID);

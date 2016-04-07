@@ -327,7 +327,7 @@ final class RecordingSession {
         Notification.Builder builder = new Notification.Builder(context) //
                 .setContentTitle(title).setContentText(subtitle).setWhen(System.currentTimeMillis()).setShowWhen(true)
                 .setSmallIcon(R.drawable.ic_videocam_white_24dp)
-                .setColor(context.getResources().getColor(R.color.primary_normal)).setContentIntent(pendingViewIntent)
+                .setColor(context.getResources().getColor(R.color.colorPrimary)).setContentIntent(pendingViewIntent)
                 .setAutoCancel(true).addAction(R.drawable.ic_share_white_24dp, share, pendingShareIntent)
                 .addAction(R.drawable.ic_delete_white_24dp, delete, pendingDeleteIntent);
 

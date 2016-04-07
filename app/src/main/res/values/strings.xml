@@ -68,7 +68,7 @@
     <string name="snack_bar_text_item_removed">1 item removed</string>
     <string name="float_record_cancel">Cancle</string>
     <string name="float_record_end_handle">Saving...</string>
-    <string name="float_record_failed"></string>
+    <string name="float_record_failed">screen record failed</string>
     <string name="float_record_hd_quality">HD</string>
     <string name="float_record_start">REC</string>
     <string name="float_record_normal_quality">Normal</string>
@@ -117,4 +117,11 @@
     <string name="normal_screen_shot">Normal</string>
     <string name="free_crop_toast">Slide select picture taken part in need.</string>
     <string name="crop_toast">Double tap to get the result</string>
+    <string name="feedback">feedback</string>
+    <string name="feedback_text_empty">the feedback is too short</string>
+    <string name="feedback_send_succeed">feedback send scuessed!</string>
+    <string name="global_send">send</string>
+    <string name="feedback_hint">input you feedback</string>
+    <string name="insufficient_storage">Insufficient storage</string>
+    <string name="float_record_first_switch_hd_toast">HD is 2 times of Normal</string>
 </resources>

@@ -22,6 +22,28 @@ import com.way.captain.utils.OsUtil;
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "MainActivity";
+    Runnable navigateShare = new Runnable() {
+        public void run() {
+            String url = "http://fir.im/captain";
+            Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+            sharingIntent.setType("text/plain");
+            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name));
+            sharingIntent.putExtra(Intent.EXTRA_TEXT, url);
+            sharingIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            Intent chooserIntent = Intent.createChooser(sharingIntent, null);
+            startActivity(chooserIntent);
+        }
+    };
+    Runnable navigateFeedback = new Runnable() {
+        public void run() {
+            startActivity(new Intent(MainActivity.this, FeedbackActivity.class));
+        }
+    };
+    Runnable navigateSettings = new Runnable() {
+        public void run() {
+            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+        }
+    };
     private NavigationView mNavigationView;
     private DrawerLayout mDrawerLayout;
     private BaseFragment mFragment;
@@ -33,7 +55,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             transaction.replace(R.id.fragment_container, mFragment).commitAllowingStateLoss();
         }
     };
-
     Runnable navigateVideos = new Runnable() {
         public void run() {
             mNavigationView.getMenu().findItem(R.id.nav_videos).setChecked(true);
@@ -135,9 +156,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             if (mFragment == null || !(mFragment instanceof VideoFragment))
                 mNavigationView.postDelayed(navigateVideos, 350);
         } else if (id == R.id.nav_share) {
-
+            mNavigationView.postDelayed(navigateShare, 350);
+        } else if (id == R.id.nav_feedback) {
+            mNavigationView.postDelayed(navigateFeedback, 350);
         } else if (id == R.id.nav_settings) {
-            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+            mNavigationView.postDelayed(navigateSettings, 350);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

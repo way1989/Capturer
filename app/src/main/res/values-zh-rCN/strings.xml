@@ -103,4 +103,9 @@
     <string name="not_enough_storage">设备存储空间不够</string>
     <string name="scroll_screenshot_toast_text">点击屏幕立即结束</string>
     <string name="scroll_screenshot_toast_title">正在长截屏</string>
+    <string name="global_send">发送</string>
+    <string name="feedback">用户反馈</string>
+    <string name="feedback_hint">请给我们一些建议吧...</string>
+    <string name="feedback_send_succeed">反馈成功</string>
+    <string name="feedback_text_empty">反馈内容过少...</string>
 </resources>

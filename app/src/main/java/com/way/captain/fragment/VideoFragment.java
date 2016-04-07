@@ -223,6 +223,7 @@ public class VideoFragment extends BaseFragment implements LoaderManager.LoaderC
 
     private void initView(View view) {
         mLoadingEmptyContainer = (LoadingEmptyContainer) view.findViewById(R.id.loading_empty_container);
+        mLoadingEmptyContainer.getNoResultsContainer().setSecondaryText(R.string.video_no_result_summary);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         mViewPager = (ViewPager) view.findViewById(R.id.transition_pager);
         mBackground = view.findViewById(R.id.transition_full_background);

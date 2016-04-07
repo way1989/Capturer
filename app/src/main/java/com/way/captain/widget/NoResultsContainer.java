@@ -1,8 +1,12 @@
 package com.way.captain.widget;
 
 import android.content.Context;
+import android.support.annotation.ColorInt;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.StringRes;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -25,11 +29,11 @@ public class NoResultsContainer extends LinearLayout {
      *
      * @param resId String resource id
      */
-    public void setMainText(final int resId) {
+    public void setMainText(@StringRes final int resId) {
         ((TextView) findViewById(R.id.no_results_main_text)).setText(resId);
     }
 
-    public void setMainHighlightText(final String text) {
+    public void setMainHighlightText(@StringRes final String text) {
         final TextView hightlightText = (TextView) findViewById(R.id.no_results_main_highlight_text);
 
         if (text == null || text.isEmpty()) {
@@ -40,11 +44,15 @@ public class NoResultsContainer extends LinearLayout {
         }
     }
 
-    public void setSecondaryText(final int resId) {
+    public void setSecondaryText(@StringRes final int resId) {
         ((TextView) findViewById(R.id.no_results_secondary_text)).setText(resId);
     }
 
-    public void setTextColor(int color) {
+    public void setMainLogo(@DrawableRes final int resId) {
+        ((ImageView) findViewById(R.id.no_results_logo)).setImageResource(resId);
+    }
+
+    public void setTextColor(@ColorInt int color) {
         ((TextView) findViewById(R.id.no_results_main_text)).setTextColor(color);
         ((TextView) findViewById(R.id.no_results_main_highlight_text)).setTextColor(color);
         ((TextView) findViewById(R.id.no_results_secondary_text)).setTextColor(color);

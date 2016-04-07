@@ -108,4 +108,6 @@
     <string name="feedback_hint">请给我们一些建议吧...</string>
     <string name="feedback_send_succeed">反馈成功</string>
     <string name="feedback_text_empty">反馈内容过少...</string>
+    <string name="video_no_result_summary">摇一摇手机录几个视频吧</string>
+    <string name="gif_no_result_summary">切换到视频去制作几张gif吧</string>
 </resources>

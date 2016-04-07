@@ -81,6 +81,7 @@ public class GifFragment extends BaseFragment implements LoaderManager.LoaderCal
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mLoadingEmptyContainer = (LoadingEmptyContainer) view.findViewById(R.id.loading_empty_container);
+        mLoadingEmptyContainer.getNoResultsContainer().setSecondaryText(R.string.gif_no_result_summary);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         mViewPager = (ViewPager) view.findViewById(R.id.transition_pager);
         mBackground = view.findViewById(R.id.transition_full_background);

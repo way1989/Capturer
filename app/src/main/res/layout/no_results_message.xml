@@ -10,12 +10,12 @@
     android:visibility="gone">
 
     <ImageView
+        android:id="@+id/no_results_logo"
         android:layout_width="@dimen/white_note_width"
         android:layout_height="@dimen/white_note_height"
         android:layout_gravity="center_horizontal"
         android:paddingBottom="@dimen/white_note_padding_bottom"
-        android:scaleType="centerInside"
-        android:src="@mipmap/ic_launcher" />
+        android:scaleType="centerInside" />
 
     <LinearLayout
         android:layout_width="fill_parent"

@@ -1,7 +1,9 @@
 package com.way.captain.activity;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -9,11 +11,14 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.way.captain.App;
 import com.way.captain.R;
 import com.way.captain.fragment.BaseFragment;
 import com.way.captain.fragment.GifFragment;
@@ -96,6 +101,12 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
         mNavigationView.post(navigateGifs);
+
+        MenuItem item = mNavigationView.getMenu().findItem(R.id.nav_night_mode);
+        int uiMode = getResources().getConfiguration().uiMode;
+        boolean isCurrentNightMode = (uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        item.setTitle(isCurrentNightMode ? R.string.nav_day_mode : R.string.nav_night_mode);
+        Log.i("way", "onCreate isCurrentNightMode = " + isCurrentNightMode);
     }
 
     @Override
@@ -140,7 +151,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             startActivity(new Intent(MainActivity.this, SettingsActivity.class));
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -155,6 +165,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         } else if (id == R.id.nav_videos) {
             if (mFragment == null || !(mFragment instanceof VideoFragment))
                 mNavigationView.postDelayed(navigateVideos, 350);
+        } else if(id == R.id. nav_night_mode) {
+            int uiMode = getResources().getConfiguration().uiMode;
+            boolean isCurrentNightMode = (uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+            Log.i("way", "isCurrentNightMode = " + isCurrentNightMode);
+            getDelegate().setLocalNightMode(isCurrentNightMode ? AppCompatDelegate.MODE_NIGHT_NO : AppCompatDelegate.MODE_NIGHT_YES);
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(App.KEY_NIGHT_MODE, !isCurrentNightMode).apply();
+            recreate();
         } else if (id == R.id.nav_share) {
             mNavigationView.postDelayed(navigateShare, 350);
         } else if (id == R.id.nav_feedback) {

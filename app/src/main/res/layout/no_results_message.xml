@@ -33,8 +33,7 @@
             android:maxLines="2"
             android:text="@string/empty_generic_main"
             android:textAllCaps="true"
-            android:textColor="@color/no_results"
-            android:textSize="@dimen/no_results_text_main"
+            android:textAppearance="?android:attr/textAppearanceLarge"
             android:textStyle="bold" />
 
         <TextView
@@ -45,8 +44,7 @@
             android:ellipsize="end"
             android:gravity="center_horizontal"
             android:maxLines="2"
-            android:textColor="@color/no_results"
-            android:textSize="@dimen/no_results_text_main"
+            android:textAppearance="?android:attr/textAppearanceLarge"
             android:textStyle="bold|italic"
             android:visibility="gone" />
     </LinearLayout>
@@ -58,6 +56,5 @@
         android:fontFamily="sans-serif-light"
         android:gravity="center_horizontal"
         android:text="@string/empty_generic_secondary"
-        android:textColor="@color/no_results"
-        android:textSize="@dimen/no_results_text_secondary" />
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
 </com.way.captain.widget.NoResultsContainer>

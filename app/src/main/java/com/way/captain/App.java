@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatDelegate;
 
 import com.bugtags.library.Bugtags;
 import com.joanzapata.iconify.Iconify;
@@ -16,6 +17,7 @@ import com.way.captain.service.ShakeService;
  * Created by android on 16-2-4.
  */
 public class App extends Application {
+    public static final String KEY_NIGHT_MODE = "night_mode_key";
     private static Context mContext;
 
     public static Context getContext() {
@@ -32,6 +34,8 @@ public class App extends Application {
         Bugtags.start(getString(R.string.bugtag_app_key), this,
                 BuildConfig.DEBUG ? Bugtags.BTGInvocationEventBubble : Bugtags.BTGInvocationEventNone);
         mContext = this;
+        boolean isNightMode = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(KEY_NIGHT_MODE, false);
+        AppCompatDelegate.setDefaultNightMode(isNightMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
         LeakCanary.install(this);
         Iconify.with(new MaterialModule());
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsFragment.ATOUCH_KEY, true))

@@ -17,6 +17,10 @@
     <item android:title="@string/advance_category">
         <menu>
             <item
+                android:id="@+id/nav_night_mode"
+                android:icon="@drawable/ic_menu_theme"
+                android:title="@string/nav_night_mode" />
+            <item
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_share"
                 android:title="@string/share" />

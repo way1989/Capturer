@@ -44,4 +44,8 @@
     <color name="frame">#86C166</color>
     <color name="guide">#AA86C166</color>
     <color name="menu_bg">#FFFFFB</color>
+
+    <color name="colorNavStart">#3F51B5</color>
+    <color name="colorNavCenter">#283593</color>
+    <color name="colorNavEnd">#1a237e</color>
 </resources>

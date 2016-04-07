@@ -126,4 +126,6 @@
     <string name="float_record_first_switch_hd_toast">HD is 2 times of Normal</string>
     <string name="video_no_result_summary">Shake your device to take some video</string>
     <string name="gif_no_result_summary">switch to video to make some gifs</string>
+    <string name="nav_night_mode">Night mode</string>
+    <string name="nav_day_mode">Day mode</string>
 </resources>

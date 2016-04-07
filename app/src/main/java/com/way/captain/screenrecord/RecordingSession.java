@@ -53,7 +53,7 @@ import static android.os.Environment.DIRECTORY_MOVIES;
 final class RecordingSession {
     static final int NOTIFICATION_ID = 522592;
 
-    private static final String DISPLAY_NAME = "telecine";
+    private static final String DISPLAY_NAME = "ScreenRecord";
     private static final String MIME_TYPE = "video/mp4";
     private final Handler mainThread = new Handler(Looper.getMainLooper());
     private final Context context;
@@ -63,7 +63,7 @@ final class RecordingSession {
     private final boolean showCountDown;
     private final Integer videoSizePercentage;
     private final File outputRoot;
-    private final DateFormat fileFormat = new SimpleDateFormat("'Telecine_'yyyy-MM-dd-HH-mm-ss'.mp4'", Locale.US);
+    private final DateFormat fileFormat = new SimpleDateFormat("'ScreenRecord_'yyyy-MM-dd-HH-mm-ss'.mp4'", Locale.US);
     private final NotificationManager notificationManager;
     private final WindowManager windowManager;
     private final MediaProjectionManager projectionManager;
@@ -79,7 +79,6 @@ final class RecordingSession {
             stopRecording();
         }
     };
-    private long recordingStartNanos;
 
 
     RecordingSession(Context context, Listener listener, int resultCode, Intent data, Boolean showCountDown,
@@ -93,7 +92,7 @@ final class RecordingSession {
         this.videoSizePercentage = videoSizePercentage;
 
         File picturesDir = Environment.getExternalStoragePublicDirectory(DIRECTORY_MOVIES);
-        outputRoot = new File(picturesDir, "Telecine");
+        outputRoot = new File(picturesDir, DISPLAY_NAME);
 
         notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         windowManager = (WindowManager) context.getSystemService(WINDOW_SERVICE);
@@ -255,7 +254,6 @@ final class RecordingSession {
 
         recorder.start();
         running = true;
-        recordingStartNanos = System.nanoTime();
         listener.onStart();
 
         Log.d("way", "Screen recording started.");
@@ -281,8 +279,6 @@ final class RecordingSession {
 
         // Stop the recorder which writes the contents to the file.
         recorder.stop();
-
-        long recordingStopNanos = System.nanoTime();
 
         recorder.release();
         display.release();

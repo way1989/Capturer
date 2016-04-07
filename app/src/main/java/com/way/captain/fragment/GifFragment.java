@@ -227,7 +227,7 @@ public class GifFragment extends BaseFragment implements LoaderManager.LoaderCal
     @Override
     public void onPositionUpdate(float state, boolean isLeaving) {
         mBackground.setVisibility(state == 0f ? View.INVISIBLE : View.VISIBLE);
-        mBackground.setAlpha((int) (255 * state));
+        mBackground.setAlpha((int) (state));
     }
 
     @Override

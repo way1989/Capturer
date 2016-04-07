@@ -507,7 +507,8 @@ public class VideoFragment extends BaseFragment implements LoaderManager.LoaderC
     @Override
     public void onPositionUpdate(float state, boolean isLeaving) {
         mBackground.setVisibility(state == 0f ? View.INVISIBLE : View.VISIBLE);
-        mBackground.setAlpha((int) (255 * state));
+        mBackground.setAlpha((int) (state));
+        Log.i("way", "onPositionUpdate alpha = " + state);
     }
 
     private void loadFFMpegBinary() {

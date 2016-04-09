@@ -43,8 +43,8 @@
     <dimen name="layout_child_offset_tumblr">72dp</dimen>
     <dimen name="item_circle_size_tumblr">48dp</dimen>
     <dimen name="item_font_size_tumblr">16sp</dimen>
-    <dimen name="feedback_text_width">130dp</dimen>
-    <dimen name="global_margin_great">20dp</dimen>
+    <dimen name="feedback_text_width">120dp</dimen>
+    <dimen name="global_margin_great">16dp</dimen>
     <dimen name="global_font_large">14sp</dimen>
-    <dimen name="global_margin_standard">10dp</dimen>
+    <dimen name="global_margin_standard">8dp</dimen>
 </resources>

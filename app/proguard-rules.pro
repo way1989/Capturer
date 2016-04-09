@@ -27,7 +27,7 @@
 
 #-dontwarn com.github.hiteshsondhi88.libffmpeg.**
 #-keep com.github.hiteshsondhi88.libffmpeg.**{*;}
-#-keep android.support.**{*;}
-#-keep com.way.captain.widget.**{*;}
-#-keep com.getbase.floatingactionbutton.**{*;}
-#-keep com.alexvasilkov.**{*;}
+-keep class android.support.**{*;}
+#-keep class com.way.captain.widget.**{*;}
+#-keep class com.getbase.floatingactionbutton.**{*;}
+#-keep class com.alexvasilkov.**{*;}

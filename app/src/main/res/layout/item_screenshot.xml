@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_view"
+    android:layout_width="match_parent"
+    android:layout_height="176dp"
+    android:layout_gravity="center"
+    android:layout_margin="3dp"
+    android:foreground="?selectableItemBackground"
+    card_view:cardBackgroundColor="?android:colorBackground"
+    card_view:cardCornerRadius="2dp"
+    card_view:cardElevation="2dp">
+
+    <com.way.captain.widget.SimpleTagImageView xmlns:simple="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/ic_screenshot"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        simple:simple_tag_background_color="@color/colorAccent"
+        simple:simple_tag_enable="false"
+        simple:simple_tag_orientation="right_top"
+        simple:simple_tag_textColor="@android:color/white"
+        simple:simple_tag_textSize="12sp"
+        simple:simple_tag_width="12dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="32dip"
+        android:layout_gravity="bottom"
+        android:alpha="0.7"
+        android:background="?android:colorBackground" />
+
+
+    <ImageButton
+        android:id="@+id/popup_menu_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:background="?selectableItemBackground"
+        android:padding="4dp"
+        android:src="@drawable/ic_menu_more"
+        android:tint="@color/colorAccent" />
+</android.support.v7.widget.CardView>

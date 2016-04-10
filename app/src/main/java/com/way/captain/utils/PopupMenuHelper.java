@@ -53,6 +53,9 @@ public abstract class PopupMenuHelper implements PopupMenu.OnMenuItemClickListen
         if (mType != null) {
             // inflate the menu
             switch (mType) {
+                case Screenshot:
+                    popupMenu.getMenuInflater().inflate(R.menu.menu_screenshot_item, menu);
+                    break;
                 case Gif:
                     popupMenu.getMenuInflater().inflate(R.menu.menu_gif_item, menu);
                     break;
@@ -87,6 +90,7 @@ public abstract class PopupMenuHelper implements PopupMenu.OnMenuItemClickListen
 
     // the different types of pop up menus
     public static enum PopupMenuType {
+        Screenshot,
         Gif,
         Video,
     }

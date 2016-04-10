@@ -128,4 +128,9 @@
     <string name="gif_no_result_summary">switch to video to make some gifs</string>
     <string name="nav_night_mode">Night mode</string>
     <string name="nav_day_mode">Day mode</string>
+    <string name="screenshot_title">Screenshot</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="image_transition">transition_image</string>
 </resources>

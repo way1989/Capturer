@@ -4,24 +4,22 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatDelegate;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.way.captain.App;
 import com.way.captain.R;
 import com.way.captain.fragment.BaseFragment;
 import com.way.captain.fragment.GifFragment;
+import com.way.captain.fragment.MainFragment;
 import com.way.captain.fragment.VideoFragment;
 import com.way.captain.utils.OsUtil;
 
@@ -88,27 +86,18 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             return;
         }
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setVisibility(View.GONE);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-            }
-        });
+
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        mDrawerLayout.setDrawerListener(toggle);
-        toggle.syncState();
 
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
-        mNavigationView.setNavigationItemSelectedListener(this);
-        mNavigationView.post(navigateGifs);
+        if (mNavigationView != null)
+            mNavigationView.setNavigationItemSelectedListener(this);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, new MainFragment()).commitAllowingStateLoss();
+
+        //mNavigationView.post(navigateGifs);
 
         MenuItem item = mNavigationView.getMenu().findItem(R.id.nav_night_mode);
         int uiMode = getResources().getConfiguration().uiMode;
@@ -122,14 +111,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawer(GravityCompat.START);
         } else {
-            if (mFragment != null && mFragment.onBackPressed())
-                return;
-            long time = System.currentTimeMillis();
-            if (time - mLastPressTime > 3000) {
-                Snackbar.make(mDrawerLayout, R.string.twice_press_exit, Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                mLastPressTime = time;
-            } else
+//            if (mFragment != null && mFragment.onBackPressed())
+//                return;
+//            long time = System.currentTimeMillis();
+//            if (time - mLastPressTime > 3000) {
+//                Snackbar.make(mDrawerLayout, R.string.twice_press_exit, Snackbar.LENGTH_SHORT).show();
+//                mLastPressTime = time;
+//            } else
                 super.onBackPressed();
         }
     }
@@ -143,43 +131,59 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
-            return true;
+        switch (id) {
+            case android.R.id.home:
+                if (isNavigatingMain()) {
+                    mDrawerLayout.openDrawer(GravityCompat.START);
+                } else {
+                    super.onBackPressed();
+                }
+                return true;
+            case R.id.action_settings:
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                return true;
+            default:
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private boolean isNavigatingMain() {
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        return (currentFragment instanceof MainFragment);
     }
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        if (id == R.id.nav_gifs) {
-            if (mFragment == null || !(mFragment instanceof GifFragment))
-                mNavigationView.postDelayed(navigateGifs, 350);
-        } else if (id == R.id.nav_videos) {
-            if (mFragment == null || !(mFragment instanceof VideoFragment))
-                mNavigationView.postDelayed(navigateVideos, 350);
-        } else if (id == R.id.nav_night_mode) {
-            mNavigationView.postDelayed(navigateChangeMode, 350);
-
-        } else if (id == R.id.nav_share) {
-            mNavigationView.postDelayed(navigateShare, 350);
-        } else if (id == R.id.nav_feedback) {
-            mNavigationView.postDelayed(navigateFeedback, 350);
-        } else if (id == R.id.nav_settings) {
-            mNavigationView.postDelayed(navigateSettings, 350);
+        switch (id) {
+            case R.id.nav_screenshot:
+                item.setChecked(true);
+                break;
+            case R.id.nav_gifs:
+                item.setChecked(true);
+                break;
+            case R.id.nav_videos:
+                item.setChecked(true);
+                break;
+            case R.id.nav_night_mode:
+                mNavigationView.post(navigateChangeMode);
+                break;
+            case R.id.nav_share:
+                mNavigationView.post(navigateShare);
+                break;
+            case R.id.nav_feedback:
+                mNavigationView.post(navigateFeedback);
+                break;
+            case R.id.nav_settings:
+                mNavigationView.post(navigateSettings);
+                break;
+            default:
+                break;
         }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 }

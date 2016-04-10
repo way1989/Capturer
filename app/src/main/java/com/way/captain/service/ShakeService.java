@@ -14,6 +14,7 @@ import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 import android.view.View;
 
 import com.way.captain.R;
@@ -69,6 +70,9 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        String action = intent == null ? null : intent.getAction();
+        if (TextUtils.equals(action, "com.way.action.SHOW_MENU"))
+            showDialog();
         if (mIsRunning) {
             return START_STICKY;
         }

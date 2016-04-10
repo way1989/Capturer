@@ -69,6 +69,14 @@ public class GlideHelper {
                     }
                 });
     }
+    public static void loadScreenshotResource(String path, @NonNull ImageView image) {
+        Glide.with(image.getContext())
+                .load(path)
+                .animate(ANIMATOR)
+                .centerCrop()
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .into(image);
+    }
 
     public static void loadResourceBitmap(String path, @NonNull ImageView image) {
         Glide.with(image.getContext())

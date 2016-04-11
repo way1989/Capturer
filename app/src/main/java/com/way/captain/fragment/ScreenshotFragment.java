@@ -2,7 +2,6 @@ package com.way.captain.fragment;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,15 +23,10 @@ import android.widget.PopupMenu;
 
 import com.way.captain.R;
 import com.way.captain.adapter.ScreenshotAdapter;
-import com.way.captain.data.ScreenshotDataProvider;
-import com.way.captain.data.ScreenshotInfos;
-import com.way.captain.data.ScreenshotListLoader;
-import com.way.captain.utils.AppUtils;
-import com.way.captain.utils.DensityUtil;
+import com.way.captain.data.DataInfo;
+import com.way.captain.data.DataLoader;
+import com.way.captain.data.DataProvider;
 import com.way.captain.utils.DetailTransition;
-import com.way.captain.utils.PopupMenuHelper;
-import com.way.captain.utils.ScreenshotPopupMenuHelper;
-import com.way.captain.widget.IPopupMenuCallback;
 import com.way.captain.widget.LoadingEmptyContainer;
 
 import java.io.File;
@@ -43,15 +37,19 @@ import java.util.Date;
  * Created by way on 16/4/10.
  */
 public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener,
-        LoaderManager.LoaderCallbacks<ScreenshotListLoader.Result>, ScreenshotAdapter.OnItemClickListener,  PopupMenu.OnMenuItemClickListener {
+        LoaderManager.LoaderCallbacks<DataLoader.Result>, ScreenshotAdapter.OnItemClickListener,
+        PopupMenu.OnMenuItemClickListener {
+    private static final int SCREENSHOT_LOADER_ID = 0;
+    private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
-    private ScreenshotDataProvider mDataProvider = new ScreenshotDataProvider();
+    private DataProvider mDataProvider = new DataProvider();
     private ScreenshotAdapter mScreenshotAdapter;
     /**
      * Loading container and no results container
      */
     private LoadingEmptyContainer mLoadingEmptyContainer;
+    private int mClickPosition;
 
     @Override
     public boolean onBackPressed() {
@@ -66,8 +64,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(
-                R.layout.fragment_screenshot, container, false);
+        View view = inflater.inflate(R.layout.fragment_screenshot, container, false);
         return view;
     }
 
@@ -80,34 +77,33 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerview);
         GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 3);
         mRecyclerView.setLayoutManager(layoutManager);
-        //mRecyclerView.addItemDecoration(new SpacesItemDecoration(DensityUtil.dip2px(getContext(), 3)));
         mScreenshotAdapter = new ScreenshotAdapter(getContext(), this);
         mRecyclerView.setAdapter(mScreenshotAdapter);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
         mSwipeRefreshLayout.setOnRefreshListener(this);
-        getLoaderManager().initLoader(1, null, this);
+        getLoaderManager().initLoader(SCREENSHOT_LOADER_ID, null, this);
     }
 
     @Override
     public void onRefresh() {
         mSwipeRefreshLayout.setRefreshing(true);
-        getLoaderManager().restartLoader(1, null, this);
+        getLoaderManager().restartLoader(SCREENSHOT_LOADER_ID, null, this);
     }
 
     @Override
-    public Loader<ScreenshotListLoader.Result> onCreateLoader(int id, Bundle args) {
+    public Loader<DataLoader.Result> onCreateLoader(int id, Bundle args) {
         mLoadingEmptyContainer.showLoading();
-        return new ScreenshotListLoader(getContext());
+        return new DataLoader(getContext(), DataInfo.TYPE_SCREEN_SHOT);
     }
 
     @Override
-    public void onLoadFinished(Loader<ScreenshotListLoader.Result> loader, ScreenshotListLoader.Result data) {
+    public void onLoadFinished(Loader<DataLoader.Result> loader, DataLoader.Result data) {
         mSwipeRefreshLayout.setRefreshing(false);
-        if (data.screenshotInfoses != null && !data.screenshotInfoses.isEmpty()) {
+        if (data.dataInfoes != null && !data.dataInfoes.isEmpty()) {
             mLoadingEmptyContainer.setVisibility(View.INVISIBLE);
-            mDataProvider.setData(data.screenshotInfoses);
+            mDataProvider.setData(data.dataInfoes);
             mScreenshotAdapter.setDatas(mDataProvider);
         } else {
             mLoadingEmptyContainer.showNoResults();
@@ -115,7 +111,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     }
 
     @Override
-    public void onLoaderReset(Loader<ScreenshotListLoader.Result> loader) {
+    public void onLoaderReset(Loader<DataLoader.Result> loader) {
         mSwipeRefreshLayout.setRefreshing(false);
         if (mScreenshotAdapter != null)
             mScreenshotAdapter.clearData();
@@ -124,8 +120,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     @Override
     public void onItemClick(View v) {
         int position = (Integer) v.getTag(R.id.tag_item);
-        String path = mDataProvider.getItem(position).getPath();
-        //AppUtils.navigateToAlbum(getActivity(), position, new Pair<View, String>(albumArt, "transition_album_art" + position));
+        String path = mDataProvider.getItem(position);
         DetailFragment detailFragment = DetailFragment.newInstance(path, position);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             detailFragment.setSharedElementEnterTransition(new DetailTransition());
@@ -153,56 +148,15 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
         // show it
         popupMenu.show();
     }
-    private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
-    private int mClickPosition;
+
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.gif_item_share:
-                String subjectDate = DateFormat.getDateTimeInstance().format(new Date(System.currentTimeMillis()));
-                String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
-                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-                sharingIntent.setType("image/png");
-                sharingIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(mScreenshotAdapter.getItem(mClickPosition).getPath())));
-                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-                Intent chooserIntent = Intent.createChooser(sharingIntent, null);
-                chooserIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(chooserIntent);
+                shareScreenshot();
                 return true;
             case R.id.gif_item_delete:
-                mScreenshotAdapter.removeItem(mClickPosition);
-                mScreenshotAdapter.notifyItemRemoved(mClickPosition);
-                Snackbar snackbar = Snackbar.make(
-                        mRecyclerView,
-                        R.string.snack_bar_text_item_removed,
-                        Snackbar.LENGTH_LONG);
-
-                snackbar.setAction(R.string.snack_bar_action_undo, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        //onItemUndoActionClicked();
-                        int position = mDataProvider.undoLastRemoval();
-                        if (position >= 0) {
-                            mScreenshotAdapter.notifyItemInserted(position);
-                            mRecyclerView.scrollToPosition(position);
-                            mLoadingEmptyContainer.setVisibility(View.INVISIBLE);
-                        }
-                    }
-                });
-                snackbar.setActionTextColor(Color.WHITE);
-                snackbar.setCallback(new Snackbar.Callback() {
-                    @Override
-                    public void onDismissed(Snackbar snackbar, int event) {
-                        super.onDismissed(snackbar, event);
-                        mDataProvider.deleteLastRemoval();
-                    }
-                });
-                snackbar.show();
-                if (mDataProvider.getCount() == 0) {
-                    mLoadingEmptyContainer.showNoResults();
-                } else {
-                    mLoadingEmptyContainer.setVisibility(View.INVISIBLE);
-                }
+                deleteScreenshot();
                 return true;
             default:
                 break;
@@ -210,24 +164,52 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
         return false;
     }
 
+    private void shareScreenshot() {
+        String subjectDate = DateFormat.getDateTimeInstance().format(new Date(System.currentTimeMillis()));
+        String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
+        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+        sharingIntent.setType("image/png");
+        sharingIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(mScreenshotAdapter.getItem(mClickPosition))));
+        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        Intent chooserIntent = Intent.createChooser(sharingIntent, null);
+        chooserIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(chooserIntent);
+    }
 
-    public class SpacesItemDecoration extends RecyclerView.ItemDecoration {
-        private int space;
+    private void deleteScreenshot() {
+        mScreenshotAdapter.removeItem(mClickPosition);
+        mScreenshotAdapter.notifyItemRemoved(mClickPosition);
+        Snackbar snackbar = Snackbar.make(
+                mRecyclerView,
+                R.string.snack_bar_text_item_removed,
+                Snackbar.LENGTH_LONG);
 
-        public SpacesItemDecoration(int space) {
-            this.space = space;
-        }
-
-        @Override
-        public void getItemOffsets(Rect outRect, View view,
-                                   RecyclerView parent, RecyclerView.State state) {
-
-
-            outRect.left = space;
-            outRect.top = space;
-            outRect.right = space;
-            outRect.bottom = space;
-
+        snackbar.setAction(R.string.snack_bar_action_undo, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //onItemUndoActionClicked();
+                int position = mDataProvider.undoLastRemoval();
+                if (position >= 0) {
+                    mScreenshotAdapter.notifyItemInserted(position);
+                    mRecyclerView.scrollToPosition(position);
+                    mLoadingEmptyContainer.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+        snackbar.setActionTextColor(Color.WHITE);
+        snackbar.setCallback(new Snackbar.Callback() {
+            @Override
+            public void onDismissed(Snackbar snackbar, int event) {
+                super.onDismissed(snackbar, event);
+                mDataProvider.deleteLastRemoval();
+            }
+        });
+        snackbar.show();
+        if (mDataProvider.getCount() == 0) {
+            mLoadingEmptyContainer.showNoResults();
+        } else {
+            mLoadingEmptyContainer.setVisibility(View.INVISIBLE);
         }
     }
+
 }

@@ -9,6 +9,7 @@ import android.view.MotionEvent;
 
 import com.bugtags.library.Bugtags;
 import com.way.captain.App;
+import com.way.captain.BuildConfig;
 import com.way.firupgrade.FIRUtils;
 
 /**
@@ -20,6 +21,7 @@ public class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         boolean isNightMode = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(App.KEY_NIGHT_MODE, false);
         AppCompatDelegate.setDefaultNightMode(isNightMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+        if(!BuildConfig.DEBUG)
         FIRUtils.checkForUpdate(this, false);
     }
 

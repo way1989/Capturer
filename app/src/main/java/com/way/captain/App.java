@@ -9,7 +9,7 @@ import android.support.v7.app.AppCompatDelegate;
 import com.bugtags.library.Bugtags;
 import com.joanzapata.iconify.Iconify;
 import com.joanzapata.iconify.fonts.MaterialModule;
-import com.squareup.leakcanary.LeakCanary;
+//import com.squareup.leakcanary.LeakCanary;
 import com.way.captain.fragment.SettingsFragment;
 import com.way.captain.service.ShakeService;
 
@@ -36,7 +36,7 @@ public class App extends Application {
         mContext = this;
         boolean isNightMode = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(KEY_NIGHT_MODE, false);
         AppCompatDelegate.setDefaultNightMode(isNightMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
-        LeakCanary.install(this);
+//        LeakCanary.install(this);
         Iconify.with(new MaterialModule());
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsFragment.ATOUCH_KEY, true))
             startService(new Intent(this, ShakeService.class));

@@ -9,9 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 
 import com.way.captain.R;
-import com.way.captain.data.ScreenshotDataProvider;
-import com.way.captain.data.ScreenshotInfos;
-import com.way.captain.utils.AppUtils;
+import com.way.captain.data.DataProvider;
 import com.way.captain.utils.glide.GlideHelper;
 import com.way.captain.widget.SimpleTagImageView;
 
@@ -20,7 +18,7 @@ import com.way.captain.widget.SimpleTagImageView;
  */
 public class ScreenshotAdapter extends RecyclerView.Adapter<ScreenshotAdapter.ViewHolder> {
     private LayoutInflater mInflater;
-    private ScreenshotDataProvider mDataProvider = new ScreenshotDataProvider();
+    private DataProvider mDataProvider = new DataProvider();
     private OnItemClickListener mListener;
 
     public ScreenshotAdapter(Context context, OnItemClickListener listener) {
@@ -29,7 +27,7 @@ public class ScreenshotAdapter extends RecyclerView.Adapter<ScreenshotAdapter.Vi
         setHasStableIds(true);
     }
 
-    public void setDatas(ScreenshotDataProvider dataProvider) {
+    public void setDatas(DataProvider dataProvider) {
         mDataProvider = dataProvider;
         notifyDataSetChanged();
     }
@@ -43,7 +41,7 @@ public class ScreenshotAdapter extends RecyclerView.Adapter<ScreenshotAdapter.Vi
         notifyDataSetChanged();
     }
 
-    public ScreenshotInfos getItem(int pos) {
+    public String getItem(int pos) {
         return mDataProvider.getItem(pos);
     }
 
@@ -56,11 +54,11 @@ public class ScreenshotAdapter extends RecyclerView.Adapter<ScreenshotAdapter.Vi
 
     @Override
     public void onBindViewHolder(ScreenshotAdapter.ViewHolder holder, int position) {
-        ScreenshotInfos info = mDataProvider.getItem(position);
-        GlideHelper.loadScreenshotResource(info.getPath(), holder.image);
+        String info = mDataProvider.getItem(position);
+        GlideHelper.loadScreenshotResource(info, holder.image);
         // 把每个图片视图设置不同的Transition名称, 防止在一个视图内有多个相同的名称, 在变换的时候造成混乱
         // Fragment支持多个View进行变换, 使用适配器时, 需要加以区分
-        ViewCompat.setTransitionName(holder.image, info.getPath());
+        ViewCompat.setTransitionName(holder.image, info);
         holder.itemView.setTag(R.id.tag_item, position);
         holder.popupMenuButton.setTag(R.id.tag_item, position);
     }
@@ -78,7 +76,7 @@ public class ScreenshotAdapter extends RecyclerView.Adapter<ScreenshotAdapter.Vi
     @Override
     public long getItemId(int position) {
         //return super.getItemId(position);
-        return mDataProvider.getItem(position).getPath().hashCode();
+        return mDataProvider.getItem(position).hashCode();
     }
 
     public interface OnItemClickListener {

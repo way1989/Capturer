@@ -55,8 +55,6 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
     }
 
     public void setDatas(VideoDataProvider dataProvider) {
-//        mVideosInfos.clear();
-//        mVideosInfos.addAll(datas);
         mDataProvider = dataProvider;
         notifyDataSetChanged();
     }

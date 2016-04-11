@@ -5,6 +5,8 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -163,6 +165,10 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
             throw new IllegalStateException("Result code or data missing.");
         }
         mIsLongScreenshot = TextUtils.equals(intent.getAction(), ACTION_LONG_SCREENSHOT);
+        if(mIsLongScreenshot && getResources().getConfiguration().orientation != Configuration.ORIENTATION_PORTRAIT) {
+            Toast.makeText(this,R.string.turn_screen_orientation, Toast.LENGTH_SHORT).show();
+            return START_NOT_STICKY;
+        }
         mProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         mProjection = mProjectionManager.getMediaProjection(resultCode, data);
 
@@ -308,6 +314,7 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
                         | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
                 PixelFormat.TRANSLUCENT);
         layoutParams.y = 0;
+        layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED;
         layoutParams.windowAnimations = R.style.VolumePanelAnimation;
         layoutParams.gravity = getResources().getInteger(
                 R.integer.standard_notification_panel_layout_gravity);

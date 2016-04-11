@@ -112,4 +112,5 @@
     <string name="gif_no_result_summary">切换到视频去制作几张gif吧</string>
     <string name="nav_night_mode">夜间模式</string>
     <string name="nav_day_mode">日间模式</string>
+    <string name="turn_screen_orientation">请旋转您的手机方向为垂直方向</string>
 </resources>

@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.way.captain.R;
 
 /**
@@ -20,21 +19,7 @@ import com.way.captain.R;
  */
 public class DetailFragment extends Fragment {
     private static final String ARG_NUMBER = "arg_number";
-    private static final String ARG_USE_TRANSITION = "arg_useTransition";
-    private static final String ARG_TRANSITION_NAME = "arg_transitionName";
     private static final String ARG_PATH = "arg_path";
-
-    public static Fragment newInstance(int position, boolean useTransition, String transitionName) {
-        Bundle bundle = new Bundle();
-        bundle.putInt(ARG_NUMBER, position);
-        bundle.putBoolean(ARG_USE_TRANSITION, useTransition);
-        if (useTransition)
-            bundle.putString(ARG_TRANSITION_NAME, transitionName);
-        DetailFragment detailFragment = new DetailFragment();
-        detailFragment.setArguments(bundle);
-
-        return detailFragment;
-    }
 
     public static DetailFragment newInstance(String path, int position) {
         Bundle bundle = new Bundle();
@@ -66,11 +51,12 @@ public class DetailFragment extends Fragment {
 
         final int number = getArguments().getInt(ARG_NUMBER);
         final String path = getArguments().getString(ARG_PATH);
+        // Bitmap bitmap = BitmapFactory.decodeFile(path);
         ImageView imageView = (ImageView) view.findViewById(R.id.detail_image);
+        //imageView.setImageBitmap(bitmap);
         Glide.with(imageView.getContext())
                 .load(path)
                 .dontAnimate()
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(imageView);
     }
 }

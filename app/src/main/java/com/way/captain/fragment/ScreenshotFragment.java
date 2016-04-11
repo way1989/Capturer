@@ -1,5 +1,6 @@
 package com.way.captain.fragment;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -121,21 +122,25 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     @Override
     public void onItemClick(View v) {
         int position = (Integer) v.getTag(R.id.tag_item);
-        String path = mDataProvider.getItem(position);
-        DetailFragment detailFragment = DetailFragment.newInstance(path, position);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            detailFragment.setSharedElementEnterTransition(new DetailTransition());
-            setExitTransition(new Fade());
-            detailFragment.setEnterTransition(new Fade());
-            detailFragment.setSharedElementReturnTransition(new DetailTransition());
-        }
         ImageView imageView = (ImageView) v.findViewById(R.id.ic_screenshot);
-        getActivity().getSupportFragmentManager().beginTransaction()
-                .addSharedElement(imageView, getResources().getString(R.string.image_transition))
-                .replace(R.id.fragment_container, detailFragment)
-                .addToBackStack(null)
-                .commit();
-        startActivity(new Intent(getActivity(), DetailsActivity.class));
+//        String path = mDataProvider.getItem(position);
+//        DetailFragment detailFragment = DetailFragment.newInstance(path, position);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            detailFragment.setSharedElementEnterTransition(new DetailTransition());
+//            setExitTransition(new Fade());
+//            detailFragment.setEnterTransition(new Fade());
+//            detailFragment.setSharedElementReturnTransition(new DetailTransition());
+//        }
+//        getActivity().getSupportFragmentManager().beginTransaction()
+//                .addSharedElement(imageView, getResources().getString(R.string.image_transition))
+//                .replace(R.id.fragment_container, detailFragment)
+//                .addToBackStack(null)
+//                .commit();
+        Intent intent = new Intent(getActivity(), DetailsActivity.class);
+        intent.putStringArrayListExtra("datas", mDataProvider.getData());
+        intent.putExtra("position", position);
+        startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(getActivity(),imageView,
+                getResources().getString(R.string.image_transition)).toBundle());
     }
 
     @Override

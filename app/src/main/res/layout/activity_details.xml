@@ -1,26 +1,27 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.way.captain.activity.DetailsActivity">
+
     <com.alexvasilkov.gestures.views.GestureImageView
         android:id="@+id/detail_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
         android:src="@mipmap/ic_launcher"
+        android:transitionName="@string/image_transition"
         tools:ignore="UnusedAttribute" />
-    <android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@android:color/transparent"
-        app:popupTheme="@style/AppTheme.DayNight" />
-    </android.support.design.widget.AppBarLayout>
+
+
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/transparent"
+            android:theme="@style/AppTheme.AppBarTransparent"
+            app:popupTheme="@style/AppTheme.DayNight" />
 
 </FrameLayout>

@@ -23,6 +23,9 @@ public class DataProvider {
         mData.clear();
         mData.addAll(datas);
     }
+    public ArrayList<String> getData(){
+        return mData;
+    }
 
     public int getCount() {
         return mData.size();

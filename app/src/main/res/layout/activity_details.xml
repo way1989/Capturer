@@ -1,11 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:transitionName="@string/image_transition">
-
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.way.captain.activity.DetailsActivity">
     <com.alexvasilkov.gestures.views.GestureImageView
         android:id="@+id/detail_image"
         android:layout_width="match_parent"
@@ -24,4 +22,5 @@
         android:background="@android:color/transparent"
         app:popupTheme="@style/AppTheme.DayNight" />
     </android.support.design.widget.AppBarLayout>
+
 </FrameLayout>

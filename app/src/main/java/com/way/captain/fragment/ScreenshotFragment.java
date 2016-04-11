@@ -22,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 
 import com.way.captain.R;
+import com.way.captain.activity.DetailsActivity;
 import com.way.captain.adapter.ScreenshotAdapter;
 import com.way.captain.data.DataInfo;
 import com.way.captain.data.DataLoader;
@@ -134,6 +135,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
                 .replace(R.id.fragment_container, detailFragment)
                 .addToBackStack(null)
                 .commit();
+        startActivity(new Intent(getActivity(), DetailsActivity.class));
     }
 
     @Override

@@ -13,7 +13,7 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" >
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="android:textColorPrimary">@color/abc_primary_text_material_dark</item>
     </style>
 
@@ -55,11 +55,13 @@
     <style name="PromoScreenTextStyle.CenterAligned">
         <item name="android:textAlignment">center</item>
     </style>
+
     <style name="Item_Tumblr">
         <item name="android:layout_width">@dimen/item_circle_size_tumblr</item>
         <item name="android:layout_height">@dimen/item_circle_size_tumblr</item>
         <item name="android:padding">8dp</item>
     </style>
+
     <style name="Theme_Dialog" parent="@android:style/Theme.DeviceDefault.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowFrame">@null</item>
@@ -75,5 +77,20 @@
     <style name="VolumePanelAnimation">
         <item name="android:windowEnterAnimation">@anim/popup_enter_material</item>
         <item name="android:windowExitAnimation">@anim/popup_exit_material</item>
+    </style>
+
+    <style name="FullscreenTheme" parent="AppTheme.DayNight">
+        <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:windowBackground">@null</item>
+        <item name="metaButtonBarStyle">?android:attr/buttonBarStyle</item>
+        <item name="metaButtonBarButtonStyle">?android:attr/buttonBarButtonStyle</item>
+    </style>
+    <style name="FullscreenTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
+        <item name="android:background">@color/black_overlay</item>
     </style>
 </resources>

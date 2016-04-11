@@ -134,4 +134,8 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="image_transition">transition_image</string>
     <string name="turn_screen_orientation">Keep your device orientation is portrait</string>
+
+    <string name="title_activity_details">DetailsActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

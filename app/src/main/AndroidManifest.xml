@@ -93,7 +93,12 @@
 
         <service android:name=".screenshot.crop.TakeCropScreenshotService" />
 
-        <activity android:name=".activity.FeedbackActivity"></activity>
+        <activity android:name=".activity.FeedbackActivity" />
+        <activity
+            android:name=".activity.DetailsActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_details"
+            android:theme="@style/FullscreenTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

@@ -31,8 +31,8 @@ public class App extends Application {
 //        BTGInvocationEventShake   // 通过摇一摇呼出 Bugtags
 //        BTGInvocationEventBubble  // 通过悬浮小球呼出 Bugtags
         //BugtagsOptions options = new BugtagsOptions.Builder().trackingCrashLog(true).build();
-        Bugtags.start(getString(R.string.bugtag_app_key), this,
-                BuildConfig.DEBUG ? Bugtags.BTGInvocationEventBubble : Bugtags.BTGInvocationEventNone);
+//        Bugtags.start(getString(R.string.bugtag_app_key), this,
+//                BuildConfig.DEBUG ? Bugtags.BTGInvocationEventBubble : Bugtags.BTGInvocationEventNone);
         mContext = this;
         boolean isNightMode = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(KEY_NIGHT_MODE, false);
         AppCompatDelegate.setDefaultNightMode(isNightMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);

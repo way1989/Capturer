@@ -1,6 +1,7 @@
 package com.way.captain.fragment;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.MediaPlayer;
@@ -62,7 +63,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static android.os.Environment.DIRECTORY_MOVIES;
 
@@ -462,6 +465,16 @@ public class VideoFragment extends BaseFragment implements LoaderManager.LoaderC
     public boolean onFloatButtonClick() {
         //if (onGifSettingsClick()) return true;
         return false;
+    }
+
+    @Override
+    public void onActivityReenter(Bundle bundle) {
+
+    }
+
+    @Override
+    public void changeSharedElements(List<String> names, Map<String, View> sharedElements, int position) {
+
     }
 
     private boolean onGifSettingsClick() {

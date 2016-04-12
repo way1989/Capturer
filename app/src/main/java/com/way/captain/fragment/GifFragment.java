@@ -1,5 +1,6 @@
 package com.way.captain.fragment;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -34,6 +35,9 @@ import com.way.captain.utils.GifPopupMenuHelper;
 import com.way.captain.utils.PopupMenuHelper;
 import com.way.captain.widget.IPopupMenuCallback;
 import com.way.captain.widget.LoadingEmptyContainer;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by android on 16-2-1.
@@ -242,6 +246,16 @@ public class GifFragment extends BaseFragment implements LoaderManager.LoaderCal
     @Override
     public boolean onFloatButtonClick() {
         return false;
+    }
+
+    @Override
+    public void onActivityReenter(Bundle bundle) {
+
+    }
+
+    @Override
+    public void changeSharedElements(List<String> names, Map<String, View> sharedElements, int position) {
+
     }
 
     @Override

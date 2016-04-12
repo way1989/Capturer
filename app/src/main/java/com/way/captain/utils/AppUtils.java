@@ -1,18 +1,7 @@
 package com.way.captain.utils;
 
-import android.app.Activity;
 import android.os.Build;
 import android.os.Environment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
-import android.transition.Transition;
-import android.transition.TransitionInflater;
-import android.util.Pair;
-import android.view.View;
-
-import com.way.captain.R;
-import com.way.captain.fragment.DetailFragment;
 
 import java.io.File;
 

@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.SharedElementCallback;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -28,12 +29,14 @@ import com.way.captain.fragment.BaseFragment;
 import com.way.captain.fragment.GifFragment;
 import com.way.captain.fragment.MainFragment;
 import com.way.captain.fragment.ScreenshotFragment;
+import com.way.captain.fragment.SettingsFragment;
 import com.way.captain.fragment.VideoFragment;
 import com.way.captain.service.ShakeService;
 import com.way.captain.utils.OsUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener,
         ViewPager.OnPageChangeListener{
@@ -92,7 +95,39 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
     };
     private long mLastPressTime;
+    private Bundle mTmpReenterState;
 
+    private final SharedElementCallback mCallback = new SharedElementCallback() {
+        @Override
+        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+            Log.i("way", "SharedElementCallback-->onMapSharedElements mTmpReenterState = " + mTmpReenterState);
+            if (mTmpReenterState != null) {
+                int startingPosition = mTmpReenterState.getInt(ScreenshotFragment.EXTRA_STARTING_POSITION);
+                int currentPosition = mTmpReenterState.getInt(ScreenshotFragment.EXTRA_CURRENT_POSITION);
+                if (startingPosition != currentPosition) {
+                    // If startingPosition != currentPosition the user must have swiped to a
+                    // different page in the DetailsActivity. We must update the shared element
+                    // so that the correct one falls into place.
+                    BaseFragment fragment = mAdapter.getItem(mViewPager.getCurrentItem());
+                    fragment.changeSharedElements(names, sharedElements, currentPosition);
+                }
+
+                mTmpReenterState = null;
+            } else {
+                // If mTmpReenterState is null, then the activity is exiting.
+                View navigationBar = findViewById(android.R.id.navigationBarBackground);
+                View statusBar = findViewById(android.R.id.statusBarBackground);
+                if (navigationBar != null) {
+                    names.add(navigationBar.getTransitionName());
+                    sharedElements.put(navigationBar.getTransitionName(), navigationBar);
+                }
+                if (statusBar != null) {
+                    names.add(statusBar.getTransitionName());
+                    sharedElements.put(statusBar.getTransitionName(), statusBar);
+                }
+            }
+        }
+    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,6 +135,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             return;
         }
         setContentView(R.layout.activity_main);
+        setExitSharedElementCallback(mCallback);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -145,6 +181,16 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         boolean isCurrentNightMode = (uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
         item.setTitle(isCurrentNightMode ? R.string.nav_day_mode : R.string.nav_night_mode);
         Log.i("way", "onCreate isCurrentNightMode = " + isCurrentNightMode);
+    }
+
+    @Override
+    public void onActivityReenter(int resultCode, Intent data) {
+        super.onActivityReenter(resultCode, data);
+        if(mAdapter != null && mViewPager != null) {
+            mTmpReenterState = new Bundle(data.getExtras());
+            BaseFragment fragment = mAdapter.getItem(mViewPager.getCurrentItem());
+            fragment.onActivityReenter(mTmpReenterState);
+        }
     }
 
     @Override
@@ -230,13 +276,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
-
+    private Adapter mAdapter;
     private void setupViewPager(ViewPager viewPager) {
-        Adapter adapter = new Adapter(getSupportFragmentManager());
-        adapter.addFragment(new ScreenshotFragment(), this.getString(R.string.screen_shot));
-        adapter.addFragment(new GifFragment(), this.getString(R.string.gif_title));
-        adapter.addFragment(new VideoFragment(), this.getString(R.string.video_title));
-        viewPager.setAdapter(adapter);
+        mAdapter = new Adapter(getSupportFragmentManager());
+        mAdapter.addFragment(new ScreenshotFragment(), this.getString(R.string.screen_shot));
+        mAdapter.addFragment(new GifFragment(), this.getString(R.string.gif_title));
+        mAdapter.addFragment(new VideoFragment(), this.getString(R.string.video_title));
+        viewPager.setAdapter(mAdapter);
         mNavigationView.getMenu().findItem(R.id.nav_screenshot).setChecked(true);
     }
 
@@ -266,20 +312,20 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     static class Adapter extends FragmentPagerAdapter {
-        private final List<Fragment> mFragments = new ArrayList<>();
+        private final List<BaseFragment> mFragments = new ArrayList<>();
         private final List<String> mFragmentTitles = new ArrayList<>();
 
         public Adapter(FragmentManager fm) {
             super(fm);
         }
 
-        public void addFragment(Fragment fragment, String title) {
+        public void addFragment(BaseFragment fragment, String title) {
             mFragments.add(fragment);
             mFragmentTitles.add(title);
         }
 
         @Override
-        public Fragment getItem(int position) {
+        public BaseFragment getItem(int position) {
             return mFragments.get(position);
         }
 

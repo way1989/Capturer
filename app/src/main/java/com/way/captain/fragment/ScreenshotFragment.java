@@ -9,16 +9,19 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.SharedElementCallback;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.transition.Fade;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 
@@ -34,6 +37,8 @@ import com.way.captain.widget.LoadingEmptyContainer;
 import java.io.File;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by way on 16/4/10.
@@ -52,6 +57,10 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
      */
     private LoadingEmptyContainer mLoadingEmptyContainer;
     private int mClickPosition;
+    public static final String EXTRA_DATAS = "extra_datas";
+    public static final String EXTRA_STARTING_POSITION = "extra_starting_item_position";
+    public static final String EXTRA_CURRENT_POSITION = "extra_current_item_position";
+    private boolean mIsDetailsActivityStarted;
 
     @Override
     public boolean onBackPressed() {
@@ -63,6 +72,51 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
         return false;
     }
 
+    @Override
+    public void onActivityReenter(Bundle bundle) {
+        int startingPosition = bundle.getInt(EXTRA_STARTING_POSITION);
+        int currentPosition = bundle.getInt(EXTRA_CURRENT_POSITION);
+        Log.i("way", "onActivityReenter startingPosition = " + startingPosition + ", currentPosition = " + currentPosition);
+
+        if (startingPosition != currentPosition) {
+            mRecyclerView.scrollToPosition(currentPosition);
+        }
+        getActivity().postponeEnterTransition();
+        mRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
+                // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
+                mRecyclerView.requestLayout();
+                Log.i("way", "onActivityReenter startPostponedEnterTransition...");
+                getActivity().startPostponedEnterTransition();
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public void changeSharedElements(List<String> names, Map<String, View> sharedElements, int position) {
+        String newTransitionName = mDataProvider.getItem(position);
+        View newSharedElement = mRecyclerView.findViewHolderForAdapterPosition(position).itemView.findViewById(R.id.ic_screenshot);
+        Log.i("way", "changeSharedElements newSharedElement = " + newSharedElement);
+        if (newSharedElement != null) {
+            names.clear();
+            names.add(newTransitionName);
+            sharedElements.clear();
+            sharedElements.put(newTransitionName, newSharedElement);
+        }
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        mIsDetailsActivityStarted = false;
+    }
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -75,7 +129,6 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
         super.onViewCreated(view, savedInstanceState);
         mLoadingEmptyContainer = (LoadingEmptyContainer) view.findViewById(R.id.loading_empty_container);
         mLoadingEmptyContainer.getNoResultsContainer().setSecondaryText(R.string.gif_no_result_summary);
-
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerview);
         GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 3);
         mRecyclerView.setLayoutManager(layoutManager);
@@ -123,24 +176,14 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     public void onItemClick(View v) {
         int position = (Integer) v.getTag(R.id.tag_item);
         ImageView imageView = (ImageView) v.findViewById(R.id.ic_screenshot);
-//        String path = mDataProvider.getItem(position);
-//        DetailFragment detailFragment = DetailFragment.newInstance(path, position);
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            detailFragment.setSharedElementEnterTransition(new DetailTransition());
-//            setExitTransition(new Fade());
-//            detailFragment.setEnterTransition(new Fade());
-//            detailFragment.setSharedElementReturnTransition(new DetailTransition());
-//        }
-//        getActivity().getSupportFragmentManager().beginTransaction()
-//                .addSharedElement(imageView, getResources().getString(R.string.image_transition))
-//                .replace(R.id.fragment_container, detailFragment)
-//                .addToBackStack(null)
-//                .commit();
-        Intent intent = new Intent(getActivity(), DetailsActivity.class);
-        intent.putStringArrayListExtra("datas", mDataProvider.getData());
-        intent.putExtra("position", position);
-        startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(getActivity(),imageView,
-                getResources().getString(R.string.image_transition)).toBundle());
+        if (!mIsDetailsActivityStarted) {
+            mIsDetailsActivityStarted = true;
+            Intent intent = new Intent(getActivity(), DetailsActivity.class);
+            intent.putStringArrayListExtra(EXTRA_DATAS, mDataProvider.getData());
+            intent.putExtra(EXTRA_STARTING_POSITION, position);
+            startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(getActivity(), imageView,
+                    imageView.getTransitionName()).toBundle());
+        }
     }
 
     @Override

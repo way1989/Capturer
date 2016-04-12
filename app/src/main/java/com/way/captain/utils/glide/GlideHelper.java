@@ -48,26 +48,12 @@ public class GlideHelper {
     }
 
     public static void loadResource(String path, @NonNull ImageView image) {
-        DisplayMetrics metrics = image.getResources().getDisplayMetrics();
-        final int w = metrics.widthPixels, h = metrics.heightPixels;
-
         Glide.with(image.getContext())
                 .load(path)
                 .animate(ANIMATOR)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .into(new GlideDrawableImageViewTarget(image) {
-                    @Override
-                    public void getSize(final SizeReadyCallback cb) {
-                        // We don't want to load very big images on devices with small screens.
-                        // This will help Glide correctly choose images scale when reading them.
-                        super.getSize(new SizeReadyCallback() {
-                            @Override
-                            public void onSizeReady(int width, int height) {
-                                cb.onSizeReady(w / 2, h / 2);
-                            }
-                        });
-                    }
-                });
+                .fitCenter()
+                .into(image);
     }
     public static void loadScreenshotResource(String path, @NonNull ImageView image) {
         Glide.with(image.getContext())

@@ -4,26 +4,39 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.way.captain.App;
 import com.way.captain.R;
 import com.way.captain.fragment.BaseFragment;
 import com.way.captain.fragment.GifFragment;
 import com.way.captain.fragment.MainFragment;
+import com.way.captain.fragment.ScreenshotFragment;
 import com.way.captain.fragment.VideoFragment;
+import com.way.captain.service.ShakeService;
 import com.way.captain.utils.OsUtil;
 
-public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener,
+        ViewPager.OnPageChangeListener{
     private static final String TAG = "MainActivity";
     Runnable navigateShare = new Runnable() {
         public void run() {
@@ -57,6 +70,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             recreate();
         }
     };
+    ViewPager mViewPager;
     private NavigationView mNavigationView;
     private DrawerLayout mDrawerLayout;
     private BaseFragment mFragment;
@@ -87,15 +101,42 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
         setContentView(R.layout.activity_main);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        if(fab != null)
+        fab.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                startService(new Intent(MainActivity.this, ShakeService.class).setAction("com.way.action.SHOW_MENU"));
+            }
+        });
+
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawerLayout.setDrawerListener(toggle);
+        toggle.syncState();
 
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         if (mNavigationView != null)
             mNavigationView.setNavigationItemSelectedListener(this);
 
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, new MainFragment()).commitAllowingStateLoss();
+        mViewPager = (ViewPager) findViewById(R.id.viewpager);
+        if (mViewPager != null) {
+            setupViewPager(mViewPager);
+            mViewPager.setOffscreenPageLimit(2);
+            mViewPager.addOnPageChangeListener(this);
+        }
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        if(tabLayout != null)
+            tabLayout.setupWithViewPager(mViewPager);
+        //FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        //transaction.replace(R.id.fragment_container, new MainFragment()).commitAllowingStateLoss();
 
         //mNavigationView.post(navigateGifs);
 
@@ -118,14 +159,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 //                Snackbar.make(mDrawerLayout, R.string.twice_press_exit, Snackbar.LENGTH_SHORT).show();
 //                mLastPressTime = time;
 //            } else
-                super.onBackPressed();
+            super.onBackPressed();
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
@@ -161,12 +202,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         switch (id) {
             case R.id.nav_screenshot:
                 item.setChecked(true);
+                mViewPager.setCurrentItem(0, true);
                 break;
             case R.id.nav_gifs:
                 item.setChecked(true);
+                mViewPager.setCurrentItem(1, true);
                 break;
             case R.id.nav_videos:
                 item.setChecked(true);
+                mViewPager.setCurrentItem(2, true);
                 break;
             case R.id.nav_night_mode:
                 mNavigationView.post(navigateChangeMode);
@@ -185,5 +229,68 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
         mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void setupViewPager(ViewPager viewPager) {
+        Adapter adapter = new Adapter(getSupportFragmentManager());
+        adapter.addFragment(new ScreenshotFragment(), this.getString(R.string.screen_shot));
+        adapter.addFragment(new GifFragment(), this.getString(R.string.gif_title));
+        adapter.addFragment(new VideoFragment(), this.getString(R.string.video_title));
+        viewPager.setAdapter(adapter);
+        mNavigationView.getMenu().findItem(R.id.nav_screenshot).setChecked(true);
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        switch (position) {
+            case 0:
+                mNavigationView.getMenu().findItem(R.id.nav_screenshot).setChecked(true);
+                break;
+            case 1:
+                mNavigationView.getMenu().findItem(R.id.nav_gifs).setChecked(true);
+                break;
+            case 2:
+                mNavigationView.getMenu().findItem(R.id.nav_videos).setChecked(true);
+                break;
+        }
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
+    }
+
+    static class Adapter extends FragmentPagerAdapter {
+        private final List<Fragment> mFragments = new ArrayList<>();
+        private final List<String> mFragmentTitles = new ArrayList<>();
+
+        public Adapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        public void addFragment(Fragment fragment, String title) {
+            mFragments.add(fragment);
+            mFragmentTitles.add(title);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return mFragments.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return mFragments.size();
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return mFragmentTitles.get(position);
+        }
     }
 }

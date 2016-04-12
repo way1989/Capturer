@@ -83,6 +83,7 @@ public class GlideHelper {
                 .load(path)
                 .asBitmap()
                 .animate(ANIMATOR)
+                .fitCenter()
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(image);
     }

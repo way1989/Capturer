@@ -1,7 +1,6 @@
 package com.way.captain.fragment;
 
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.View;
@@ -14,8 +13,6 @@ import java.util.Map;
  */
 public abstract class BaseFragment extends Fragment {
     public abstract boolean onBackPressed();
-
-    public abstract boolean onFloatButtonClick();
 
     public abstract void onActivityReenter(Bundle bundle);
     public abstract void changeSharedElements(List<String> names, Map<String, View> sharedElements, int position);

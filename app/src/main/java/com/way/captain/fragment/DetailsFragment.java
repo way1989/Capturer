@@ -16,6 +16,8 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.way.captain.R;
+import com.way.captain.data.DataInfo;
+import com.way.captain.utils.glide.GlideHelper;
 
 import java.util.ArrayList;
 
@@ -33,8 +35,9 @@ public class DetailsFragment extends Fragment {
     private boolean mIsTransitioning;
     private ImageView mImageView;
 
-    public static DetailsFragment newInstance(ArrayList<String> path, int position, int startingPosition) {
+    public static DetailsFragment newInstance(int type, ArrayList<String> path, int position, int startingPosition) {
         Bundle args = new Bundle();
+        args.putInt(ScreenshotFragment.ARGS_TYPE, type);
         args.putStringArrayList(ARG_ALBUM_IMAGE_PATH, path);
         args.putInt(ARG_ALBUM_IMAGE_POSITION, position);
         args.putInt(ARG_STARTING_ALBUM_IMAGE_POSITION, startingPosition);
@@ -70,27 +73,19 @@ public class DetailsFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        final int type = getArguments().getInt(ScreenshotFragment.ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT);
         final ArrayList<String> path = getArguments().getStringArrayList(ARG_ALBUM_IMAGE_PATH);
         mImageView = (ImageView) view.findViewById(R.id.detail_image);
         mImageView.setTransitionName(path.get(mAlbumPosition));
-        Glide.with(mImageView.getContext())
-                .load(path.get(mAlbumPosition))
-                .dontAnimate()
-                .listener(new RequestListener<String, GlideDrawable>() {
-                    @Override
-                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                        startPostponedEnterTransition();
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        startPostponedEnterTransition();
-                        return false;
-                    }
-                }).fitCenter()
-                .into(mImageView);
+        GlideHelper.loadResourceBitmap(path.get(mAlbumPosition), mImageView);
+        startPostponedEnterTransition();
+        if(type == DataInfo.TYPE_SCREEN_GIF)
+        mImageView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                GlideHelper.loadResource(path.get(mAlbumPosition), mImageView);
+            }
+        }, 1000L);
     }
 
     private void startPostponedEnterTransition() {

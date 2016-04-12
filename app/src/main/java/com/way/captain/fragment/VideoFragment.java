@@ -462,12 +462,6 @@ public class VideoFragment extends BaseFragment implements LoaderManager.LoaderC
     }
 
     @Override
-    public boolean onFloatButtonClick() {
-        //if (onGifSettingsClick()) return true;
-        return false;
-    }
-
-    @Override
     public void onActivityReenter(Bundle bundle) {
 
     }

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -22,14 +23,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.way.captain.App;
 import com.way.captain.R;
+import com.way.captain.data.DataInfo;
 import com.way.captain.fragment.BaseFragment;
 import com.way.captain.fragment.GifFragment;
 import com.way.captain.fragment.MainFragment;
 import com.way.captain.fragment.ScreenshotFragment;
-import com.way.captain.fragment.SettingsFragment;
 import com.way.captain.fragment.VideoFragment;
 import com.way.captain.service.ShakeService;
 import com.way.captain.utils.OsUtil;
@@ -39,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener,
-        ViewPager.OnPageChangeListener{
+        ViewPager.OnPageChangeListener {
     private static final String TAG = "MainActivity";
     Runnable navigateShare = new Runnable() {
         public void run() {
@@ -96,7 +98,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     };
     private long mLastPressTime;
     private Bundle mTmpReenterState;
-
+    private Adapter mAdapter;
     private final SharedElementCallback mCallback = new SharedElementCallback() {
         @Override
         public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
@@ -128,6 +130,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }
         }
     };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -141,14 +144,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        if(fab != null)
-        fab.setOnClickListener(new View.OnClickListener() {
+        if (fab != null)
+            fab.setOnClickListener(new View.OnClickListener() {
 
-            @Override
-            public void onClick(View view) {
-                startService(new Intent(MainActivity.this, ShakeService.class).setAction("com.way.action.SHOW_MENU"));
-            }
-        });
+                @Override
+                public void onClick(View view) {
+                    startService(new Intent(MainActivity.this, ShakeService.class).setAction("com.way.action.SHOW_MENU"));
+                }
+            });
 
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -169,7 +172,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        if(tabLayout != null)
+        if (tabLayout != null)
             tabLayout.setupWithViewPager(mViewPager);
         //FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         //transaction.replace(R.id.fragment_container, new MainFragment()).commitAllowingStateLoss();
@@ -186,7 +189,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     public void onActivityReenter(int resultCode, Intent data) {
         super.onActivityReenter(resultCode, data);
-        if(mAdapter != null && mViewPager != null) {
+        if (mAdapter != null && mViewPager != null) {
             mTmpReenterState = new Bundle(data.getExtras());
             BaseFragment fragment = mAdapter.getItem(mViewPager.getCurrentItem());
             fragment.onActivityReenter(mTmpReenterState);
@@ -198,13 +201,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawer(GravityCompat.START);
         } else {
-//            if (mFragment != null && mFragment.onBackPressed())
-//                return;
-//            long time = System.currentTimeMillis();
-//            if (time - mLastPressTime > 3000) {
-//                Snackbar.make(mDrawerLayout, R.string.twice_press_exit, Snackbar.LENGTH_SHORT).show();
-//                mLastPressTime = time;
-//            } else
+            if (mFragment != null && mFragment.onBackPressed())
+                return;
+            long time = System.currentTimeMillis();
+            if (time - mLastPressTime > 3000) {
+                Snackbar.make(mDrawerLayout, R.string.twice_press_exit, Snackbar.LENGTH_SHORT).show();
+                mLastPressTime = time;
+            } else
             super.onBackPressed();
         }
     }
@@ -276,12 +279,12 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
-    private Adapter mAdapter;
+
     private void setupViewPager(ViewPager viewPager) {
         mAdapter = new Adapter(getSupportFragmentManager());
-        mAdapter.addFragment(new ScreenshotFragment(), this.getString(R.string.screen_shot));
-        mAdapter.addFragment(new GifFragment(), this.getString(R.string.gif_title));
-        mAdapter.addFragment(new VideoFragment(), this.getString(R.string.video_title));
+        mAdapter.addFragment(ScreenshotFragment.newInstance(DataInfo.TYPE_SCREEN_SHOT), this.getString(R.string.screen_shot));
+        mAdapter.addFragment(ScreenshotFragment.newInstance(DataInfo.TYPE_SCREEN_GIF), this.getString(R.string.gif_title));
+        mAdapter.addFragment(ScreenshotFragment.newInstance(DataInfo.TYPE_SCREEN_RECORD), this.getString(R.string.video_title));
         viewPager.setAdapter(mAdapter);
         mNavigationView.getMenu().findItem(R.id.nav_screenshot).setChecked(true);
     }
@@ -311,7 +314,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     }
 
-    static class Adapter extends FragmentPagerAdapter {
+    class Adapter extends FragmentPagerAdapter {
         private final List<BaseFragment> mFragments = new ArrayList<>();
         private final List<String> mFragmentTitles = new ArrayList<>();
 
@@ -322,6 +325,12 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         public void addFragment(BaseFragment fragment, String title) {
             mFragments.add(fragment);
             mFragmentTitles.add(title);
+        }
+
+        @Override
+        public void setPrimaryItem(ViewGroup container, int position, Object object) {
+            super.setPrimaryItem(container, position, object);
+            mFragment = (BaseFragment) object;
         }
 
         @Override

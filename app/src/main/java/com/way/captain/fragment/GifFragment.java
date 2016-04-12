@@ -244,11 +244,6 @@ public class GifFragment extends BaseFragment implements LoaderManager.LoaderCal
     }
 
     @Override
-    public boolean onFloatButtonClick() {
-        return false;
-    }
-
-    @Override
     public void onActivityReenter(Bundle bundle) {
 
     }

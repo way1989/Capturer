@@ -16,7 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         simple:simple_tag_background_color="@color/colorAccent"
-        simple:simple_tag_enable="false"
+        simple:simple_tag_enable="true"
         simple:simple_tag_orientation="right_top"
         simple:simple_tag_textColor="@android:color/white"
         simple:simple_tag_textSize="12sp"

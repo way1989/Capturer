@@ -1,34 +1,28 @@
 package com.way.captain.activity;
 
-import android.annotation.SuppressLint;
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.transition.Transition;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.way.captain.R;
+import com.way.captain.data.DataInfo;
 import com.way.captain.fragment.DetailsFragment;
 import com.way.captain.fragment.ScreenshotFragment;
-import com.way.captain.utils.ThemeUtils;
+import com.way.captain.utils.TransitionListenerAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +31,10 @@ import java.util.Map;
 
 public class DetailsActivity extends BaseActivity {
     private static final String STATE_CURRENT_PAGE_POSITION = "state_current_page_position";
-
+    private DetailsFragment mCurrentDetailsFragment;
+    private int mCurrentPosition;
+    private int mStartingPosition;
+    private boolean mIsReturning;
     private final SharedElementCallback mCallback = new SharedElementCallback() {
         @Override
         public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
@@ -61,27 +58,31 @@ public class DetailsActivity extends BaseActivity {
             }
         }
     };
-
-    private DetailsFragment mCurrentDetailsFragment;
-    private int mCurrentPosition;
-    private int mStartingPosition;
-    private boolean mIsReturning;
     private ArrayList<String> mDatas;
+    private int mType;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
         postponeEnterTransition();
         setEnterSharedElementCallback(mCallback);
+        final android.view.Window window = getWindow();
+        ObjectAnimator animator = ObjectAnimator.ofInt(window,
+                "statusBarColor", window.getStatusBarColor(), Color.BLACK);
+        animator.setEvaluator(new ArgbEvaluator());
+        animator.setDuration(200L);
+        animator.start();
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        if(toolbar != null)
-        toolbar.setAlpha(0f);
+        if (toolbar != null)
+            toolbar.setAlpha(0f);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
+        Intent intent = getIntent();
+        mType = intent.getIntExtra(ScreenshotFragment.ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT);
         mDatas = getIntent().getStringArrayListExtra(ScreenshotFragment.EXTRA_DATAS);
         mStartingPosition = getIntent().getIntExtra(ScreenshotFragment.EXTRA_STARTING_POSITION, 0);
         if (savedInstanceState == null) {
@@ -91,48 +92,32 @@ public class DetailsActivity extends BaseActivity {
         }
 
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
-        pager.setAdapter(new DetailsFragmentPagerAdapter(getSupportFragmentManager()));
-        pager.setCurrentItem(mCurrentPosition);
-        pager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-            @Override
-            public void onPageSelected(int position) {
-                mCurrentPosition = position;
-            }
-        });
-        getWindow().getSharedElementEnterTransition().addListener(new Transition.TransitionListener() {
-            @Override
-            public void onTransitionStart(Transition transition) {
-
-            }
+        if(pager != null) {
+            pager.setAdapter(new DetailsFragmentPagerAdapter(getSupportFragmentManager()));
+            pager.setCurrentItem(mCurrentPosition);
+            pager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+                @Override
+                public void onPageSelected(int position) {
+                    mCurrentPosition = position;
+                }
+            });
+        }
+        getWindow().getSharedElementEnterTransition().addListener(new TransitionListenerAdapter() {
 
             @Override
             public void onTransitionEnd(Transition transition) {
-                if(toolbar != null)
+                if (toolbar != null)
                     toolbar.animate().alpha(1f);
-                ThemeUtils.setStatusBarColor(DetailsActivity.this, Color.BLACK);
-            }
-
-            @Override
-            public void onTransitionCancel(Transition transition) {
-
-            }
-
-            @Override
-            public void onTransitionPause(Transition transition) {
-
-            }
-
-            @Override
-            public void onTransitionResume(Transition transition) {
-
             }
         });
     }
+
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(STATE_CURRENT_PAGE_POSITION, mCurrentPosition);
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -142,6 +127,7 @@ public class DetailsActivity extends BaseActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
     @Override
     public void finishAfterTransition() {
         mIsReturning = true;
@@ -159,7 +145,7 @@ public class DetailsActivity extends BaseActivity {
 
         @Override
         public Fragment getItem(int position) {
-            return DetailsFragment.newInstance(mDatas, position, mStartingPosition);
+            return DetailsFragment.newInstance(mType, mDatas, position, mStartingPosition);
         }
 
         @Override

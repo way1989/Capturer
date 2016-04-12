@@ -5,15 +5,6 @@
     android:layout_height="match_parent"
     tools:context="com.way.captain.activity.DetailsActivity">
 
-<!--    <com.alexvasilkov.gestures.views.GestureImageView
-        android:id="@+id/detail_image"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:src="@mipmap/ic_launcher"
-        android:transitionName="@string/image_transition"
-        tools:ignore="UnusedAttribute" />-->
-
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
@@ -23,7 +14,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/imgly_preview_footer_background"
+        android:background="@color/overlay"
         android:theme="@style/AppTheme.AppBarTransparent"
         app:popupTheme="@style/AppTheme.DayNight" />
 

@@ -4,17 +4,14 @@ import android.app.ActivityOptions;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.app.SharedElementCallback;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.transition.Fade;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -31,7 +28,6 @@ import com.way.captain.adapter.ScreenshotAdapter;
 import com.way.captain.data.DataInfo;
 import com.way.captain.data.DataLoader;
 import com.way.captain.data.DataProvider;
-import com.way.captain.utils.DetailTransition;
 import com.way.captain.widget.LoadingEmptyContainer;
 
 import java.io.File;
@@ -46,6 +42,10 @@ import java.util.Map;
 public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener,
         LoaderManager.LoaderCallbacks<DataLoader.Result>, ScreenshotAdapter.OnItemClickListener,
         PopupMenu.OnMenuItemClickListener {
+    public static final String ARGS_TYPE = "type";
+    public static final String EXTRA_DATAS = "extra_datas";
+    public static final String EXTRA_STARTING_POSITION = "extra_starting_item_position";
+    public static final String EXTRA_CURRENT_POSITION = "extra_current_item_position";
     private static final int SCREENSHOT_LOADER_ID = 0;
     private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -57,10 +57,15 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
      */
     private LoadingEmptyContainer mLoadingEmptyContainer;
     private int mClickPosition;
-    public static final String EXTRA_DATAS = "extra_datas";
-    public static final String EXTRA_STARTING_POSITION = "extra_starting_item_position";
-    public static final String EXTRA_CURRENT_POSITION = "extra_current_item_position";
     private boolean mIsDetailsActivityStarted;
+
+    public static BaseFragment newInstance(int type) {
+        Bundle args = new Bundle();
+        args.putInt(ARGS_TYPE, type);
+        ScreenshotFragment fragment = new ScreenshotFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
     public boolean onBackPressed() {
@@ -68,13 +73,8 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     }
 
     @Override
-    public boolean onFloatButtonClick() {
-        return false;
-    }
-
-    @Override
     public void onActivityReenter(Bundle bundle) {
-        if(mRecyclerView == null) return;
+        if (mRecyclerView == null) return;
         int startingPosition = bundle.getInt(EXTRA_STARTING_POSITION);
         int currentPosition = bundle.getInt(EXTRA_CURRENT_POSITION);
         Log.i("way", "onActivityReenter startingPosition = " + startingPosition + ", currentPosition = " + currentPosition);
@@ -113,11 +113,13 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
+
     @Override
     public void onResume() {
         super.onResume();
         mIsDetailsActivityStarted = false;
     }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -133,7 +135,8 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerview);
         GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 3);
         mRecyclerView.setLayoutManager(layoutManager);
-        mScreenshotAdapter = new ScreenshotAdapter(getContext(), this);
+        int type = getArguments().getInt(ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT);
+        mScreenshotAdapter = new ScreenshotAdapter(getContext(),type, this);
         mRecyclerView.setAdapter(mScreenshotAdapter);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
@@ -151,7 +154,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     @Override
     public Loader<DataLoader.Result> onCreateLoader(int id, Bundle args) {
         mLoadingEmptyContainer.showLoading();
-        return new DataLoader(getContext(), DataInfo.TYPE_SCREEN_SHOT);
+        return new DataLoader(getContext(), getArguments().getInt(ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT));
     }
 
     @Override
@@ -180,6 +183,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
         if (!mIsDetailsActivityStarted) {
             mIsDetailsActivityStarted = true;
             Intent intent = new Intent(getActivity(), DetailsActivity.class);
+            intent.putExtra(ARGS_TYPE, getArguments().getInt(ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT));
             intent.putStringArrayListExtra(EXTRA_DATAS, mDataProvider.getData());
             intent.putExtra(EXTRA_STARTING_POSITION, position);
             startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(getActivity(), imageView,

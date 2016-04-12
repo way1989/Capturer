@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import com.way.captain.R;
 import com.way.captain.data.DataInfo;
@@ -59,28 +60,22 @@ public class ScreenshotAdapter extends RecyclerView.Adapter<ScreenshotAdapter.Vi
     @Override
     public void onBindViewHolder(ScreenshotAdapter.ViewHolder holder, int position) {
         String info = mDataProvider.getItem(position);
+        GlideHelper.loadResourceBitmap(info, holder.image);
         switch (mType) {
             case DataInfo.TYPE_SCREEN_SHOT:
-                GlideHelper.loadResourceBitmap(info, holder.image);
                 holder.image.setTagEnable(false);
-                holder.image.setTagText("");
                 break;
             case DataInfo.TYPE_SCREEN_GIF:
-                GlideHelper.loadResourceBitmap(info, holder.image);
                 holder.image.setTagEnable(true);
                 holder.image.setTagText("GIF");
                 break;
             case DataInfo.TYPE_SCREEN_RECORD:
-                GlideHelper.loadResourceBitmap(info, holder.image);
                 holder.image.setTagEnable(true);
                 holder.image.setTagText("MP4");
+                holder.videoIndicator.setVisibility(View.VISIBLE);
                 break;
         }
-        /*if (mType == DataInfo.TYPE_SCREEN_GIF) {
-            GlideHelper.loadResourceBitmap(info, holder.image);
-        } else {
-            GlideHelper.loadScreenshotResource(info, holder.image);
-        }*/
+
         // 把每个图片视图设置不同的Transition名称, 防止在一个视图内有多个相同的名称, 在变换的时候造成混乱
         // Fragment支持多个View进行变换, 使用适配器时, 需要加以区分
         ViewCompat.setTransitionName(holder.image, info);
@@ -100,7 +95,6 @@ public class ScreenshotAdapter extends RecyclerView.Adapter<ScreenshotAdapter.Vi
 
     @Override
     public long getItemId(int position) {
-        //return super.getItemId(position);
         return mDataProvider.getItem(position).hashCode();
     }
 
@@ -108,18 +102,19 @@ public class ScreenshotAdapter extends RecyclerView.Adapter<ScreenshotAdapter.Vi
         void onItemClick(View v);
 
         void onPopupMenuClick(View v);
-
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public final SimpleTagImageView image;
         public final ImageButton popupMenuButton;
+        ImageView videoIndicator;
 
         public ViewHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
 
             image = (SimpleTagImageView) itemView.findViewById(R.id.ic_screenshot);
+            videoIndicator = (ImageView) itemView.findViewById(R.id.video_indicator);
             popupMenuButton = (ImageButton) itemView.findViewById(R.id.popup_menu_button);
             popupMenuButton.setOnClickListener(this);
 

@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.transition.Transition;
 import android.view.MenuItem;
@@ -83,6 +84,7 @@ public class DetailsActivity extends BaseActivity {
 
         Intent intent = getIntent();
         mType = intent.getIntExtra(ScreenshotFragment.ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT);
+        setActionBarTitle();
         mDatas = getIntent().getStringArrayListExtra(ScreenshotFragment.EXTRA_DATAS);
         mStartingPosition = getIntent().getIntExtra(ScreenshotFragment.EXTRA_STARTING_POSITION, 0);
         if (savedInstanceState == null) {
@@ -92,7 +94,7 @@ public class DetailsActivity extends BaseActivity {
         }
 
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
-        if(pager != null) {
+        if (pager != null) {
             pager.setAdapter(new DetailsFragmentPagerAdapter(getSupportFragmentManager()));
             pager.setCurrentItem(mCurrentPosition);
             pager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
@@ -110,6 +112,23 @@ public class DetailsActivity extends BaseActivity {
                     toolbar.animate().alpha(1f);
             }
         });
+    }
+
+    private void setActionBarTitle() {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar == null)
+            return;
+        switch (mType) {
+            case DataInfo.TYPE_SCREEN_SHOT:
+                actionBar.setTitle(R.string.screen_shot);
+                break;
+            case DataInfo.TYPE_SCREEN_GIF:
+                actionBar.setTitle(R.string.gif_title);
+                break;
+            case DataInfo.TYPE_SCREEN_RECORD:
+                actionBar.setTitle(R.string.video_title);
+                break;
+        }
     }
 
     @Override
@@ -145,7 +164,7 @@ public class DetailsActivity extends BaseActivity {
 
         @Override
         public Fragment getItem(int position) {
-            return DetailsFragment.newInstance(mType, mDatas, position, mStartingPosition);
+            return DetailsFragment.newInstance(mType, mDatas.get(position));
         }
 
         @Override

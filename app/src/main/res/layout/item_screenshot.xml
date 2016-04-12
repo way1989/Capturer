@@ -22,6 +22,14 @@
         simple:simple_tag_textSize="12sp"
         simple:simple_tag_width="12dp" />
 
+    <ImageView
+        android:id="@+id/video_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_gallery_play"
+        android:visibility="gone" />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="32dip"

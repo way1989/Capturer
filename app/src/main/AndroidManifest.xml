@@ -98,6 +98,11 @@
             android:name=".activity.DetailsActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_details"
+            android:theme="@style/FullscreenTheme.NoActionBar" />
+        <activity
+            android:name=".activity.VideoActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_video"
             android:theme="@style/FullscreenTheme.NoActionBar"></activity>
     </application>
 

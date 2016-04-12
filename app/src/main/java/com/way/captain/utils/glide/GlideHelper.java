@@ -50,7 +50,8 @@ public class GlideHelper {
     public static void loadResource(String path, @NonNull ImageView image) {
         Glide.with(image.getContext())
                 .load(path)
-                .animate(ANIMATOR)
+                //.animate(ANIMATOR)
+                .dontAnimate()
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .fitCenter()
                 .into(image);
@@ -58,7 +59,8 @@ public class GlideHelper {
     public static void loadScreenshotResource(String path, @NonNull ImageView image) {
         Glide.with(image.getContext())
                 .load(path)
-                .animate(ANIMATOR)
+                //.animate(ANIMATOR)
+                .dontAnimate()
                 .centerCrop()
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(image);
@@ -68,7 +70,8 @@ public class GlideHelper {
         Glide.with(image.getContext())
                 .load(path)
                 .asBitmap()
-                .animate(ANIMATOR)
+                //.animate(ANIMATOR)
+                .dontAnimate()
                 .fitCenter()
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(image);

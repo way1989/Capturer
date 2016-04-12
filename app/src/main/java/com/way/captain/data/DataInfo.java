@@ -1,12 +1,14 @@
 package com.way.captain.data;
 
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.way.captain.utils.AppUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by way on 16/2/1.
@@ -21,6 +23,7 @@ public class DataInfo {
     private static final String GIF = ".gif";
     private static final String MP4 = ".mp4";
 
+    @Nullable
     public static ArrayList<String> getDataInfos(int type) {
         switch (type) {
             case TYPE_SCREEN_SHOT:
@@ -38,8 +41,8 @@ public class DataInfo {
     /*
      * 获取目录下所有文件
      */
+    @Nullable
     public static ArrayList<String> getFiles(String dir, String fileType) {
-
         if (TextUtils.isEmpty(dir))
             return null;
 
@@ -47,21 +50,28 @@ public class DataInfo {
         if (!realFile.isDirectory())
             return null;
 
-        ArrayList<String> files = new ArrayList<>();
+        ArrayList<File> files = new ArrayList<>();
         File[] subfiles = realFile.listFiles();
         for (File file : subfiles) {
             if (file.isDirectory())
                 continue;
-            String name = file.getName();
-            int i = name.indexOf('.');
-            if (i == -1)
+            if (file.length() < 1)
                 continue;
-            name = name.substring(i);
-            if (name.equalsIgnoreCase(fileType)) {
-                files.add(file.getAbsolutePath());
+            String name = file.getName();
+            if (name.endsWith(fileType.toLowerCase())) {
+                files.add(file);
             }
         }
-        return files;
+        Collections.sort(files, new Comparator<File>() {
+            @Override
+            public int compare(File lhs, File rhs) {
+                return ((Long) rhs.lastModified()).compareTo(lhs.lastModified());
+            }
+        });
+        ArrayList<String> results = new ArrayList<>();
+        for (File file : files)
+            results.add(file.getAbsolutePath());
+        return results;
     }
 
 

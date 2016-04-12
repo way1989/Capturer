@@ -74,6 +74,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
 
     @Override
     public void onActivityReenter(Bundle bundle) {
+        if(mRecyclerView == null) return;
         int startingPosition = bundle.getInt(EXTRA_STARTING_POSITION);
         int currentPosition = bundle.getInt(EXTRA_CURRENT_POSITION);
         Log.i("way", "onActivityReenter startingPosition = " + startingPosition + ", currentPosition = " + currentPosition);

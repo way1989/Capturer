@@ -2,6 +2,7 @@ package com.way.captain.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -12,6 +13,7 @@ import android.support.v4.app.SharedElementCallback;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.transition.Transition;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,6 +28,7 @@ import com.bumptech.glide.request.target.Target;
 import com.way.captain.R;
 import com.way.captain.fragment.DetailsFragment;
 import com.way.captain.fragment.ScreenshotFragment;
+import com.way.captain.utils.ThemeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +74,9 @@ public class DetailsActivity extends BaseActivity {
         postponeEnterTransition();
         setEnterSharedElementCallback(mCallback);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if(toolbar != null)
+        toolbar.setAlpha(0f);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -94,7 +99,34 @@ public class DetailsActivity extends BaseActivity {
                 mCurrentPosition = position;
             }
         });
+        getWindow().getSharedElementEnterTransition().addListener(new Transition.TransitionListener() {
+            @Override
+            public void onTransitionStart(Transition transition) {
 
+            }
+
+            @Override
+            public void onTransitionEnd(Transition transition) {
+                if(toolbar != null)
+                    toolbar.animate().alpha(1f);
+                ThemeUtils.setStatusBarColor(DetailsActivity.this, Color.BLACK);
+            }
+
+            @Override
+            public void onTransitionCancel(Transition transition) {
+
+            }
+
+            @Override
+            public void onTransitionPause(Transition transition) {
+
+            }
+
+            @Override
+            public void onTransitionResume(Transition transition) {
+
+            }
+        });
     }
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {

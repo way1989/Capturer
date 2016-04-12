@@ -11,17 +11,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@mipmap/ic_launcher"
         tools:ignore="UnusedAttribute" />
-    <android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@android:color/transparent"
+        android:background="@color/imgly_preview_footer_background"
+        android:theme="@style/AppTheme.AppBarTransparent"
         app:popupTheme="@style/AppTheme.DayNight" />
-    </android.support.design.widget.AppBarLayout>
 </FrameLayout>

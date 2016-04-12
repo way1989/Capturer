@@ -24,6 +24,8 @@
 -dontwarn com.bugtags.library.**
 #BUGTAG end
 -dontwarn com.alexvasilkov.android.**
+-dontwarn ly.img.android.**
+-dontwarn android.support.**
 
 #-dontwarn com.github.hiteshsondhi88.libffmpeg.**
 #-keep com.github.hiteshsondhi88.libffmpeg.**{*;}

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:dpv="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:fontFamily="sans-serif-thin"
+        android:gravity="center"
+        android:text="download"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="?android:attr/textColorPrimary" />
+
+    <com.way.captain.widget.DownloadProgressBar
+        android:id="@+id/dpv3"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:layout_gravity="center"
+        dpv:circleBackgroundColor="@color/colorAccent"
+        dpv:progressBackgroundColor="@color/colorAccent"
+        dpv:progressColor="@color/colorPrimaryDark"
+        dpv:drawingColor="@color/colorPrimary"
+        dpv:progressDuration="2000"
+        dpv:resultDuration="5000"
+        dpv:circleRadius="48dp"
+        dpv:lineWidth="3dp"
+        dpv:strokeWidth="3dp"
+        dpv:overshootValue="2.5"
+        />
+
+</LinearLayout>

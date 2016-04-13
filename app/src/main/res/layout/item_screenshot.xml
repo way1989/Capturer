@@ -24,8 +24,8 @@
 
     <ImageView
         android:id="@+id/video_indicator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:layout_gravity="center"
         android:src="@drawable/ic_gallery_play"
         android:visibility="gone" />

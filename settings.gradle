@@ -1,1 +1,1 @@
-include ':app', ':firupgrade'
+include ':app', ':firupgrade', ':downloadlibrary'

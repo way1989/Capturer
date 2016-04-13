@@ -3,9 +3,9 @@ package com.way.captain.activity;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
-import android.app.ActivityOptions;
+import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -36,7 +37,12 @@ import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunnin
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 import com.way.captain.R;
 import com.way.captain.utils.GifUtils;
+import com.way.captain.widget.DownloadProgressBar;
 import com.way.captain.widget.FastVideoView;
+import com.way.downloadlibrary.DownloadManager;
+import com.way.downloadlibrary.DownloadRequest;
+import com.way.downloadlibrary.IDownloadListener;
+import com.way.downloadlibrary.net.exception.DataErrorEnum;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -80,6 +86,10 @@ public class VideoActivity extends BaseActivity implements PopupMenu.OnMenuItemC
         }
     };
     private ProgressDialog mProgressDialog;
+    private String mUpdateAppName = "Captain.apk";
+    private String url = "http://download.fir.im/v2/app/install/56f7564ce75e2d0e3600000f?download_token=88adcfc58a1985717ea03991ad66224a";
+    private Dialog mDownloadDialog;
+    private DownloadProgressBar mArrowDownloadButton;
 
     public static void startVideoActivity(Activity context, String path, ImageView imageView) {
         Intent i = new Intent(context, VideoActivity.class);
@@ -106,6 +116,8 @@ public class VideoActivity extends BaseActivity implements PopupMenu.OnMenuItemC
 
 
         loadFFMpegBinary();
+        showDownloadDialog();
+
         initPlayControlerView();
         initProgressDialog();
         final String path = getIntent().getStringExtra(ARG_IMAGE_PATH);
@@ -113,6 +125,28 @@ public class VideoActivity extends BaseActivity implements PopupMenu.OnMenuItemC
         mVideoView.setVideoPath(path);
         mVideoView.start();
         mPlayControlerView.setVisibility(View.VISIBLE);
+    }
+
+    private void showDownloadDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(R.layout.download_dialog_layout).setTitle("download").setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        mDownloadDialog = builder.create();
+        mDownloadDialog.show();
+        mArrowDownloadButton = (DownloadProgressBar) mDownloadDialog.findViewById(R.id.dpv3);
+        mArrowDownloadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("liweiping", "mArrowDownloadButton onClick");
+                DownloadRequest request = new DownloadRequest(mUpdateAppName, mUpdateAppName, getFilesDir().getAbsolutePath(), url);
+                DownloadManager.instance().registerListener(mUpdateAppName, new UpdateDownloadListener());
+                DownloadManager.instance().start(request);
+            }
+        });
     }
 
     @Override
@@ -348,6 +382,83 @@ public class VideoActivity extends BaseActivity implements PopupMenu.OnMenuItemC
             });
         } catch (FFmpegCommandAlreadyRunningException e) {
             // do nothing for now
+        }
+    }
+
+    private class UpdateDownloadListener implements IDownloadListener {
+
+        @Override
+        public void downloadWait(DownloadRequest downloadRequest) {
+            Log.i("liweiping", "UpdateDownloadListener downloadWait...");
+            mArrowDownloadButton.post(new Runnable() {
+                @Override
+                public void run() {
+                    mArrowDownloadButton.setEnabled(false);
+                }
+            });
+        }
+
+        @Override
+        public void downloadStart(DownloadRequest downloadRequest) {
+            Log.i("liweiping", "UpdateDownloadListener downloadWait...");
+            mArrowDownloadButton.post(new Runnable() {
+                @Override
+                public void run() {
+                    mArrowDownloadButton.setEnabled(false);
+                    mArrowDownloadButton.playManualProgressAnimation();
+                }
+            });
+        }
+
+        @Override
+        public void downloadFinish(DownloadRequest downloadRequest) {
+            Log.i("liweiping", "UpdateDownloadListener downloadFinish..." + downloadRequest.getFileName());
+            mArrowDownloadButton.post(new Runnable() {
+                @Override
+                public void run() {
+                    mArrowDownloadButton.setSuccessResultState();
+                    mArrowDownloadButton.setEnabled(true);
+                }
+            });
+        }
+
+        @Override
+        public void downloadCancel(DownloadRequest downloadRequest) {
+            Log.i("liweiping", "UpdateDownloadListener downloadCancel...");
+            mArrowDownloadButton.post(new Runnable() {
+                @Override
+                public void run() {
+                    mArrowDownloadButton.abortDownload();
+                }
+            });
+        }
+
+        @Override
+        public void downloadPause(DownloadRequest downloadRequest) {
+            Log.i("liweiping", "UpdateDownloadListener downloadPause...");
+        }
+
+        @Override
+        public void downloadProgress(DownloadRequest downloadRequest, final int downloadProgress) {
+            Log.i("liweiping", "UpdateDownloadListener downloadProgress... downloadProgress = " + downloadProgress);
+            mArrowDownloadButton.post(new Runnable() {
+                @Override
+                public void run() {
+                    mArrowDownloadButton.setProgress(downloadProgress);
+                }
+            });
+        }
+
+        @Override
+        public void downloadError(DownloadRequest downloadRequest, DataErrorEnum error) {
+            Log.i("liweiping", "UpdateDownloadListener downloadError... error = " + error);
+            mArrowDownloadButton.post(new Runnable() {
+                @Override
+                public void run() {
+                    mArrowDownloadButton.setErrorResultState();
+
+                }
+            });
         }
     }
 }

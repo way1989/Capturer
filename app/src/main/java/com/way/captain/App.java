@@ -36,7 +36,7 @@ public class App extends Application {
         boolean isNightMode = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(KEY_NIGHT_MODE, false);
         AppCompatDelegate.setDefaultNightMode(isNightMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
 //        LeakCanary.install(this);
-        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsFragment.ATOUCH_KEY, true))
+        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsFragment.SHAKE_KEY, true))
             startService(new Intent(this, ShakeService.class));
     }
 }

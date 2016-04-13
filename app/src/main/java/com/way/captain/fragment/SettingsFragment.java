@@ -15,6 +15,7 @@ import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 
 import com.way.captain.R;
+import com.way.captain.screenshot.ShellCmdUtils;
 import com.way.captain.service.ShakeService;
 import com.way.captain.utils.AppUtils;
 import com.way.firupgrade.FIRUtils;
@@ -27,10 +28,11 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     public static final String VIDEO_STOP_METHOD_KEY = "key_video_stop_method";
     public static final String SHOW_COUNTDOWN_KEY = "key_three_second_countdown";
     public static final String SHOW_TOUCHES_KEY = "key_show_touches";
-    public static final String ATOUCH_KEY = "key_use_atouch";
+    public static final String SHAKE_KEY = "key_use_atouch";
     public static final String BOOT_AUTO_KEY = "key_boot_atuo";
     private static final String VERSION_KEY = "key_version";
     public static final String SCREENSHOT_SOUND = "key_screenshot_sound";
+    public static final String LONG_SCREENSHOT_AUTO = "key_long_screenshot_auto";
     private Activity mContext;
 
     @Override
@@ -53,6 +55,10 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             PreferenceCategory preferenceScreen = (PreferenceCategory) findPreference("key_advance_category");
             preferenceScreen.removePreference(findPreference(SHOW_TOUCHES_KEY));
         }
+        if(!ShellCmdUtils.isDeviceRoot()){
+            PreferenceCategory preferenceScreen = (PreferenceCategory) findPreference("key_advance_category");
+            preferenceScreen.removePreference(findPreference(LONG_SCREENSHOT_AUTO));
+        }
         PreferenceManager.getDefaultSharedPreferences(getActivity()).registerOnSharedPreferenceChangeListener(this);
     }
 
@@ -60,7 +66,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
         String key = preference.getKey();
         switch (key) {
-            case ATOUCH_KEY:
+            case SHAKE_KEY:
                 SwitchPreference switchPreference = (SwitchPreference) preference;
                 if (switchPreference.isChecked())
                     mContext.startService(new Intent(mContext, ShakeService.class));

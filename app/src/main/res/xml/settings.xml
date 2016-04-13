@@ -45,6 +45,11 @@
             android:key="key_screenshot_sound"
             android:summary="@string/screenshot_sound_summary"
             android:title="@string/screenshot_sound" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="key_long_screenshot_auto"
+            android:summary="@string/long_screenshot_auto_summary"
+            android:title="@string/long_screenshot_auto" />
     </PreferenceCategory>
     <!-- About -->
     <PreferenceCategory android:title="@string/about_menu">

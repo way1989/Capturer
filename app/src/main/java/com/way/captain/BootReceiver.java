@@ -15,7 +15,7 @@ public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
-            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(SettingsFragment.ATOUCH_KEY, true)
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(SettingsFragment.SHAKE_KEY, true)
                     && PreferenceManager.getDefaultSharedPreferences(context).getBoolean(SettingsFragment.BOOT_AUTO_KEY, true))
                 context.startService(new Intent(context, ShakeService.class));
         }

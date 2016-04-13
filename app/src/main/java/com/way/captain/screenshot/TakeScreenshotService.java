@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -35,6 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.way.captain.R;
+import com.way.captain.fragment.SettingsFragment;
 import com.way.captain.utils.DensityUtil;
 
 import java.nio.ByteBuffer;
@@ -56,7 +58,8 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
     private static final String DISPLAY_NAME = "Screenshot";
     private static final String EXTRA_RESULT_CODE = "result-code";
     private static final String EXTRA_DATA = "data";
-    private static final boolean isRoot = ShellCmdUtils.isDeviceRoot();
+    private static final boolean IS_DEVICE_ROOT = ShellCmdUtils.isDeviceRoot();
+    private boolean mIsAutoLongScreenshot;
     private static GlobalScreenshot mScreenshot;
     private Dialog mDialog;
     private int mCurrentScrollCount = 0;
@@ -127,6 +130,8 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(GlobalScreenshot.SCREENSHOT_NOTIFICATION_ID);
         mScreenshot = new GlobalScreenshot(TakeScreenshotService.this);
+        mIsAutoLongScreenshot = IS_DEVICE_ROOT && PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean(SettingsFragment.LONG_SCREENSHOT_AUTO, true);
     }
 
     @Override
@@ -257,7 +262,7 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
 
     private void scrollToNextScreen() {
         //如果手机没有root，就需要用户手动滚动屏幕了
-        if (!isRoot) {
+        if (!mIsAutoLongScreenshot) {
             enableDialogTouchFlag(true);
             return;
         }
@@ -299,7 +304,7 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
-            if (isRoot)
+            if (mIsAutoLongScreenshot)
                 rootView.setOnClickListener(this);
         }
         if (!mDialog.isShowing())
@@ -314,11 +319,13 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
         title.setText(getString(R.string.long_screenshot_indicator_title, mCurrentScrollCount));
         if (enable) {
             textView.setText(R.string.long_screenshot_indicator);
+            mDialog.findViewById(R.id.long_screenshot_indicator_arrow).setVisibility(View.VISIBLE);
             mDialog.findViewById(R.id.long_screenshot_indicator).setVisibility(View.VISIBLE);
             mDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);//允许用户滚动屏幕
         } else {
             textView.setText(R.string.long_screenshot_progressing);
             mDialog.findViewById(R.id.long_screenshot_indicator).setVisibility(View.GONE);
+            mDialog.findViewById(R.id.long_screenshot_indicator_arrow).setVisibility(View.GONE);
             mDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);//禁止用户滚动屏幕
         }
     }
@@ -333,7 +340,7 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                         | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
                 PixelFormat.TRANSLUCENT);
-        if (!isRoot) {
+        if (!mIsAutoLongScreenshot) {
             layoutParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN

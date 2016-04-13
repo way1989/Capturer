@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.view.MotionEvent;
@@ -17,11 +16,8 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 
-import com.joanzapata.iconify.IconDrawable;
-import com.joanzapata.iconify.fonts.MaterialIcons;
 import com.ogaclejapan.arclayout.ArcLayout;
 import com.way.captain.R;
-import com.way.captain.screenshot.ShellCmdUtils;
 import com.way.captain.utils.AnimatorUtils;
 import com.way.captain.utils.ViewUtils;
 
@@ -33,7 +29,7 @@ import java.util.List;
  */
 public class FloatMenuDialog extends Dialog implements View.OnClickListener {
     private ArcLayout mArcLayout;
-    private ImageView mCenterItem;
+    private View mCenterItem;
     private View.OnClickListener mListener;
     private boolean isHideAnimPlaying;
     private View mClickView;
@@ -53,7 +49,7 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.float_dialog_menu);
         mArcLayout = (ArcLayout) findViewById(R.id.arc_layout);
-        mCenterItem = (ImageView) findViewById(R.id.menu_screnshot_center);
+        mCenterItem = findViewById(R.id.menu_screnshot_center);
         mArcLayout.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
@@ -62,37 +58,10 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
                 return true;
             }
         });
-        mCenterItem.setImageDrawable(new IconDrawable(this.getContext().getApplicationContext(),
-                MaterialIcons.md_home).color(Color.WHITE).actionBarSize());
+
         mCenterItem.setOnClickListener(this);
         for (int i = 0, size = mArcLayout.getChildCount(); i < size; i++) {
-            ImageView button = (ImageView) mArcLayout.getChildAt(i);
-            switch (button.getId()) {
-                case R.id.menu_normal_screenshot:
-                    button.setImageDrawable(new IconDrawable(this.getContext().getApplicationContext(),
-                            MaterialIcons.md_cast_connected).color(Color.WHITE).actionBarSize());
-                    break;
-                case R.id.menu_screenrecord:
-                    button.setImageDrawable(new IconDrawable(this.getContext().getApplicationContext(),
-                            MaterialIcons.md_theaters).color(Color.WHITE).actionBarSize());
-                    break;
-                case R.id.menu_long_screenshot:
-                    if (!ShellCmdUtils.isDeviceRoot()) {
-                        button.setVisibility(View.GONE);
-                        continue;
-                    }
-                    button.setImageDrawable(new IconDrawable(this.getContext().getApplicationContext(),
-                            MaterialIcons.md_view_day).color(Color.WHITE).actionBarSize());
-                    break;
-                case R.id.menu_free_screenshot:
-                    button.setImageDrawable(new IconDrawable(this.getContext().getApplicationContext(),
-                            MaterialIcons.md_crop_free).color(Color.WHITE).actionBarSize());
-                    break;
-                case R.id.menu_rect_screenshot:
-                    button.setImageDrawable(new IconDrawable(this.getContext().getApplicationContext(),
-                            MaterialIcons.md_crop).color(Color.WHITE).actionBarSize());
-                    break;
-            }
+            View button = mArcLayout.getChildAt(i);
             button.setOnClickListener(this);
         }
     }

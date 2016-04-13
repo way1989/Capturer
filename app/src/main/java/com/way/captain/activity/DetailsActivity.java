@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.alexvasilkov.gestures.commons.DepthPageTransformer;
 import com.way.captain.R;
 import com.way.captain.data.DataInfo;
 import com.way.captain.fragment.DetailsFragment;
@@ -97,6 +98,7 @@ public class DetailsActivity extends BaseActivity {
         if (pager != null) {
             pager.setAdapter(new DetailsFragmentPagerAdapter(getSupportFragmentManager()));
             pager.setCurrentItem(mCurrentPosition);
+            pager.setPageTransformer(true, new DepthPageTransformer());
             pager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
                 @Override
                 public void onPageSelected(int position) {

@@ -140,6 +140,7 @@
     <string name="screenshot_no_result_summary">No screen shot</string>
     <string name="screenshot_sound">Screen shot sound</string>
     <string name="screenshot_sound_summary">trun on or turn off screen shot sound</string>
-    <string name="long_screenshot_indicator">Swipe for bottom to top as the indicator line,then click me to confirm</string>
+    <string name="long_screenshot_indicator">tap me to continue if you swipe,or it will stop</string>
     <string name="long_screenshot_progressing">Progressing…</string>
+    <string name="long_screenshot_indicator_title">Please swipe form bottom to top as the indicator:%stimes</string>
 </resources>

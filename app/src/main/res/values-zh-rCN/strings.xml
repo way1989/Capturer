@@ -116,6 +116,7 @@
     <string name="screenshot_no_result_summary">摇一摇开始截屏吧</string>
     <string name="screenshot_sound">截屏声音</string>
     <string name="screenshot_sound_summary">开关截屏时的声音</string>
-    <string name="long_screenshot_indicator">沿着引导线从下向上滚动相同高度,然后点击确定</string>
-    <string name="long_screenshot_progressing">处理中…</string>
+    <string name="long_screenshot_indicator">滚动后点我可继续，反之则结束</string>
+    <string name="long_screenshot_indicator_title">请沿导线从下向上滚动与其相同的高度:%s次</string>
+    <string name="long_screenshot_progressing">图片拼接中,请稍后…</string>
 </resources>

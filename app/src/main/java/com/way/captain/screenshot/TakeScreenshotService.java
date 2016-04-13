@@ -31,7 +31,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,7 +40,7 @@ import com.way.captain.utils.DensityUtil;
 import java.nio.ByteBuffer;
 
 public class TakeScreenshotService extends Service implements ImageReader.OnImageAvailableListener,
-        View.OnClickListener,View.OnLongClickListener, GlobalScreenshot.Callback {
+        View.OnClickListener, GlobalScreenshot.Callback {
     public static final int MAX_MOVE_TIMES = 20;
     public static final String ACTION_LONG_SCREENSHOT = "com.way.ACTION_LONG_SCREENSHOT";
     private static final String TAG = "CropScreenshotService";
@@ -57,6 +56,7 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
     private static final String DISPLAY_NAME = "Screenshot";
     private static final String EXTRA_RESULT_CODE = "result-code";
     private static final String EXTRA_DATA = "data";
+    private static final boolean isRoot = ShellCmdUtils.isDeviceRoot();
     private static GlobalScreenshot mScreenshot;
     private Dialog mDialog;
     private int mCurrentScrollCount = 0;
@@ -163,8 +163,9 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
             throw new IllegalStateException("Result code or data missing.");
         }
         mIsLongScreenshot = TextUtils.equals(intent.getAction(), ACTION_LONG_SCREENSHOT);
-        if(mIsLongScreenshot && getResources().getConfiguration().orientation != Configuration.ORIENTATION_PORTRAIT) {
-            Toast.makeText(this,R.string.turn_screen_orientation, Toast.LENGTH_SHORT).show();
+        if (mIsLongScreenshot && getResources().getConfiguration().orientation != Configuration.ORIENTATION_PORTRAIT) {
+            Toast.makeText(this, R.string.turn_screen_orientation, Toast.LENGTH_SHORT).show();
+            stopSelf();
             return START_NOT_STICKY;
         }
         MediaProjectionManager projectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
@@ -255,9 +256,9 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
     }
 
     private void scrollToNextScreen() {
-        if(!isRoot){
-
-            updateDialogFlag(true);
+        //如果手机没有root，就需要用户手动滚动屏幕了
+        if (!isRoot) {
+            enableDialogTouchFlag(true);
             return;
         }
 
@@ -273,7 +274,7 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
 
         mCurrentScrollCount++;
     }
-    private static final boolean isRoot = ShellCmdUtils.isDeviceRoot();
+
     private void showLongScreenshotToast() {
         if (mDialog == null) {
             mDialog = new Dialog(this);
@@ -298,24 +299,27 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
-            if(isRoot)
-            rootView.setOnClickListener(this);
+            if (isRoot)
+                rootView.setOnClickListener(this);
         }
         if (!mDialog.isShowing())
             mDialog.show();
     }
-    private void updateDialogFlag(boolean enable){
-        if(mDialog == null)
+
+    private void enableDialogTouchFlag(boolean enable) {
+        if (mDialog == null || !mDialog.isShowing())
             return;
         TextView textView = (TextView) mLongScreensshotToast.findViewById(R.id.long_screenshot_text);
-        if(enable) {
+        TextView title = (TextView) mLongScreensshotToast.findViewById(R.id.long_screenshot_title);
+        title.setText(getString(R.string.long_screenshot_indicator_title, mCurrentScrollCount));
+        if (enable) {
             textView.setText(R.string.long_screenshot_indicator);
             mDialog.findViewById(R.id.long_screenshot_indicator).setVisibility(View.VISIBLE);
-            mDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        }else {
+            mDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);//允许用户滚动屏幕
+        } else {
             textView.setText(R.string.long_screenshot_progressing);
             mDialog.findViewById(R.id.long_screenshot_indicator).setVisibility(View.GONE);
-            mDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            mDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);//禁止用户滚动屏幕
         }
     }
 
@@ -329,14 +333,13 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                         | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
                 PixelFormat.TRANSLUCENT);
-        if(!isRoot) {
+        if (!isRoot) {
             layoutParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
             mLongScreensshotToast.findViewById(R.id.toast_dialog_bg_container).setOnClickListener(this);
-            mLongScreensshotToast.findViewById(R.id.toast_dialog_bg_container).setOnLongClickListener(this);
         }
         layoutParams.y = 0;
         layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED;
@@ -379,31 +382,15 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
                 mCurrentScrollCount = MAX_MOVE_TIMES;
                 break;
             case R.id.toast_dialog_bg_container:
-                if(mHandler.hasMessages(SCROLL_MESSAGE))
+                if (mHandler.hasMessages(SCROLL_MESSAGE))
                     return;
-                updateDialogFlag(false);
-                //mCurrentScrollCount = MAX_MOVE_TIMES;
+                enableDialogTouchFlag(false);
                 mHandler.sendEmptyMessage(SCROLL_MESSAGE);
                 mCurrentScrollCount++;
                 break;
             default:
                 break;
         }
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        switch (v.getId()) {
-            case R.id.toast_dialog_bg_container:
-                if (mHandler.hasMessages(SCROLL_MESSAGE))
-                    mHandler.removeMessages(SCROLL_MESSAGE);
-                updateDialogFlag(false);
-                mCurrentScrollCount = MAX_MOVE_TIMES;
-                mHandler.sendEmptyMessage(SCROLL_MESSAGE);
-                mCurrentScrollCount++;
-                return true;
-        }
-        return false;
     }
 
     @Override

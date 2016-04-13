@@ -94,7 +94,6 @@ android {
 dependencies {
     //compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':firupgrade')
-    //compile 'com.joanzapata.iconify:android-iconify-material:2.2.2'
     compile project(':downloadlibrary')
     //compile 'ly.img.android:photo-editor-sdk:1.0.8'
     compile 'com.android.support:appcompat-v7:23.3.0'

@@ -145,4 +145,6 @@
     <string name="long_screenshot_indicator_title">Please swipe form bottom to top as the indicator:%stimes</string>
     <string name="long_screenshot_auto">Auto long screenshot</string>
     <string name="long_screenshot_auto_summary">auto swipe when take long screenshot</string>
+    <string name="video_to_gif_need_so_text">We need to download the ffmpeg library,please tap the button</string>
+    <string name="video_to_gif_need_so_title">Download necessary library</string>
 </resources>

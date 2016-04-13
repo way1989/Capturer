@@ -25,7 +25,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,10 +52,11 @@ import java.util.Locale;
 
 import static android.os.Environment.DIRECTORY_MOVIES;
 
-public class VideoActivity extends BaseActivity implements PopupMenu.OnMenuItemClickListener {
+public class VideoActivity extends BaseActivity {
     private static final String ARG_IMAGE_PATH = "arg_image_path";
     private final static int PROGRESS_CHANGED = 0;
     private static final String TAG = "VideoActivity";
+    private static final String FFMPEG = "ffmpeg";
     private final DateFormat fileFormat = new SimpleDateFormat("'Gif_'yyyy-MM-dd-HH-mm-ss'.gif'", Locale.US);
     StringBuilder mFormatBuilder;
     Formatter mFormatter;
@@ -86,10 +86,11 @@ public class VideoActivity extends BaseActivity implements PopupMenu.OnMenuItemC
         }
     };
     private ProgressDialog mProgressDialog;
-    private String mUpdateAppName = "Captain.apk";
-    private String url = "http://download.fir.im/v2/app/install/56f7564ce75e2d0e3600000f?download_token=88adcfc58a1985717ea03991ad66224a";
+    private String url = "http://7xrpr9.com1.z0.glb.clouddn.com/ffmpeg/armeabi-v7a-neon/ffmpeg";
+    //private String url = "http://7xrpr9.com1.z0.glb.clouddn.com/ffmpeg/x86/ffmpeg";
+    //private String url = "http://7xrpr9.com1.z0.glb.clouddn.com/ffmpeg/armeabi-v7a/ffmpeg";
     private Dialog mDownloadDialog;
-    private DownloadProgressBar mArrowDownloadButton;
+    private DownloadProgressBar mDownloadProgressBar;
 
     public static void startVideoActivity(Activity context, String path, ImageView imageView) {
         Intent i = new Intent(context, VideoActivity.class);
@@ -114,7 +115,6 @@ public class VideoActivity extends BaseActivity implements PopupMenu.OnMenuItemC
         animator.setDuration(200L);
         animator.start();
 
-
         loadFFMpegBinary();
         showDownloadDialog();
 
@@ -128,25 +128,37 @@ public class VideoActivity extends BaseActivity implements PopupMenu.OnMenuItemC
     }
 
     private void showDownloadDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setView(R.layout.download_dialog_layout).setTitle("download").setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+        final DownloadRequest request = new DownloadRequest(TAG, FFMPEG,
+                getFilesDir().getAbsolutePath(), url);
+        final DownloadManager downloadManager = DownloadManager.instance();
+        downloadManager.registerListener(TAG, new UpdateDownloadListener());
 
-            }
-        });
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(R.layout.download_dialog_layout)
+                .setTitle(R.string.video_to_gif_need_so_title)
+                .setMessage(R.string.video_to_gif_need_so_text)
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        downloadManager.cancel(TAG);
+                    }
+                });
         mDownloadDialog = builder.create();
         mDownloadDialog.show();
-        mArrowDownloadButton = (DownloadProgressBar) mDownloadDialog.findViewById(R.id.dpv3);
-        mArrowDownloadButton.setOnClickListener(new View.OnClickListener() {
+        mDownloadProgressBar = (DownloadProgressBar) mDownloadDialog.findViewById(R.id.download_progressbar);
+        mDownloadProgressBar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("liweiping", "mArrowDownloadButton onClick");
-                DownloadRequest request = new DownloadRequest(mUpdateAppName, mUpdateAppName, getFilesDir().getAbsolutePath(), url);
-                DownloadManager.instance().registerListener(mUpdateAppName, new UpdateDownloadListener());
-                DownloadManager.instance().start(request);
+                downloadManager.start(request);
+                mDownloadDialog.setCancelable(false);
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_video_edit, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -154,6 +166,18 @@ public class VideoActivity extends BaseActivity implements PopupMenu.OnMenuItemC
         switch (item.getItemId()) {
             case android.R.id.home:
                 finishAfterTransition();
+                break;
+            case R.id.video_menu_to_gif:
+                onGifSettingsClick();
+                break;
+            case R.id.video_menu_frame:
+                GifUtils.framePicker(this);
+                break;
+            case R.id.video_menu_length:
+                GifUtils.lengthPicker(this);
+                break;
+            case R.id.video_menu_scale:
+                GifUtils.sizePicker(this);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -168,12 +192,7 @@ public class VideoActivity extends BaseActivity implements PopupMenu.OnMenuItemC
         mSeekBar = (SeekBar) findViewById(R.id.mediacontroller_progress);
         mDurationTextView = (TextView) findViewById(R.id.time);
         mPlayedTextView = (TextView) findViewById(R.id.time_current);
-        findViewById(R.id.to_gif).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showVideoEditMenu(v);
-            }
-        });
+
         mPlayPauseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -223,37 +242,6 @@ public class VideoActivity extends BaseActivity implements PopupMenu.OnMenuItemC
         });
     }
 
-    private void showVideoEditMenu(View view) {
-        // create the popup menu
-        PopupMenu popupMenu = new PopupMenu(this, view);
-        final Menu menu = popupMenu.getMenu();
-        popupMenu.getMenuInflater().inflate(R.menu.menu_video_edit, menu);
-        // hook up the click listener
-        popupMenu.setOnMenuItemClickListener(this);
-        // show it
-        popupMenu.show();
-    }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.video_menu_to_gif:
-                onGifSettingsClick();
-                break;
-            case R.id.video_menu_frame:
-                GifUtils.framePicker(this);
-                break;
-            case R.id.video_menu_length:
-                GifUtils.lengthPicker(this);
-                break;
-            case R.id.video_menu_scale:
-                GifUtils.sizePicker(this);
-                break;
-            default:
-                break;
-        }
-        return false;
-    }
 
     private String stringForTime(int timeMs) {
         int totalSeconds = timeMs / 1000;
@@ -390,10 +378,10 @@ public class VideoActivity extends BaseActivity implements PopupMenu.OnMenuItemC
         @Override
         public void downloadWait(DownloadRequest downloadRequest) {
             Log.i("liweiping", "UpdateDownloadListener downloadWait...");
-            mArrowDownloadButton.post(new Runnable() {
+            mDownloadProgressBar.post(new Runnable() {
                 @Override
                 public void run() {
-                    mArrowDownloadButton.setEnabled(false);
+                    mDownloadProgressBar.setEnabled(false);
                 }
             });
         }
@@ -401,23 +389,27 @@ public class VideoActivity extends BaseActivity implements PopupMenu.OnMenuItemC
         @Override
         public void downloadStart(DownloadRequest downloadRequest) {
             Log.i("liweiping", "UpdateDownloadListener downloadWait...");
-            mArrowDownloadButton.post(new Runnable() {
+            mDownloadProgressBar.post(new Runnable() {
                 @Override
                 public void run() {
-                    mArrowDownloadButton.setEnabled(false);
-                    mArrowDownloadButton.playManualProgressAnimation();
+                    mDownloadProgressBar.setEnabled(false);
+                    mDownloadProgressBar.playManualProgressAnimation();
                 }
             });
         }
 
         @Override
-        public void downloadFinish(DownloadRequest downloadRequest) {
+        public void downloadFinish(final DownloadRequest downloadRequest) {
             Log.i("liweiping", "UpdateDownloadListener downloadFinish..." + downloadRequest.getFileName());
-            mArrowDownloadButton.post(new Runnable() {
+            File file = new File(downloadRequest.getFilePath(), downloadRequest.getFileName());
+            if(!file.canExecute())
+                file.setExecutable(true);
+            mDownloadProgressBar.post(new Runnable() {
                 @Override
                 public void run() {
-                    mArrowDownloadButton.setSuccessResultState();
-                    mArrowDownloadButton.setEnabled(true);
+                    mDownloadProgressBar.setSuccessResultState();
+                    mDownloadProgressBar.setEnabled(false);
+                    mDownloadDialog.setCancelable(true);
                 }
             });
         }
@@ -425,10 +417,12 @@ public class VideoActivity extends BaseActivity implements PopupMenu.OnMenuItemC
         @Override
         public void downloadCancel(DownloadRequest downloadRequest) {
             Log.i("liweiping", "UpdateDownloadListener downloadCancel...");
-            mArrowDownloadButton.post(new Runnable() {
+            mDownloadProgressBar.post(new Runnable() {
                 @Override
                 public void run() {
-                    mArrowDownloadButton.abortDownload();
+                    mDownloadProgressBar.abortDownload();
+                    mDownloadDialog.setCancelable(true);
+                    mDownloadProgressBar.setEnabled(true);
                 }
             });
         }
@@ -441,10 +435,10 @@ public class VideoActivity extends BaseActivity implements PopupMenu.OnMenuItemC
         @Override
         public void downloadProgress(DownloadRequest downloadRequest, final int downloadProgress) {
             Log.i("liweiping", "UpdateDownloadListener downloadProgress... downloadProgress = " + downloadProgress);
-            mArrowDownloadButton.post(new Runnable() {
+            mDownloadProgressBar.post(new Runnable() {
                 @Override
                 public void run() {
-                    mArrowDownloadButton.setProgress(downloadProgress);
+                    mDownloadProgressBar.setProgress(downloadProgress);
                 }
             });
         }
@@ -452,11 +446,12 @@ public class VideoActivity extends BaseActivity implements PopupMenu.OnMenuItemC
         @Override
         public void downloadError(DownloadRequest downloadRequest, DataErrorEnum error) {
             Log.i("liweiping", "UpdateDownloadListener downloadError... error = " + error);
-            mArrowDownloadButton.post(new Runnable() {
+            mDownloadProgressBar.post(new Runnable() {
                 @Override
                 public void run() {
-                    mArrowDownloadButton.setErrorResultState();
-
+                    mDownloadProgressBar.setErrorResultState();
+                    mDownloadProgressBar.setEnabled(true);
+                    mDownloadDialog.setCancelable(true);
                 }
             });
         }

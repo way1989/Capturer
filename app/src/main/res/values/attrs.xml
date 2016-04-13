@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="ForegroundImageView">
-        <attr name="android:foreground" />
-    </declare-styleable>
 
-    <attr name="aspect" />
     <declare-styleable name="SimpleTagImageView">
         <attr name="simple_corner_distance" format="dimension" />
         <attr name="simple_tag_width" format="dimension" />
@@ -21,13 +17,5 @@
         <attr name="simple_tag_enable" format="boolean" />
         <attr name="simple_tag_round_radius" format="dimension" />
     </declare-styleable>
-
-    <!-- Declare custom theme attributes that allow changing which styles are
-         used for button bars depending on the API level.
-         ?android:attr/buttonBarStyle is new as of API 11 so this is
-         necessary to support previous API levels. -->
-    <declare-styleable name="ButtonBarContainerTheme">
-        <attr name="metaButtonBarStyle" format="reference" />
-        <attr name="metaButtonBarButtonStyle" format="reference" />
-    </declare-styleable>
+    
 </resources>

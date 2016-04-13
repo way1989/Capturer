@@ -130,19 +130,35 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mLoadingEmptyContainer = (LoadingEmptyContainer) view.findViewById(R.id.loading_empty_container);
-        mLoadingEmptyContainer.getNoResultsContainer().setSecondaryText(R.string.gif_no_result_summary);
+        int type = getArguments().getInt(ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT);
+
+        initLoadingEmptyView(view, type);
+
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerview);
         GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 3);
         mRecyclerView.setLayoutManager(layoutManager);
-        int type = getArguments().getInt(ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT);
-        mScreenshotAdapter = new ScreenshotAdapter(getContext(),type, this);
+        mScreenshotAdapter = new ScreenshotAdapter(getContext(), type, this);
         mRecyclerView.setAdapter(mScreenshotAdapter);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
         mSwipeRefreshLayout.setOnRefreshListener(this);
         getLoaderManager().initLoader(SCREENSHOT_LOADER_ID, null, this);
+    }
+
+    private void initLoadingEmptyView(View view, int type) {
+        mLoadingEmptyContainer = (LoadingEmptyContainer) view.findViewById(R.id.loading_empty_container);
+        switch (type) {
+            case DataInfo.TYPE_SCREEN_SHOT:
+                mLoadingEmptyContainer.getNoResultsContainer().setSecondaryText(R.string.screenshot_no_result_summary);
+                break;
+            case DataInfo.TYPE_SCREEN_GIF:
+                mLoadingEmptyContainer.getNoResultsContainer().setSecondaryText(R.string.gif_no_result_summary);
+                break;
+            case DataInfo.TYPE_SCREEN_RECORD:
+                mLoadingEmptyContainer.getNoResultsContainer().setSecondaryText(R.string.video_no_result_summary);
+                break;
+        }
     }
 
     @Override
@@ -242,7 +258,6 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
         snackbar.setAction(R.string.snack_bar_action_undo, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //onItemUndoActionClicked();
                 int position = mDataProvider.undoLastRemoval();
                 if (position >= 0) {
                     mScreenshotAdapter.notifyItemInserted(position);

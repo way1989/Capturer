@@ -50,6 +50,7 @@ public class NoResultsContainer extends LinearLayout {
 
     public void setMainLogo(@DrawableRes final int resId) {
         ((ImageView) findViewById(R.id.no_results_logo)).setImageResource(resId);
+        findViewById(R.id.no_results_logo).setVisibility(View.VISIBLE);
     }
 
     public void setTextColor(@ColorInt int color) {

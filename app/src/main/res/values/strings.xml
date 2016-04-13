@@ -136,7 +136,6 @@
     <string name="turn_screen_orientation">Keep your device orientation is portrait</string>
 
     <string name="title_activity_details">DetailsActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="title_activity_video">Video</string>
+    <string name="screenshot_no_result_summary">No screen shot</string>
 </resources>

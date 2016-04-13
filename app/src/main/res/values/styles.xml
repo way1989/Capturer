@@ -16,9 +16,6 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="android:textColorPrimary">@color/abc_primary_text_material_dark</item>
     </style>
-    <style name="AppTheme.AppBarTransparent" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
-        <item name="android:textColorPrimary">@color/abc_primary_text_material_dark</item>
-    </style>
 
     <style name="Theme.Telecine" parent="android:Theme.Material.Light.DarkActionBar">
         <item name="android:colorPrimary">@color/colorPrimary</item>
@@ -86,17 +83,18 @@
         <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
         <item name="android:windowActionBarOverlay">true</item>
         <item name="android:windowBackground">@null</item>
-        <item name="metaButtonBarStyle">?android:attr/buttonBarStyle</item>
-        <item name="metaButtonBarButtonStyle">?android:attr/buttonBarButtonStyle</item>
     </style>
+
     <style name="FullscreenTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowBackground">@android:color/black</item>
-    <!--    <item name="android:statusBarColor">@android:color/black</item>
+        <!--
         <item name="android:windowEnterTransition">@transition/details_window_enter_transition</item>
-        <item name="android:windowReturnTransition">@transition/details_window_return_transition</item>-->
+        <item name="android:windowReturnTransition">@transition/details_window_return_transition</item>
+        -->
     </style>
+
     <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
         <item name="android:background">@color/black_overlay</item>
     </style>

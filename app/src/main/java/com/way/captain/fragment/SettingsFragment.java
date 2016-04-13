@@ -30,6 +30,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     public static final String ATOUCH_KEY = "key_use_atouch";
     public static final String BOOT_AUTO_KEY = "key_boot_atuo";
     private static final String VERSION_KEY = "key_version";
+    public static final String SCREENSHOT_SOUND = "key_screenshot_sound";
     private Activity mContext;
 
     @Override

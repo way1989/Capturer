@@ -11,6 +11,7 @@
     android:translationZ="8dp">
 
     <TextView
+        android:id="@+id/long_screenshot_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ellipsize="end"
@@ -18,10 +19,12 @@
         android:paddingEnd="8dp"
         android:paddingStart="8dp"
         android:singleLine="true"
+        android:fontFamily="sans-serif-thin"
         android:text="@string/scroll_screenshot_toast_title"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
+        android:id="@+id/long_screenshot_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ellipsize="end"
@@ -30,5 +33,6 @@
         android:paddingStart="8dp"
         android:singleLine="true"
         android:text="@string/scroll_screenshot_toast_text"
+        android:fontFamily="sans-serif-thin"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 </LinearLayout>

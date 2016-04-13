@@ -40,6 +40,11 @@
             android:key="key_show_touches"
             android:summary="@string/show_touches_summary"
             android:title="@string/show_touches" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="key_screenshot_sound"
+            android:summary="@string/screenshot_sound_summary"
+            android:title="@string/screenshot_sound" />
     </PreferenceCategory>
     <!-- About -->
     <PreferenceCategory android:title="@string/about_menu">

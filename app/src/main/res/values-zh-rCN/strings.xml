@@ -22,8 +22,8 @@
     <string name="show_touches">显示触摸区域</string>
 
     <string name="share">分享</string>
-    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在保存屏幕截图..."</string>
-    <string name="screenshot_saving_title" msgid="8242282144535555697">"正在保存屏幕截图..."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在保存屏幕截图…"</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"正在保存屏幕截图…"</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"正在保存屏幕截图。"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"已抓取屏幕截图。"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"触摸可查看您的屏幕截图。"</string>
@@ -36,7 +36,7 @@
     <string name="about_menu">关于</string>
     <string name="action_settings">设置</string>
     <string name="advance_category">高级设置</string>
-    <string name="chathead_content_text">试试摇一摇你的手机...</string>
+    <string name="chathead_content_text">试试摇一摇你的手机…</string>
     <string name="chathead_content_title">Captain正在运行</string>
     <string name="countdown_summary">录屏前倒计时3秒</string>
     <string name="settings_author_title">作者</string>
@@ -52,7 +52,7 @@
     <string name="boot_auto_summary">开机后自动启动录屏</string>
 
     <string name="float_record_cancel">取消</string>
-    <string name="float_record_end_handle">处理中...</string>
+    <string name="float_record_end_handle">处理中…</string>
     <string name="float_record_failed">录制失败</string>
     <string name="float_record_first_switch_hd_toast">高清画质下，视频大小是标准的2~3倍</string>
     <string name="float_record_super_hd_quality">超清</string>
@@ -105,13 +105,17 @@
     <string name="scroll_screenshot_toast_title">正在长截屏</string>
     <string name="global_send">发送</string>
     <string name="feedback">用户反馈</string>
-    <string name="feedback_hint">请给我们一些建议吧...</string>
+    <string name="feedback_hint">请给我们一些建议吧…</string>
     <string name="feedback_send_succeed">反馈成功</string>
-    <string name="feedback_text_empty">反馈内容过少...</string>
+    <string name="feedback_text_empty">反馈内容过少…</string>
     <string name="video_no_result_summary">摇一摇手机录几个视频吧</string>
     <string name="gif_no_result_summary">切换到视频去制作几张gif吧</string>
     <string name="nav_night_mode">夜间模式</string>
     <string name="nav_day_mode">日间模式</string>
     <string name="turn_screen_orientation">请旋转您的手机方向为垂直方向</string>
     <string name="screenshot_no_result_summary">摇一摇开始截屏吧</string>
+    <string name="screenshot_sound">截屏声音</string>
+    <string name="screenshot_sound_summary">开关截屏时的声音</string>
+    <string name="long_screenshot_indicator">沿着引导线从下向上滚动相同高度,然后点击确定</string>
+    <string name="long_screenshot_progressing">处理中…</string>
 </resources>

@@ -49,7 +49,7 @@
     <string name="screenshot_delete_confirmation">Screenshot deleted.</string>
     <string name="screen_shot">Take Screenshot</string>
     <string name="chathead_content_title">Captain is running</string>
-    <string name="chathead_content_text">Please shake your device...</string>
+    <string name="chathead_content_text">Please shake your device…</string>
     <string name="shipped_ffmpeg_version" translatable="false">n2.4.2</string>
     <string name="video_size_percentage_summary">select the size of screen record</string>
     <string name="countdown_summary">wait three seconds when begin take a screen record</string>
@@ -67,7 +67,7 @@
     <string name="snack_bar_action_undo">UNDO</string>
     <string name="snack_bar_text_item_removed">1 item removed</string>
     <string name="float_record_cancel">Cancle</string>
-    <string name="float_record_end_handle">Saving...</string>
+    <string name="float_record_end_handle">Saving…</string>
     <string name="float_record_failed">screen record failed</string>
     <string name="float_record_hd_quality">HD</string>
     <string name="float_record_start">REC</string>
@@ -138,4 +138,8 @@
     <string name="title_activity_details">DetailsActivity</string>
     <string name="title_activity_video">Video</string>
     <string name="screenshot_no_result_summary">No screen shot</string>
+    <string name="screenshot_sound">Screen shot sound</string>
+    <string name="screenshot_sound_summary">trun on or turn off screen shot sound</string>
+    <string name="long_screenshot_indicator">Swipe for bottom to top as the indicator line,then click me to confirm</string>
+    <string name="long_screenshot_progressing">Progressing…</string>
 </resources>

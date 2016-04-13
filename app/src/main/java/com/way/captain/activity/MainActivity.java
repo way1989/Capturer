@@ -178,7 +178,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 return;
             long time = System.currentTimeMillis();
             if (time - mLastPressTime > 3000) {
-                Snackbar.make(mDrawerLayout, R.string.twice_press_exit, Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(mViewPager, R.string.twice_press_exit, Snackbar.LENGTH_SHORT).show();
                 mLastPressTime = time;
             } else
                 super.onBackPressed();

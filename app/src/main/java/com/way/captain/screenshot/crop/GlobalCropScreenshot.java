@@ -29,6 +29,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -43,6 +44,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Process;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -56,6 +58,7 @@ import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 import com.way.captain.R;
+import com.way.captain.fragment.SettingsFragment;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -370,6 +373,7 @@ class GlobalCropScreenshot {
     private AsyncTask<SaveImageInBackgroundData, Void, SaveImageInBackgroundData> mSaveInBgTask;
 
     private MediaActionSound mCameraSound;
+    private SharedPreferences mSharedPreferences;
 
     /**
      * @param context everything needs a context :(
@@ -431,6 +435,7 @@ class GlobalCropScreenshot {
         // Setup the Camera shutter sound
         mCameraSound = new MediaActionSound();
         mCameraSound.load(MediaActionSound.SHUTTER_CLICK);
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
     }
 
     static void notifyScreenshotError(Context context, NotificationManager nManager) {
@@ -578,6 +583,7 @@ class GlobalCropScreenshot {
             public void run() {
                 // Play the shutter sound to notify that we've taken a
                 // screenshot
+                if(mSharedPreferences.getBoolean(SettingsFragment.SCREENSHOT_SOUND, true))
                 mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
 
                 mScreenshotView.setLayerType(View.LAYER_TYPE_HARDWARE, null);

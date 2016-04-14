@@ -2,11 +2,6 @@ package com.way.downloadlibrary.net.http;
 
 import android.text.TextUtils;
 
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.methods.HttpRequestBase;
-
 import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,14 +10,12 @@ public final class CookieHolder {
 
     private static final CookieHolder instance = new CookieHolder();
 
-    private Object lock = new Object();
+    private final Object lock = new Object();
 
     private Map<String, String> cookieValues;
 
-    private CookieStore cookieStore;
-
     private CookieHolder() {
-        cookieValues = new HashMap<String, String>();
+        cookieValues = new HashMap<>();
     }
 
     public static CookieHolder getInstance() {
@@ -79,38 +72,6 @@ public final class CookieHolder {
         if (!TextUtils.isEmpty(cookie)) {
             connection.addRequestProperty("Cookie", cookie);
         }
-    }
-
-    public void resolveCookie2(HttpResponse response) {
-        synchronized (lock) {
-            Header[] cookies = response.getHeaders("Set-Cookie");
-            if (cookies == null) {
-                return;
-            }
-            for (Header cookie : cookies) {
-                String name = cookie.getName();
-                String value = cookie.getValue();
-                if (cookieValues.containsKey(name)) {
-                    cookieValues.remove(name);
-                }
-                cookieValues.put(name, value);
-            }
-        }
-    }
-
-    public void setCookie2(HttpRequestBase request) {
-        String cookie = getCookie();
-        if (!TextUtils.isEmpty(cookie)) {
-            request.setHeader("Cookie", cookie);
-        }
-    }
-
-    public CookieStore getCookieStore() {
-        return cookieStore;
-    }
-
-    public void setCookieStore(CookieStore cookieStore) {
-        this.cookieStore = cookieStore;
     }
 
 }

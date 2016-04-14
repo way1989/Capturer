@@ -56,6 +56,7 @@ public class GlideHelper {
                 .fitCenter()
                 .into(image);
     }
+
     public static void loadScreenshotResource(String path, @NonNull ImageView image) {
         Glide.with(image.getContext())
                 .load(path)

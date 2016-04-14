@@ -50,7 +50,7 @@ public final class ScreenRecordService extends Service {
                 if (!AppUtils.isMarshmallow())
                     Settings.System.putInt(contentResolver, SHOW_TOUCHES, 1);
             }
-            if(!PreferenceManager.getDefaultSharedPreferences(ScreenRecordService.this)
+            if (!PreferenceManager.getDefaultSharedPreferences(ScreenRecordService.this)
                     .getBoolean(SettingsFragment.VIDEO_STOP_METHOD_KEY, true)) {
                 startTime = SystemClock.elapsedRealtime();
                 mBuilder = createNotificationBuilder();
@@ -61,21 +61,21 @@ public final class ScreenRecordService extends Service {
                         updateNotification(ScreenRecordService.this);
                     }
                 }, 100, 1000);
-            }else {
-            Context context = getApplicationContext();
-            String title = context.getString(R.string.notification_recording_title);
-            //String subtitle = context.getString(R.string.notification_recording_subtitle);
-            Notification.Builder builder  = new Notification.Builder(context) //
-                    .setContentTitle(title)/*.setContentText(subtitle)*/.setSmallIcon(R.drawable.ic_videocam_white_24dp)
-                    .setColor(context.getResources().getColor(R.color.colorPrimary)).setAutoCancel(true)
-                    .setPriority(Notification.PRIORITY_MIN);
-            Intent stopIntent = new Intent("com.way.stop");
-            stopIntent.putExtra("id", NOTIFICATION_ID);
-            builder.addAction(R.drawable.ic_clear_white_24dp,context.getResources()
-                    .getString(R.string.share), PendingIntent.getBroadcast(context, 0, stopIntent, PendingIntent.FLAG_CANCEL_CURRENT));
-            Notification notification  = builder.build();
-            Log.d("way", "Moving service into the foreground with recording notification.");
-            startForeground(NOTIFICATION_ID, notification);
+            } else {
+                Context context = getApplicationContext();
+                String title = context.getString(R.string.notification_recording_title);
+                //String subtitle = context.getString(R.string.notification_recording_subtitle);
+                Notification.Builder builder = new Notification.Builder(context) //
+                        .setContentTitle(title)/*.setContentText(subtitle)*/.setSmallIcon(R.drawable.ic_videocam_white_24dp)
+                        .setColor(context.getResources().getColor(R.color.colorPrimary)).setAutoCancel(true)
+                        .setPriority(Notification.PRIORITY_MIN);
+                Intent stopIntent = new Intent("com.way.stop");
+                stopIntent.putExtra("id", NOTIFICATION_ID);
+                builder.addAction(R.drawable.ic_clear_white_24dp, context.getResources()
+                        .getString(R.string.share), PendingIntent.getBroadcast(context, 0, stopIntent, PendingIntent.FLAG_CANCEL_CURRENT));
+                Notification notification = builder.build();
+                Log.d("way", "Moving service into the foreground with recording notification.");
+                startForeground(NOTIFICATION_ID, notification);
             }
         }
 
@@ -150,7 +150,7 @@ public final class ScreenRecordService extends Service {
         Log.d("way", "Starting up!");
         running = true;
 
-        if(intent == null){
+        if (intent == null) {
             stopSelf();
             return START_NOT_STICKY;
         }

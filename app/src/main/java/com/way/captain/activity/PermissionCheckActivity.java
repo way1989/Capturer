@@ -35,13 +35,14 @@ import com.way.captain.utils.OsUtil;
  * to grant permissions. However, the OS may not actually prompt the user if the user had
  * previously checked the "Never ask again" checkbox while denying the required permissions.
  */
-public class PermissionCheckActivity extends BaseActivity {
+public class PermissionCheckActivity extends BaseActivity implements OnClickListener {
     private static final int REQUIRED_PERMISSIONS_REQUEST_CODE = 1;
     private static final long AUTOMATED_RESULT_THRESHOLD_MILLLIS = 250;
     private static final String PACKAGE_URI_PREFIX = "package:";
     private long mRequestTimeMillis;
     private TextView mNextView;
     private TextView mSettingsView;
+    private TextView mEnablePermissionView;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -51,32 +52,15 @@ public class PermissionCheckActivity extends BaseActivity {
         }
 
         setContentView(R.layout.permission_check_activity);
-        getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimary));
-
-        findViewById(R.id.exit).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(final View view) {
-                finish();
-            }
-        });
+        View exit = findViewById(R.id.exit);
+        if (exit != null) exit.setOnClickListener(this);
 
         mNextView = (TextView) findViewById(R.id.next);
-        mNextView.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(final View view) {
-                tryRequestPermission();
-            }
-        });
+        if (mNextView != null) mNextView.setOnClickListener(this);
 
         mSettingsView = (TextView) findViewById(R.id.settings);
-        mSettingsView.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(final View view) {
-                final Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                        Uri.parse(PACKAGE_URI_PREFIX + getPackageName()));
-                startActivity(intent);
-            }
-        });
+        if (mSettingsView != null) mSettingsView.setOnClickListener(this);
+        mEnablePermissionView = (TextView) findViewById(R.id.enable_permission_procedure);
     }
 
     @Override
@@ -118,7 +102,7 @@ public class PermissionCheckActivity extends BaseActivity {
                     mNextView.setVisibility(View.GONE);
 
                     mSettingsView.setVisibility(View.VISIBLE);
-                    findViewById(R.id.enable_permission_procedure).setVisibility(View.VISIBLE);
+                    mEnablePermissionView.setVisibility(View.VISIBLE);
                 }
             }
         }
@@ -137,9 +121,25 @@ public class PermissionCheckActivity extends BaseActivity {
     }
 
     private void redirect() {
-        //UIIntents.get().launchConversationListActivity(this);
         Intent i = new Intent(this, MainActivity.class);
         startActivity(i);
         finish();
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.exit:
+                finish();
+                break;
+            case R.id.next:
+                tryRequestPermission();
+                break;
+            case R.id.settings:
+                final Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.parse(PACKAGE_URI_PREFIX + getPackageName()));
+                startActivity(intent);
+                break;
+        }
     }
 }

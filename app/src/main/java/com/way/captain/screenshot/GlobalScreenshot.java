@@ -454,7 +454,7 @@ class GlobalScreenshot {
                 // outside
                 // lockscreen
                 .setCategory(Notification.CATEGORY_ERROR).setAutoCancel(true)
-                .setColor(context.getResources().getColor(R.color.system_notification_accent_color));
+                .setColor(context.getResources().getColor(R.color.colorPrimary));
         Notification n = new Notification.BigTextStyle(b).bigText(r.getString(R.string.screenshot_failed_text)).build();
         nManager.notify(SCREENSHOT_NOTIFICATION_ID, n);
     }
@@ -619,8 +619,8 @@ class GlobalScreenshot {
             public void run() {
                 // Play the shutter sound to notify that we've taken a
                 // screenshot
-                if(mSharedPreferences.getBoolean(SettingsFragment.SCREENSHOT_SOUND, true))
-                mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
+                if (mSharedPreferences.getBoolean(SettingsFragment.SCREENSHOT_SOUND, true))
+                    mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
 
                 mScreenshotView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
                 mScreenshotView.buildLayer();

@@ -14,7 +14,6 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnticipateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
-import android.widget.ImageView;
 
 import com.ogaclejapan.arclayout.ArcLayout;
 import com.way.captain.R;

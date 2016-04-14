@@ -15,5 +15,6 @@ public abstract class BaseFragment extends Fragment {
     public abstract boolean onBackPressed();
 
     public abstract void onActivityReenter(Bundle bundle);
+
     public abstract void changeSharedElements(List<String> names, Map<String, View> sharedElements, int position);
 }

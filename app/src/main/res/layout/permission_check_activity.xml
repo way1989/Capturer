@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
     <TextView
         style="@style/PromoScreenTextStyle.CenterAligned"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="96dp"
+        android:paddingTop="48dp"
         android:text="@string/required_permissions_promo" />
 
     <TextView
@@ -23,19 +21,6 @@
         android:text="@string/enable_permission_procedure"
         android:visibility="invisible" />
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:importantForAccessibility="no"
-        android:paddingTop="40dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/permissions" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/white" />
     <!-- Buttons -->
     <LinearLayout
         android:layout_width="match_parent"

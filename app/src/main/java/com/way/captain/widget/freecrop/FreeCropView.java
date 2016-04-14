@@ -62,6 +62,7 @@ public class FreeCropView extends ViewGroup {
     private Bitmap mBaseBitmap;
     private Rect mImageRect;
     private float mScale = 1.0f;
+    private OnStateListener mListener;
 
     public FreeCropView(Context context) {
         this(context, null);
@@ -139,22 +140,6 @@ public class FreeCropView extends ViewGroup {
         this.mScale = mScale;
     }
 
-    public void setFreeCropBitmap(Bitmap bitmap) {
-
-        if (bitmap == null) {
-            Log.e(TAG, "seFreeCropBitmap : bitmap == null");
-            return;
-        }
-
-        mImageWidth = bitmap.getWidth();
-        mImageHeight = bitmap.getHeight();
-        mBaseBitmap = bitmap;
-        Log.i(TAG, "seFreeCropBitmap : bitmap = " + bitmap + ", mImageWidth = " + mImageWidth + ", mImageHeight = "
-                + mImageHeight);
-        requestLayout();
-        invalidate();
-    }
-
     public boolean reset() {
         clear(false);
         invalidate();
@@ -170,7 +155,7 @@ public class FreeCropView extends ViewGroup {
         if (mBaseBitmap == null) {
             return null;
         }
-        if(mPath == null || mPath.isEmpty())
+        if (mPath == null || mPath.isEmpty())
             return mBaseBitmap;
         Bitmap resizeBitmap = resizeBitmap(mBaseBitmap, mScale);
         Bitmap bitmap = Bitmap.createBitmap(resizeBitmap.getWidth(), resizeBitmap.getHeight(), Config.ARGB_8888);
@@ -205,6 +190,22 @@ public class FreeCropView extends ViewGroup {
         if (bitmap != null && !bitmap.isRecycled())
             bitmap.recycle();
         return cropped;
+    }
+
+    public void setFreeCropBitmap(Bitmap bitmap) {
+
+        if (bitmap == null) {
+            Log.e(TAG, "seFreeCropBitmap : bitmap == null");
+            return;
+        }
+
+        mImageWidth = bitmap.getWidth();
+        mImageHeight = bitmap.getHeight();
+        mBaseBitmap = bitmap;
+        Log.i(TAG, "seFreeCropBitmap : bitmap = " + bitmap + ", mImageWidth = " + mImageWidth + ", mImageHeight = "
+                + mImageHeight);
+        requestLayout();
+        invalidate();
     }
 
     public boolean hasCropBitmap() {
@@ -318,7 +319,7 @@ public class FreeCropView extends ViewGroup {
     private void touchDown(MotionEvent event) {
         Log.i(TAG, "onTouchEvent touchDown  = ");
         mIsListeningForGestures = true;
-        if(mListener != null) mListener.onStart();
+        if (mListener != null) mListener.onStart();
 
         float x = event.getX();
         float y = event.getY();
@@ -417,7 +418,7 @@ public class FreeCropView extends ViewGroup {
 
     private void touchUp(MotionEvent event, boolean cancel) {
         mIsListeningForGestures = false;
-        if(mListener != null) mListener.onEnd();
+        if (mListener != null) mListener.onEnd();
 
         drawStroke = new GestureStroke(mStrokeBuffer);
         clipStroke = new ClipStroke(mImageRect, mStrokeBuffer);
@@ -477,6 +478,16 @@ public class FreeCropView extends ViewGroup {
         mPath.rewind();
     }
 
+    public void setOnStateListener(OnStateListener listener) {
+        mListener = listener;
+    }
+
+    public interface OnStateListener {
+        public void onStart();
+
+        public void onEnd();
+    }
+
     private class FadeOutRunnable implements Runnable {
 
         public void run() {
@@ -500,14 +511,5 @@ public class FreeCropView extends ViewGroup {
 
             invalidate();
         }
-    }
-
-    private OnStateListener mListener;
-    public void setOnStateListener(OnStateListener listener){
-        mListener = listener;
-    }
-    public interface OnStateListener{
-        public void onStart();
-        public void onEnd();
     }
 }

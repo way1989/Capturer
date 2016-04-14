@@ -30,9 +30,9 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     public static final String SHOW_TOUCHES_KEY = "key_show_touches";
     public static final String SHAKE_KEY = "key_use_atouch";
     public static final String BOOT_AUTO_KEY = "key_boot_atuo";
-    private static final String VERSION_KEY = "key_version";
     public static final String SCREENSHOT_SOUND = "key_screenshot_sound";
     public static final String LONG_SCREENSHOT_AUTO = "key_long_screenshot_auto";
+    private static final String VERSION_KEY = "key_version";
     private Activity mContext;
 
     @Override
@@ -55,7 +55,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             PreferenceCategory preferenceScreen = (PreferenceCategory) findPreference("key_advance_category");
             preferenceScreen.removePreference(findPreference(SHOW_TOUCHES_KEY));
         }
-        if(!ShellCmdUtils.isDeviceRoot()){
+        if (!ShellCmdUtils.isDeviceRoot()) {
             PreferenceCategory preferenceScreen = (PreferenceCategory) findPreference("key_advance_category");
             preferenceScreen.removePreference(findPreference(LONG_SCREENSHOT_AUTO));
         }

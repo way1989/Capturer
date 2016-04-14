@@ -3,9 +3,6 @@ package com.way.captain.screenrecord;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-
-import com.way.captain.fragment.SettingsFragment;
 
 public final class ScreenRecordShortcutLaunchActivity extends Activity {
 

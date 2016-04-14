@@ -15,25 +15,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ellipsize="end"
+        android:fontFamily="sans-serif-thin"
         android:gravity="center|top"
         android:paddingEnd="8dp"
         android:paddingStart="8dp"
         android:singleLine="true"
-        android:fontFamily="sans-serif-thin"
         android:text="@string/scroll_screenshot_toast_title"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="?android:attr/textColorPrimary" />
 
     <TextView
         android:id="@+id/long_screenshot_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ellipsize="end"
+        android:fontFamily="sans-serif-thin"
         android:gravity="center"
+        android:maxLines="2"
         android:paddingEnd="8dp"
         android:paddingStart="8dp"
-        android:maxLines="2"
         android:text="@string/scroll_screenshot_toast_text"
-        android:fontFamily="sans-serif-thin"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 </LinearLayout>

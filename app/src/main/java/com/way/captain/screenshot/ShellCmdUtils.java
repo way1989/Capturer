@@ -10,17 +10,19 @@ import java.io.OutputStream;
  */
 public class ShellCmdUtils {
     private static final String TAG = "ShellCmdUtils";
-    public static boolean isDeviceRoot(){
-        try{
-            Process process =  Runtime.getRuntime().exec("su");
+
+    public static boolean isDeviceRoot() {
+        try {
+            Process process = Runtime.getRuntime().exec("su");
             Log.i(TAG, "isDeviceRoot: process = " + process + ", process.getOutputStream() = " + process.getOutputStream());
-            if(process != null && process.getOutputStream() != null)
-            return true;
-        }catch (Exception e){
+            if (process != null && process.getOutputStream() != null)
+                return true;
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
+
     public static boolean execShellCmd(String cmd) {
         try {
             Process process = Runtime.getRuntime().exec("su");
@@ -48,7 +50,7 @@ public class ShellCmdUtils {
         sb.append(endX);
         sb.append(" ");
         sb.append(endY);
-        if(duration > 0) {
+        if (duration > 0) {
             sb.append(" ");
             sb.append(duration);
         }

@@ -42,8 +42,9 @@
         <activity
             android:name=".activity.PermissionCheckActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
+            android:label="@string/permission_title"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/AppTheme.DayNight.Dialog" />
 
         <service
             android:name=".screenrecord.ScreenRecordService"

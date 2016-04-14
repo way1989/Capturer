@@ -51,7 +51,7 @@ import static android.media.MediaRecorder.VideoSource.SURFACE;
 import static android.os.Environment.DIRECTORY_MOVIES;
 
 final class RecordingSession {
-    static final int NOTIFICATION_ID = 522592;
+    static final int NOTIFICATION_ID = 789;
 
     private static final String DISPLAY_NAME = "ScreenRecord";
     private static final String MIME_TYPE = "video/mp4";
@@ -63,7 +63,7 @@ final class RecordingSession {
     private final boolean showCountDown;
     private final Integer videoSizePercentage;
     private final File outputRoot;
-    private final DateFormat fileFormat = new SimpleDateFormat("'ScreenRecord_'yyyy-MM-dd-HH-mm-ss'.mp4'", Locale.US);
+    private final DateFormat fileFormat = new SimpleDateFormat("'ScreenRecord_'yyyy-MM-dd-HH-mm-ss'.mp4'");
     private final NotificationManager notificationManager;
     private final WindowManager windowManager;
     private final MediaProjectionManager projectionManager;
@@ -270,7 +270,7 @@ final class RecordingSession {
         if (!PreferenceManager.getDefaultSharedPreferences(context)
                 .getBoolean(SettingsFragment.VIDEO_STOP_METHOD_KEY, true)) {
             context.unregisterReceiver(stopReceiver);
-        }else {
+        } else {
             hideOverlay();
         }
 

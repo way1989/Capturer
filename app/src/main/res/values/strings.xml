@@ -155,4 +155,5 @@
     <string name="success">success...</string>
     <string name="abort">abort...</string>
     <string name="error">error...</string>
+    <string name="permission_title">Permission manager</string>
 </resources>

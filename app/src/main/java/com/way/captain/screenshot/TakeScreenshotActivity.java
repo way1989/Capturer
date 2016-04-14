@@ -3,14 +3,12 @@ package com.way.captain.screenshot;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.way.captain.fragment.SettingsFragment;
-
 public class TakeScreenshotActivity extends Activity {
     private boolean mIsLongScreenshot;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

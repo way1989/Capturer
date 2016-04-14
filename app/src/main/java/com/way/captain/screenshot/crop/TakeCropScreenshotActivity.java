@@ -3,12 +3,10 @@ package com.way.captain.screenshot.crop;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-
-import com.way.captain.fragment.SettingsFragment;
 
 public class TakeCropScreenshotActivity extends Activity {
     private String mAction;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

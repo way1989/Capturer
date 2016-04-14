@@ -59,8 +59,8 @@ public class TakeScreenshotService extends Service implements ImageReader.OnImag
     private static final String EXTRA_RESULT_CODE = "result-code";
     private static final String EXTRA_DATA = "data";
     private static final boolean IS_DEVICE_ROOT = ShellCmdUtils.isDeviceRoot();
-    private boolean mIsAutoLongScreenshot;
     private static GlobalScreenshot mScreenshot;
+    private boolean mIsAutoLongScreenshot;
     private Dialog mDialog;
     private int mCurrentScrollCount = 0;
     private boolean mIsRunning;

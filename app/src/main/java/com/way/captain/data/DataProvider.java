@@ -17,14 +17,15 @@ public class DataProvider {
         mDeleteData = new ArrayList<>();
     }
 
+    public ArrayList<String> getData() {
+        return mData;
+    }
+
     public void setData(ArrayList<String> datas) {
         if (datas == null || datas.isEmpty())
             return;
         mData.clear();
         mData.addAll(datas);
-    }
-    public ArrayList<String> getData(){
-        return mData;
     }
 
     public int getCount() {

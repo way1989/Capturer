@@ -1,6 +1,7 @@
 package com.way.captain.fragment;
 
 import android.app.ActivityOptions;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -47,7 +48,13 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     public static final String EXTRA_STARTING_POSITION = "extra_starting_item_position";
     public static final String EXTRA_CURRENT_POSITION = "extra_current_item_position";
     private static final int SCREENSHOT_LOADER_ID = 0;
-    private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
+
+    @Override
+    public Context getContext() {
+        return super.getContext();
+    }
+
+    public static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
     private DataProvider mDataProvider = new DataProvider();

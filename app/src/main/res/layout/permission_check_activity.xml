@@ -8,7 +8,8 @@
         style="@style/PromoScreenTextStyle.CenterAligned"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="48dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
         android:text="@string/required_permissions_promo" />
 
     <TextView
@@ -16,10 +17,10 @@
         style="@style/PromoScreenTextStyle.CenterAligned"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
         android:contentDescription="@string/enable_permission_procedure_description"
-        android:paddingTop="16dp"
         android:text="@string/enable_permission_procedure"
-        android:visibility="invisible" />
+        android:visibility="gone" />
 
     <!-- Buttons -->
     <LinearLayout

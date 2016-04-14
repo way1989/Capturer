@@ -157,4 +157,10 @@
     <string name="error">error...</string>
     <string name="permission_title">Permission manager</string>
     <string name="screen_shot_title">Screenshot</string>
+    <string name="image_info">Details</string>
+    <string name="image_info_size">Size: %1$s x %2$s </string>
+    <string name="image_info_length">Length: %s </string>
+    <string name="image_info_time">Time: %s </string>
+    <string name="image_info_path">Path: %s </string>
+    <string name="image_info_duration">Duration: %s</string>
 </resources>

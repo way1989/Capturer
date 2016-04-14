@@ -1,7 +1,7 @@
 <resources>
     <string name="progress_dialog_title">Check Update</string>
     <string name="progress_dialog_message">Checking...</string>
-    <string name="new_version_dialog_title">Find New Version%s,Update Now?</string>
+    <string name="new_version_dialog_title">Find New Version:%s,Update Now?</string>
     <string name="new_version_dialog_message">Change log:%s</string>
     <string name="latest_version">It\'s the latest version</string>
     <string name="net_error">Net error!</string>

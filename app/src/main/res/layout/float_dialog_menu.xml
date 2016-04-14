@@ -12,7 +12,7 @@
         app:arc_origin="center"
         app:arc_radius="@dimen/layout_radius_tumblr">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/menu_normal_screenshot"
             style="@style/Item_Tumblr"
             android:background="@drawable/tumblr_orange_oval"
@@ -20,7 +20,7 @@
             android:text="@string/normal_screen_shot"
             android:tint="@android:color/white" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/menu_screenrecord"
             style="@style/Item_Tumblr"
             android:background="@drawable/tumblr_green_oval"
@@ -28,7 +28,7 @@
             android:text="@string/record_screenshot"
             android:tint="@android:color/white" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/menu_long_screenshot"
             style="@style/Item_Tumblr"
             android:background="@drawable/tumblr_grey_oval"
@@ -36,7 +36,7 @@
             android:text="@string/long_screenshot"
             android:tint="@android:color/white" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/menu_free_screenshot"
             style="@style/Item_Tumblr"
             android:background="@drawable/tumblr_blue_oval"
@@ -44,7 +44,7 @@
             android:text="@string/free_screenshot"
             android:tint="@android:color/white" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/menu_rect_screenshot"
             style="@style/Item_Tumblr"
             android:background="@drawable/tumblr_teal_oval"
@@ -53,7 +53,7 @@
             android:tint="@android:color/white" />
     </com.ogaclejapan.arclayout.ArcLayout>
 
-    <ImageView
+    <ImageButton
         android:id="@+id/menu_screnshot_center"
         style="@style/Item_Tumblr"
         android:layout_gravity="center"

@@ -9,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
@@ -21,7 +20,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,13 +36,12 @@ import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 import com.way.captain.R;
+import com.way.captain.utils.AppUtils;
 import com.way.captain.utils.GifUtils;
-import com.way.captain.widget.DownloadProgressBar;
 import com.way.captain.widget.FastVideoView;
+import com.way.captain.widget.UpdateDownloadListener;
 import com.way.downloadlibrary.DownloadManager;
 import com.way.downloadlibrary.DownloadRequest;
-import com.way.downloadlibrary.IDownloadListener;
-import com.way.downloadlibrary.net.exception.DataErrorEnum;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -55,12 +53,12 @@ import java.util.Locale;
 import static android.os.Environment.DIRECTORY_MOVIES;
 
 public class VideoActivity extends BaseActivity {
+    public static final String TAG = "VideoActivity";
+    public static final String FFMPEG = "ffmpeg";
     private static final String ARG_IMAGE_PATH = "arg_image_path";
     private final static int PROGRESS_CHANGED = 0;
-    private static final String TAG = "VideoActivity";
-    private static final String FFMPEG = "ffmpeg";
-    private static final String BASE_URL = "http://7xrpr9.com1.z0.glb.clouddn.com/ffmpeg/%s/ffmpeg";
-    private final DateFormat fileFormat = new SimpleDateFormat("'Gif_'yyyy-MM-dd-HH-mm-ss'.gif'", Locale.US);
+    private static final String BASE_URL = "http://7xrpr9.com1.z0.glb.clouddn.com/ffmpeg/%s/ffmpeg.zip";
+    private final DateFormat fileFormat = new SimpleDateFormat("'Gif_'yyyy-MM-dd-HH-mm-ss'.gif'");
     StringBuilder mFormatBuilder;
     Formatter mFormatter;
     private FastVideoView mVideoView;
@@ -80,21 +78,14 @@ public class VideoActivity extends BaseActivity {
 
                     mPlayedTextView.setText(stringForTime(position));
                     msg = obtainMessage(PROGRESS_CHANGED);
-                    //sendMessageDelayed(msg, 1000 - (position % 1000));
-                    sendMessageDelayed(msg, 200L);
+                    sendMessageDelayed(msg, 1000 - (position % 1000));
+                    //sendMessageDelayed(msg, 200L);
                     break;
             }
 
             super.handleMessage(msg);
         }
     };
-    private ProgressDialog mProgressDialog;
-    //private String url = "http://7xrpr9.com1.z0.glb.clouddn.com/ffmpeg/armeabi-v7a-neon/ffmpeg";
-    //private String url = "http://7xrpr9.com1.z0.glb.clouddn.com/ffmpeg/x86/ffmpeg";
-    //private String url = "http://7xrpr9.com1.z0.glb.clouddn.com/ffmpeg/armeabi-v7a/ffmpeg";
-    private Dialog downloadDialog;
-    private DownloadProgressBar downloadProgressBar;
-    private TextView textView;
 
     public static void startVideoActivity(Activity context, String path, ImageView imageView) {
         Intent i = new Intent(context, VideoActivity.class);
@@ -120,7 +111,7 @@ public class VideoActivity extends BaseActivity {
         animator.start();
 
         initPlayControlerView();
-        initProgressDialog();
+
         final String path = getIntent().getStringExtra(ARG_IMAGE_PATH);
         mVideoView.setTag(path);
         mVideoView.setVideoPath(path);
@@ -270,9 +261,9 @@ public class VideoActivity extends BaseActivity {
         }
         Log.i("broncho", "Video length = " + videoDuration + ", curLength = " + videoCurrenPosition
                 + ", length = " + gifLength + ", frame = " + customGifFrame + ", scale = " + customGifScale);
-        int[] size = formatSize(info);
+        Pair<Integer, Integer> pair = AppUtils.getVideoWidthHeight(info);
         String cmd = GifUtils.getVideo2gifCommand(videoCurrenPosition, gifLength, customGifFrame, info,
-                outputFile, (int) (size[0] / Math.sqrt(customGifScale)), (int) (size[1] / Math.sqrt(customGifScale)));
+                outputFile, (int) (pair.first / Math.sqrt(customGifScale)), (int) (pair.second / Math.sqrt(customGifScale)));
         String[] command = cmd.split(" ");
         if (command.length != 0) {
             execFFmpegBinary(command);
@@ -282,23 +273,6 @@ public class VideoActivity extends BaseActivity {
         return true;
     }
 
-    private int[] formatSize(String path) {
-        int size[] = new int[]{0, 0};
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        try {
-            retriever.setDataSource(path);
-            String height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT); // 视频高度
-            String width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH); // 视频宽度
-//            String rotation = retr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION); // 视频旋转方向
-            size[0] = Integer.valueOf(width);
-            size[1] = Integer.valueOf(height);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            retriever.release();
-        }
-        return size;
-    }
 
     private void loadFFMpegBinary() {
         try {
@@ -314,14 +288,11 @@ public class VideoActivity extends BaseActivity {
 
     }
 
-    private void initProgressDialog() {
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setTitle(null);
-        mProgressDialog.setCancelable(false);
-        mProgressDialog.setCanceledOnTouchOutside(false);
-    }
-
     private void execFFmpegBinary(final String[] command) {
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle(null);
+        progressDialog.setCancelable(false);
+        progressDialog.setCanceledOnTouchOutside(false);
         try {
             FFmpeg.getInstance(this).execute(command, new ExecuteBinaryResponseHandler() {
                 @Override
@@ -337,21 +308,21 @@ public class VideoActivity extends BaseActivity {
                 @Override
                 public void onProgress(String s) {
                     Log.d(TAG, "Started command : ffmpeg " + command);
-                    mProgressDialog.setMessage(getString(R.string.processing) + "\n" + s);
+                    progressDialog.setMessage(getString(R.string.processing) + "\n" + s);
                 }
 
                 @Override
                 public void onStart() {
                     Log.d(TAG, "Started command : ffmpeg " + command);
-                    mProgressDialog.setMessage(getString(R.string.processing));
-                    mProgressDialog.show();
+                    progressDialog.setMessage(getString(R.string.processing));
+                    progressDialog.show();
                 }
 
                 @Override
                 public void onFinish() {
                     Log.d(TAG, "Finished command : ffmpeg " + command);
-                    mProgressDialog.dismiss();
-                    onBackPressed();
+                    progressDialog.dismiss();
+                    //onBackPressed();
                 }
             });
         } catch (FFmpegCommandAlreadyRunningException e) {
@@ -360,10 +331,12 @@ public class VideoActivity extends BaseActivity {
     }
 
     private void showDownloadDialog(String platform) {
+        //platform = "armeabi-v7a";
         final DownloadRequest request = new DownloadRequest(TAG, FFMPEG,
                 getFilesDir().getAbsolutePath(), String.format(BASE_URL, platform));
+        Log.i("liweiping", "download url = " + String.format(BASE_URL, platform));
         final DownloadManager downloadManager = DownloadManager.instance();
-        downloadManager.registerListener(TAG, new UpdateDownloadListener());
+        downloadManager.registerListener(TAG, new UpdateDownloadListener(VideoActivity.this));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.video_to_gif_need_so_title)
@@ -378,121 +351,6 @@ public class VideoActivity extends BaseActivity {
         Dialog dialog = builder.create();
         dialog.show();
 
-        AlertDialog.Builder downloadBuiler = new AlertDialog.Builder(this);
-        View view = LayoutInflater.from(this).inflate(R.layout.download_dialog_layout, null);
-        downloadBuiler.setTitle(R.string.downloading)
-                .setView(view).setNegativeButton(android.R.string.cancel,
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        downloadManager.cancel(TAG);
-                    }
-                });
-        downloadDialog = downloadBuiler.create();
-        downloadDialog.setCancelable(false);
-        downloadDialog.setCanceledOnTouchOutside(false);
-        downloadProgressBar = (DownloadProgressBar) view.findViewById(R.id.download_progressbar);
-        textView = (TextView) view.findViewById(R.id.download_text);
     }
 
-    private class UpdateDownloadListener implements IDownloadListener {
-
-        @Override
-        public void downloadWait(DownloadRequest downloadRequest) {
-            Log.i("liweiping", "UpdateDownloadListener downloadWait...");
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    downloadDialog.show();
-                    textView.setText(R.string.wait);
-                }
-            });
-        }
-
-        @Override
-        public void downloadStart(DownloadRequest downloadRequest) {
-            Log.i("liweiping", "UpdateDownloadListener downloadWait...");
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    downloadProgressBar.playManualProgressAnimation();
-                    textView.setText(R.string.start);
-                }
-            });
-        }
-
-        @Override
-        public void downloadFinish(final DownloadRequest downloadRequest) {
-            Log.i("liweiping", "UpdateDownloadListener downloadFinish..." + downloadRequest.getFileName());
-            File file = new File(downloadRequest.getFilePath(), downloadRequest.getFileName());
-            if (!file.canExecute())
-                file.setExecutable(true);
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    downloadProgressBar.setSuccessResultState();
-                    textView.setText(R.string.success);
-                }
-            });
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    downloadDialog.dismiss();
-                }
-            }, 3500L);
-        }
-
-        @Override
-        public void downloadCancel(DownloadRequest downloadRequest) {
-            Log.i("liweiping", "UpdateDownloadListener downloadCancel...");
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    downloadProgressBar.abortDownload();
-                    textView.setText(R.string.abort);
-                }
-            });
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    downloadDialog.dismiss();
-                }
-            }, 3500L);
-        }
-
-        @Override
-        public void downloadPause(DownloadRequest downloadRequest) {
-            Log.i("liweiping", "UpdateDownloadListener downloadPause...");
-        }
-
-        @Override
-        public void downloadProgress(DownloadRequest downloadRequest, final int downloadProgress) {
-            Log.i("liweiping", "UpdateDownloadListener downloadProgress... downloadProgress = " + downloadProgress);
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    downloadProgressBar.setProgress(downloadProgress);
-                    textView.setText(downloadProgress + "%");
-                }
-            });
-        }
-
-        @Override
-        public void downloadError(DownloadRequest downloadRequest, DataErrorEnum error) {
-            Log.i("liweiping", "UpdateDownloadListener downloadError... error = " + error);
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    downloadProgressBar.setErrorResultState();
-                    textView.setText(R.string.error);
-                }
-            });
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    downloadDialog.dismiss();
-                }
-            }, 3500L);
-        }
-    }
 }

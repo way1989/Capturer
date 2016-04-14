@@ -133,4 +133,11 @@
     <string name="error">错误...</string>
     <string name="permission_title">权限管理</string>
     <string name="screen_shot_title">截屏</string>
+
+    <string name="image_info">详情</string>
+    <string name="image_info_size">长宽: %1$s x %2$s </string>
+    <string name="image_info_length">大小: %s </string>
+    <string name="image_info_time">时间: %s </string>
+    <string name="image_info_path">路径: %s </string>
+    <string name="image_info_duration">时长: %s</string>
 </resources>

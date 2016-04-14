@@ -26,13 +26,13 @@ public class FilesOptHelper {
         return mHelper;
     }
 
-    public void unCompressFile(String source, String target) throws Exception {
+    public void unCompressFile(String sourceFile, String targetDir) throws Exception {
         synchronized (this) {
-            Log.d(TAG, "unCompressFile(String source, String target)");
-            Log.d(TAG, "source --> " + source);
-            Log.d(TAG, "target --> " + target);
+            Log.d(TAG, "unCompressFile(String sourceFile, String targetDir)");
+            Log.d(TAG, "sourceFile --> " + sourceFile);
+            Log.d(TAG, "targetDir --> " + targetDir);
 
-            ZipFile zip = new ZipFile(source);
+            ZipFile zip = new ZipFile(sourceFile);
             Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zip.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
@@ -40,10 +40,10 @@ public class FilesOptHelper {
                     String name = entry.getName();
                     Log.d(TAG, "entry.getName() --> " + name);
                     name = name.substring(0, name.length() - 1);
-                    File f = new File(target + name);
+                    File f = new File(targetDir + name);
                     f.mkdir();
                 } else {
-                    File f = new File(target + entry.getName());
+                    File f = new File(targetDir, entry.getName());
                     Log.d(TAG, "entry.getName() --> " + entry.getName());
                     boolean cg = f.getParentFile().mkdir();
                     Log.d(TAG, "cg -->" + cg);

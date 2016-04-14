@@ -171,10 +171,10 @@ public class VideoActivity extends BaseActivity {
             public void onClick(View v) {
                 if (mVideoView.isPlaying()) {
                     mVideoView.pause();
-                    mPlayPauseBtn.setImageResource(R.drawable.ic_play_arrow_white_36dp);
+                    mPlayPauseBtn.setImageResource(R.drawable.ic_play_arrow);
                 } else {
                     mVideoView.start();
-                    mPlayPauseBtn.setImageResource(R.drawable.ic_pause_white_36dp);
+                    mPlayPauseBtn.setImageResource(R.drawable.ic_pause);
                 }
             }
         });
@@ -203,14 +203,14 @@ public class VideoActivity extends BaseActivity {
                 mSeekBar.setMax(duration);
                 mDurationTextView.setText(stringForTime(duration));
                 mVideoView.start();
-                mPlayPauseBtn.setImageResource(R.drawable.ic_pause_white_36dp);
+                mPlayPauseBtn.setImageResource(R.drawable.ic_pause);
                 mHandler.sendEmptyMessage(PROGRESS_CHANGED);
             }
         });
         mVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                mPlayPauseBtn.setImageResource(R.drawable.ic_play_arrow_white_36dp);
+                mPlayPauseBtn.setImageResource(R.drawable.ic_play_arrow);
             }
         });
     }

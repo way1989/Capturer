@@ -97,7 +97,7 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
     private Notification createNotification() {
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setWhen(System.currentTimeMillis());
-        builder.setSmallIcon(R.drawable.theme_captain);
+        builder.setSmallIcon(R.drawable.ic_widgets);
         builder.setContentTitle(getString(R.string.chathead_content_title));
         builder.setContentText(getString(R.string.chathead_content_text));
         builder.setOngoing(true);

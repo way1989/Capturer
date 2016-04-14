@@ -66,12 +66,12 @@ public final class ScreenRecordService extends Service {
                 String title = context.getString(R.string.notification_recording_title);
                 //String subtitle = context.getString(R.string.notification_recording_subtitle);
                 Notification.Builder builder = new Notification.Builder(context) //
-                        .setContentTitle(title)/*.setContentText(subtitle)*/.setSmallIcon(R.drawable.ic_videocam_white_24dp)
+                        .setContentTitle(title)/*.setContentText(subtitle)*/.setSmallIcon(R.drawable.ic_videocam)
                         .setColor(context.getResources().getColor(R.color.colorPrimary)).setAutoCancel(true)
                         .setPriority(Notification.PRIORITY_MIN);
                 Intent stopIntent = new Intent("com.way.stop");
                 stopIntent.putExtra("id", NOTIFICATION_ID);
-                builder.addAction(R.drawable.ic_clear_white_24dp, context.getResources()
+                builder.addAction(R.drawable.ic_clear, context.getResources()
                         .getString(R.string.share), PendingIntent.getBroadcast(context, 0, stopIntent, PendingIntent.FLAG_CANCEL_CURRENT));
                 Notification notification = builder.build();
                 Log.d("way", "Moving service into the foreground with recording notification.");
@@ -117,12 +117,12 @@ public final class ScreenRecordService extends Service {
     private Notification.Builder createNotificationBuilder() {
         Notification.Builder builder = new Notification.Builder(this)
                 .setOngoing(true)
-                .setSmallIcon(R.drawable.ic_videocam_white_24dp)
+                .setSmallIcon(R.drawable.ic_videocam)
                 .setContentTitle(getString(R.string.notification_recording_title));
         Intent stopRecording = new Intent(ACTION_STOP_SCREENRECORD);
         //stopRecording.setClass(this, ScreenRecordService.class);
         stopRecording.putExtra("id", NOTIFICATION_ID);
-        builder.addAction(R.drawable.stop, getString(R.string.stop),
+        builder.addAction(R.drawable.ic_stop, getString(R.string.stop),
                 PendingIntent.getBroadcast(this, 0, stopRecording, PendingIntent.FLAG_CANCEL_CURRENT));
         return builder;
     }

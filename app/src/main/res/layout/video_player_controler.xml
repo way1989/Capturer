@@ -16,7 +16,8 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:background="@drawable/selectable_background_light"
-        android:src="@drawable/ic_play_arrow_white_36dp" />
+        android:tint="@android:color/white"
+        android:src="@drawable/ic_play_arrow" />
 
     <RelativeLayout
         android:layout_width="0dp"

@@ -132,4 +132,5 @@
     <string name="abort">取消...</string>
     <string name="error">错误...</string>
     <string name="permission_title">权限管理</string>
+    <string name="screen_shot_title">截屏</string>
 </resources>

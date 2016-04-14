@@ -156,4 +156,5 @@
     <string name="abort">abort...</string>
     <string name="error">error...</string>
     <string name="permission_title">Permission manager</string>
+    <string name="screen_shot_title">Screenshot</string>
 </resources>

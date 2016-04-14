@@ -145,6 +145,14 @@
     <string name="long_screenshot_indicator_title">Please swipe form bottom to top as the indicator:%stimes</string>
     <string name="long_screenshot_auto">Auto long screenshot</string>
     <string name="long_screenshot_auto_summary">auto swipe when take long screenshot</string>
-    <string name="video_to_gif_need_so_text">We need to download the ffmpeg library,please tap the button</string>
+    <string name="video_to_gif_need_so_text">We need to download the ffmpeg library,please tap the ok button to continue</string>
     <string name="video_to_gif_need_so_title">Download necessary library</string>
+    <string name="not_support_devices">Sorry,this feature do not  support your devices!</string>
+    <string name="downloading">Downloading...</string>
+    <string name="processing">Processing...</string>
+    <string name="wait">wait...</string>
+    <string name="start">start...</string>
+    <string name="success">success...</string>
+    <string name="abort">abort...</string>
+    <string name="error">error...</string>
 </resources>

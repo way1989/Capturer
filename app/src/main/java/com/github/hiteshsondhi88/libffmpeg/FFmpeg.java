@@ -7,6 +7,7 @@ import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunnin
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 import com.way.captain.R;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.util.Map;
 
@@ -30,6 +31,42 @@ public class FFmpeg implements FFmpegInterface {
             instance = new FFmpeg(context);
         }
         return instance;
+    }
+
+    public boolean hasLibrary() {
+        File ffmpegFile = new File(getFFmpegPath());
+        if (!ffmpegFile.exists())
+            return false;
+        boolean isDeviceFFmpegVersionOld = CpuArch.fromString(FileUtils.SHA1(getFFmpegPath())).equals(CpuArch.NONE);
+        if (isDeviceFFmpegVersionOld && !ffmpegFile.delete()) {
+            return false;
+        }
+        return ffmpegFile.exists() && ffmpegFile.canExecute();
+    }
+
+    public String getFFmpegPath() {
+        return FileUtils.getFFmpeg(context);
+    }
+
+    public String getLibraryPlatform() {
+        String cpuArchNameFromAssets = null;
+        switch (CpuArchHelper.getCpuArch()) {
+            case x86:
+                Log.i("Loading FFmpeg for x86 CPU");
+                cpuArchNameFromAssets = "x86";
+                break;
+            case ARMv7:
+                Log.i("Loading FFmpeg for armv7 CPU");
+                cpuArchNameFromAssets = "armeabi-v7a";
+                break;
+            case ARMv7_NEON:
+                Log.i("Loading FFmpeg for armv7-neon CPU");
+                cpuArchNameFromAssets = "armeabi-v7a-neon";
+                break;
+            case NONE:
+                cpuArchNameFromAssets = "";
+        }
+        return cpuArchNameFromAssets;
     }
 
     @Override

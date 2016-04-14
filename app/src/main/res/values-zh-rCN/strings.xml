@@ -85,9 +85,9 @@
     <string name="empty_generic_main">无数据</string>
     <string name="empty_generic_secondary">无数据</string>
     <string name="twice_press_exit">再按一次退出</string>
-	<string name="stop">停止</string>
-	<string name="insufficient_storage">存储空间不足</string>
-	<string name="video_length">视频长度: %s</string>
+    <string name="stop">停止</string>
+    <string name="insufficient_storage">存储空间不足</string>
+    <string name="video_length">视频长度: %s</string>
 
     <string name="video_stop_float">浮动按钮</string>
     <string name="video_stop_notification">通知栏按钮</string>
@@ -121,6 +121,14 @@
     <string name="long_screenshot_progressing">处理中,请稍后…</string>
     <string name="long_screenshot_auto">自动滚动截屏</string>
     <string name="long_screenshot_auto_summary">是否允许root设备自动滚动截屏</string>
-    <string name="video_to_gif_need_so_text">需要为您的设备下载视频转换gif的库文件，请点击下面的按钮开始下载</string>
-    <string name="video_to_gif_need_so_title">下载必需的库文件</string>
+    <string name="video_to_gif_need_so_text">视频转换GIF需要下载一个库文件,是否继续?</string>
+    <string name="video_to_gif_need_so_title">缺少必需的库文件!</string>
+    <string name="not_support_devices">很抱歉,该功能暂不支持您的设备!</string>
+    <string name="downloading">正在下载...</string>
+    <string name="processing">处理中...</string>
+    <string name="wait">请稍侯...</string>
+    <string name="start">开始...</string>
+    <string name="success">成功...</string>
+    <string name="abort">取消...</string>
+    <string name="error">错误...</string>
 </resources>

@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.way.captain.R;
-import com.way.captain.activity.VideoActivity;
+import com.way.captain.utils.AppUtils;
 import com.way.captain.utils.FilesOptHelper;
 import com.way.downloadlibrary.DownloadManager;
 import com.way.downloadlibrary.DownloadRequest;
@@ -38,7 +38,7 @@ public class UpdateDownloadListener implements IDownloadListener {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        DownloadManager.instance().cancel(VideoActivity.TAG);
+                        DownloadManager.instance().cancel(AppUtils.BASE_URL);
                     }
                 });
         downloadDialog = downloadBuiler.create();
@@ -78,7 +78,7 @@ public class UpdateDownloadListener implements IDownloadListener {
         File file = new File(downloadRequest.getFilePath(), downloadRequest.getFileName());
         try {
             FilesOptHelper.getInstance().unCompressFile(file.getAbsolutePath(), downloadRequest.getFilePath());
-            file = new File(downloadRequest.getFilePath(), VideoActivity.FFMPEG);
+            file = new File(downloadRequest.getFilePath(), AppUtils.FFMPEG_FILE_NAME);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -163,4 +163,6 @@
     <string name="image_info_time">Time: %s </string>
     <string name="image_info_path">Path: %s </string>
     <string name="image_info_duration">Duration: %s</string>
+    <string name="video_to_gif_success">Video to gif is succeed!</string>
+    <string name="video_to_gif_failed">Video to gif is failed!</string>
 </resources>

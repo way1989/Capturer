@@ -6,9 +6,12 @@ import android.os.Environment;
 import android.util.Pair;
 
 import java.io.File;
+import java.util.Formatter;
 import java.util.Locale;
 
 public class AppUtils {
+    public static final String BASE_URL = "http://7xrpr9.com1.z0.glb.clouddn.com/ffmpeg/%s/ffmpeg.zip";
+    public static final String FFMPEG_FILE_NAME = "ffmpeg";
 
     public static final String APP_ABSOLUTE_ROOT_PATH = Environment.getExternalStoragePublicDirectory(
             Environment.DIRECTORY_MOVIES).getAbsolutePath();
@@ -54,8 +57,6 @@ public class AppUtils {
 
     public static String getVideoDuration(String path) {
         String totalDuration = "00:00";
-        StringBuilder formatBuilder = new StringBuilder();
-        java.util.Formatter formatter = new java.util.Formatter(formatBuilder, Locale.getDefault());
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {
             retriever.setDataSource(path);
@@ -65,16 +66,7 @@ public class AppUtils {
             // 取得视频的长度(单位为秒)
             int totalSeconds = Integer.valueOf(time) / 1000;
 
-            int seconds = totalSeconds % 60;
-            int minutes = (totalSeconds / 60) % 60;
-            int hours = totalSeconds / 3600;
-
-            formatBuilder.setLength(0);
-            if (hours > 0) {
-                totalDuration = formatter.format("%d:%02d:%02d", hours, minutes, seconds).toString();
-            } else {
-                totalDuration = formatter.format("%02d:%02d", minutes, seconds).toString();
-            }
+            totalDuration = getVideoFormatTime(totalSeconds);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -83,4 +75,20 @@ public class AppUtils {
         return totalDuration;
     }
 
+    public static String getVideoFormatTime(int timeMs) {
+        StringBuilder formatBuilder = new StringBuilder();
+        Formatter formatter = new Formatter(formatBuilder, Locale.getDefault());
+        int totalSeconds = timeMs / 1000;
+
+        int seconds = totalSeconds % 60;
+        int minutes = (totalSeconds / 60) % 60;
+        int hours = totalSeconds / 3600;
+
+        formatBuilder.setLength(0);
+        if (hours > 0) {
+            return formatter.format("%d:%02d:%02d", hours, minutes, seconds).toString();
+        } else {
+            return formatter.format("%02d:%02d", minutes, seconds).toString();
+        }
+    }
 }

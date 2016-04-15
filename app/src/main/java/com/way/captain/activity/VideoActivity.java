@@ -3,7 +3,6 @@ package com.way.captain.activity;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,7 +10,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -47,20 +45,13 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Formatter;
-import java.util.Locale;
 
-import static android.os.Environment.DIRECTORY_MOVIES;
-
-public class VideoActivity extends BaseActivity {
-    public static final String TAG = "VideoActivity";
-    public static final String FFMPEG = "ffmpeg";
+public class VideoActivity extends BaseActivity implements View.OnClickListener,
+        SeekBar.OnSeekBarChangeListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
+    private static final String TAG = "VideoActivity";
     private static final String ARG_IMAGE_PATH = "arg_image_path";
     private final static int PROGRESS_CHANGED = 0;
-    private static final String BASE_URL = "http://7xrpr9.com1.z0.glb.clouddn.com/ffmpeg/%s/ffmpeg.zip";
     private final DateFormat fileFormat = new SimpleDateFormat("'Gif_'yyyy-MM-dd-HH-mm-ss'.gif'");
-    StringBuilder mFormatBuilder;
-    Formatter mFormatter;
     private FastVideoView mVideoView;
     private View mPlayControlerView;
     private ImageButton mPlayPauseBtn;
@@ -76,7 +67,7 @@ public class VideoActivity extends BaseActivity {
                     int position = mVideoView.getCurrentPosition();
                     mSeekBar.setProgress(position);
 
-                    mPlayedTextView.setText(stringForTime(position));
+                    mPlayedTextView.setText(AppUtils.getVideoFormatTime(position));
                     msg = obtainMessage(PROGRESS_CHANGED);
                     sendMessageDelayed(msg, 1000 - (position % 1000));
                     //sendMessageDelayed(msg, 200L);
@@ -86,6 +77,7 @@ public class VideoActivity extends BaseActivity {
             super.handleMessage(msg);
         }
     };
+    private boolean mIsShowControler;
 
     public static void startVideoActivity(Activity context, String path, ImageView imageView) {
         Intent i = new Intent(context, VideoActivity.class);
@@ -99,24 +91,48 @@ public class VideoActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video);
+        initToolbar();
+        setStatusBarColor();
+        initPlayControlerView();
+        playVideo();
+    }
+
+    private void initToolbar() {
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    private void setStatusBarColor() {
         final android.view.Window window = getWindow();
         ObjectAnimator animator = ObjectAnimator.ofInt(window,
                 "statusBarColor", window.getStatusBarColor(), Color.BLACK);
         animator.setEvaluator(new ArgbEvaluator());
         animator.setDuration(200L);
         animator.start();
+    }
 
-        initPlayControlerView();
-
+    private void playVideo() {
         final String path = getIntent().getStringExtra(ARG_IMAGE_PATH);
         mVideoView.setTag(path);
         mVideoView.setVideoPath(path);
         mVideoView.start();
-        mPlayControlerView.setVisibility(View.VISIBLE);
+        showControler();
+    }
+
+    private void initPlayControlerView() {
+        mVideoView = (FastVideoView) findViewById(R.id.video_view);
+        mPlayControlerView = findViewById(R.id.video_control_view);
+        mPlayPauseBtn = (ImageButton) findViewById(R.id.pause);
+        mSeekBar = (SeekBar) findViewById(R.id.mediacontroller_progress);
+        mDurationTextView = (TextView) findViewById(R.id.time);
+        mPlayedTextView = (TextView) findViewById(R.id.time_current);
+
+        mPlayPauseBtn.setOnClickListener(this);
+        mSeekBar.setOnSeekBarChangeListener(this);
+        mVideoView.setOnPreparedListener(this);
+        mVideoView.setOnCompletionListener(this);
     }
 
     @Override
@@ -147,19 +163,10 @@ public class VideoActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void initPlayControlerView() {
-        mFormatBuilder = new StringBuilder();
-        mFormatter = new Formatter(mFormatBuilder, Locale.getDefault());
-        mVideoView = (FastVideoView) findViewById(R.id.video_view);
-        mPlayControlerView = findViewById(R.id.video_control_view);
-        mPlayPauseBtn = (ImageButton) findViewById(R.id.pause);
-        mSeekBar = (SeekBar) findViewById(R.id.mediacontroller_progress);
-        mDurationTextView = (TextView) findViewById(R.id.time);
-        mPlayedTextView = (TextView) findViewById(R.id.time_current);
-
-        mPlayPauseBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.pause:
                 if (mVideoView.isPlaying()) {
                     mVideoView.pause();
                     mPlayPauseBtn.setImageResource(R.drawable.ic_play_arrow);
@@ -167,59 +174,61 @@ public class VideoActivity extends BaseActivity {
                     mVideoView.start();
                     mPlayPauseBtn.setImageResource(R.drawable.ic_pause);
                 }
-            }
-        });
-        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser)
-                    mVideoView.seekTo(progress);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                mHandler.removeMessages(PROGRESS_CHANGED);
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                mHandler.sendEmptyMessage(PROGRESS_CHANGED);
-            }
-        });
-        mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                int duration = mVideoView.getDuration();
-                Log.d("onCompletion", "" + duration);
-                mSeekBar.setMax(duration);
-                mDurationTextView.setText(stringForTime(duration));
-                mVideoView.start();
-                mPlayPauseBtn.setImageResource(R.drawable.ic_pause);
-                mHandler.sendEmptyMessage(PROGRESS_CHANGED);
-            }
-        });
-        mVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                mPlayPauseBtn.setImageResource(R.drawable.ic_play_arrow);
-            }
-        });
+                break;
+            case R.id.video_view:
+                if (mIsShowControler) {
+                    hideControler();
+                } else {
+                    showControler();
+                }
+                break;
+        }
     }
 
+    private void showControler() {
+        mPlayControlerView.setVisibility(View.VISIBLE);
+        getSupportActionBar().show();
+        mIsShowControler = true;
+    }
 
-    private String stringForTime(int timeMs) {
-        int totalSeconds = timeMs / 1000;
+    private void hideControler() {
+        mPlayControlerView.setVisibility(View.VISIBLE);
+        getSupportActionBar().show();
+        mIsShowControler = false;
+    }
 
-        int seconds = totalSeconds % 60;
-        int minutes = (totalSeconds / 60) % 60;
-        int hours = totalSeconds / 3600;
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        if (fromUser)
+            mVideoView.seekTo(progress);
+    }
 
-        mFormatBuilder.setLength(0);
-        if (hours > 0) {
-            return mFormatter.format("%d:%02d:%02d", hours, minutes, seconds).toString();
-        } else {
-            return mFormatter.format("%02d:%02d", minutes, seconds).toString();
-        }
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+        mHandler.removeMessages(PROGRESS_CHANGED);
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        mHandler.sendEmptyMessage(PROGRESS_CHANGED);
+    }
+
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+        int duration = mVideoView.getDuration();
+        Log.d("onCompletion", "" + duration);
+        mSeekBar.setMax(duration);
+        mDurationTextView.setText(AppUtils.getVideoFormatTime(duration));
+        mVideoView.start();
+        mPlayPauseBtn.setImageResource(R.drawable.ic_pause);
+        mHandler.sendEmptyMessage(PROGRESS_CHANGED);
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        mPlayPauseBtn.setImageResource(R.drawable.ic_play_arrow);
+        mSeekBar.setProgress(0);
+        mVideoView.seekTo(0);
     }
 
     private boolean onGifSettingsClick() {
@@ -238,7 +247,7 @@ public class VideoActivity extends BaseActivity {
         loadFFMpegBinary();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        File outputRoot = new File(Environment.getExternalStoragePublicDirectory(DIRECTORY_MOVIES), "Gifs");
+        File outputRoot = new File(AppUtils.GIF_PRODUCTS_FOLDER_PATH);
         if (!outputRoot.exists()) {
             outputRoot.mkdir();
         }
@@ -297,12 +306,12 @@ public class VideoActivity extends BaseActivity {
             FFmpeg.getInstance(this).execute(command, new ExecuteBinaryResponseHandler() {
                 @Override
                 public void onFailure(String s) {
-                    Snackbar.make(mVideoView, "FAILED with output : " + s, Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(mVideoView, R.string.video_to_gif_failed, Snackbar.LENGTH_SHORT).show();
                 }
 
                 @Override
                 public void onSuccess(String s) {
-                    Snackbar.make(mVideoView, "SUCCESS with output : " + s, Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(mVideoView, R.string.video_to_gif_success, Snackbar.LENGTH_SHORT).show();
                 }
 
                 @Override
@@ -322,21 +331,21 @@ public class VideoActivity extends BaseActivity {
                 public void onFinish() {
                     Log.d(TAG, "Finished command : ffmpeg " + command);
                     progressDialog.dismiss();
-                    //onBackPressed();
+                    onBackPressed();
                 }
             });
         } catch (FFmpegCommandAlreadyRunningException e) {
-            // do nothing for now
+            Snackbar.make(mVideoView, R.string.video_to_gif_failed, Snackbar.LENGTH_SHORT).show();
         }
     }
 
     private void showDownloadDialog(String platform) {
         //platform = "armeabi-v7a";
-        final DownloadRequest request = new DownloadRequest(TAG, FFMPEG,
-                getFilesDir().getAbsolutePath(), String.format(BASE_URL, platform));
-        Log.i("liweiping", "download url = " + String.format(BASE_URL, platform));
+        final DownloadRequest request = new DownloadRequest(AppUtils.BASE_URL, AppUtils.FFMPEG_FILE_NAME,
+                getFilesDir().getAbsolutePath(), String.format(AppUtils.BASE_URL, platform));
+        Log.i("liweiping", "download url = " + String.format(AppUtils.BASE_URL, platform));
         final DownloadManager downloadManager = DownloadManager.instance();
-        downloadManager.registerListener(TAG, new UpdateDownloadListener(VideoActivity.this));
+        downloadManager.registerListener(AppUtils.BASE_URL, new UpdateDownloadListener(VideoActivity.this));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.video_to_gif_need_so_title)
@@ -347,10 +356,7 @@ public class VideoActivity extends BaseActivity {
                         downloadManager.start(request);
                     }
                 })
-                .setNegativeButton(android.R.string.cancel, null);
-        Dialog dialog = builder.create();
-        dialog.show();
-
+                .setNegativeButton(android.R.string.cancel, null).create().show();
     }
 
 }

@@ -23,6 +23,7 @@
                 android:layout_width="56.0dip"
                 android:layout_height="32.0dip"
                 android:background="@drawable/bg_record_cancel_selector"
+                android:contentDescription="@string/float_record_cancel"
                 android:gravity="center"
                 android:orientation="horizontal"
                 android:paddingLeft="2.0dip"
@@ -53,6 +54,7 @@
                 android:layout_width="56.0dip"
                 android:layout_height="32.0dip"
                 android:background="@drawable/bg_record_change_quality_selector"
+                android:contentDescription="@string/float_record_quality_content"
                 android:gravity="center"
                 android:orientation="horizontal"
                 android:paddingLeft="2.0dip"
@@ -86,7 +88,8 @@
                 android:id="@+id/record_overlay_start"
                 android:layout_width="52.0dip"
                 android:layout_height="52.0dip"
-                android:background="@drawable/bg_float_record_start" />
+                android:background="@drawable/bg_float_record_start"
+                android:contentDescription="@string/float_record_start_content" />
 
             <TextView
                 android:layout_width="fill_parent"
@@ -108,7 +111,7 @@
         android:alpha="0"
         android:background="@drawable/bg_float_record_countdown"
         android:gravity="center"
-        android:text="@string/record"
+        android:text="@string/countdown_three"
         android:textAllCaps="true"
         android:textColor="#fff"
         android:textStyle="bold"

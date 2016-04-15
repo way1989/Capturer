@@ -3,10 +3,6 @@
 
     <string name="shortcut_name">启动</string>
     <string name="clear">清除</string>
-    <string name="record">准备…</string>
-    <string name="countdown_one">1…</string>
-    <string name="countdown_two">2…</string>
-    <string name="countdown_three">3…</string>
     <string name="launch_overlay">准备录制</string>
     <string name="preferences">参数</string>
     <string name="countdown">三秒倒计时</string>
@@ -49,7 +45,7 @@
     <string name="video_title">视频</string>
     <string name="gif_title">GIF动画</string>
     <string name="boot_auto">开机启动</string>
-    <string name="boot_auto_summary">开机后自动启动录屏</string>
+    <string name="boot_auto_summary">开机后自动启动Captain</string>
 
     <string name="float_record_cancel">取消</string>
     <string name="float_record_end_handle">处理中…</string>
@@ -59,6 +55,8 @@
     <string name="float_record_hd_quality">高清</string>
     <string name="float_record_normal_quality">标清</string>
     <string name="float_record_start">REC</string>
+    <string name="float_record_start_content">录屏</string>
+    <string name="float_record_quality_content">画质</string>
     <string name="settings_with_arrow">"设置 >"</string>
     <string name="enable_permission_procedure">"您可以在“设置”>“应用”>“Captain”>“权限”中更改权限。"</string>
     <string name="enable_permission_procedure_description">"您可以依次触摸“设置”、“应用”、“Captain”和“权限”来更改权限。"</string>

@@ -11,10 +11,9 @@
 
     <string name="shortcut_name">Launch</string>
     <string name="clear">Clear</string>
-    <string name="record">Record</string>
-    <string name="countdown_one">1…</string>
-    <string name="countdown_two">2…</string>
-    <string name="countdown_three">3…</string>
+    <string name="countdown_one">1</string>
+    <string name="countdown_two">2</string>
+    <string name="countdown_three">3</string>
     <string name="launch_overlay">Launch Overlay</string>
     <string name="preferences">Preferences</string>
     <string name="countdown">Three second countdown</string>
@@ -71,6 +70,8 @@
     <string name="float_record_failed">screen record failed</string>
     <string name="float_record_hd_quality">HD</string>
     <string name="float_record_start">REC</string>
+    <string name="float_record_start_content">Start</string>
+    <string name="float_record_quality_content">Quality</string>
     <string name="float_record_normal_quality">Normal</string>
     <string name="float_record_super_hd_quality">SHD</string>
     <string name="settings_with_arrow">Settings &gt;</string>
@@ -80,7 +81,7 @@
     <string name="settings" translatable="false">Settings</string>
     <string name="enable_permission_procedure">You can change permissions in Settings > Apps > Captain > Permissions.</string>
     <string name="enable_permission_procedure_description">You can change permissions in Settings, Apps, Captain, Permissions.</string>
-    <string name="required_permissions_promo">Captainneeds permission to Storage.</string>
+    <string name="required_permissions_promo">Captain needs permission to Storage.</string>
     <string name="empty_generic_main">No Datas</string>
     <string name="empty_generic_secondary">No Datas</string>
     <string name="video_set_length">Length</string>
@@ -98,7 +99,7 @@
     <string name="gif_size_unit">Scale rate</string>
     <string name="gif_size_tips">The more, the bigger Gif</string>
     <string name="default_values">Default</string>
-    <string name="twice_press_exit">Press twice to exit!</string>
+    <string name="twice_press_exit">Press again to exit!</string>
     <string name="stop">Stop</string>
     <string name="video_length">Video length: %s</string>
     <string name="not_enough_storage">Not enough storage available</string>
@@ -117,7 +118,7 @@
     <string name="normal_screen_shot">Normal</string>
     <string name="free_crop_toast">Slide select picture taken part in need.</string>
     <string name="crop_toast">Double tap to get the result</string>
-    <string name="feedback">feedback</string>
+    <string name="feedback">Feedback</string>
     <string name="feedback_text_empty">the feedback is too short</string>
     <string name="feedback_send_succeed">feedback send scuessed!</string>
     <string name="global_send">send</string>
@@ -130,8 +131,6 @@
     <string name="nav_day_mode">Day mode</string>
     <string name="screenshot_title">Screenshot</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="image_transition">transition_image</string>
     <string name="turn_screen_orientation">Keep your device orientation is portrait</string>
 
@@ -156,7 +155,7 @@
     <string name="abort">abort...</string>
     <string name="error">error...</string>
     <string name="permission_title">Permission manager</string>
-    <string name="screen_shot_title">Screenshot</string>
+    <string name="screen_shot_title">Screenshots</string>
     <string name="image_info">Details</string>
     <string name="image_info_size">Size: %1$s x %2$s </string>
     <string name="image_info_length">Length: %s </string>

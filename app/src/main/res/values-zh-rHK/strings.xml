@@ -3,10 +3,6 @@
 
     <string name="shortcut_name">啟動</string>
     <string name="clear">清除</string>
-    <string name="record">準備…</string>
-    <string name="countdown_one">1…</string>
-    <string name="countdown_two">2…</string>
-    <string name="countdown_three">3…</string>
     <string name="launch_overlay">啟動覆蓋</string>
     <string name="preferences">參數</string>
     <string name="countdown">三秒倒計時</string>

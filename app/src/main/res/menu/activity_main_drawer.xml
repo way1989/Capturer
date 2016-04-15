@@ -5,7 +5,7 @@
         <item
             android:id="@+id/nav_screenshot"
             android:icon="@drawable/ic_menu_camera"
-            android:title="@string/screen_shot" />
+            android:title="@string/screen_shot_title" />
         <item
             android:id="@+id/nav_gifs"
             android:icon="@drawable/ic_menu_gallery"

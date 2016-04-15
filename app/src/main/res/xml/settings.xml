@@ -31,7 +31,7 @@
             android:summary="@string/video_stop_method_summary"
             android:title="@string/video_stop_method" />
         <SwitchPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="key_three_second_countdown"
             android:summary="@string/countdown_summary"
             android:title="@string/countdown" />

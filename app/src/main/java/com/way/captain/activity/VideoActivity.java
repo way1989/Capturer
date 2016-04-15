@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -26,7 +27,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
@@ -100,8 +100,21 @@ public class VideoActivity extends BaseActivity implements View.OnClickListener,
     private void initToolbar() {
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null)
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            final String path = getIntent().getStringExtra(ARG_IMAGE_PATH);
+            setActionBarTitle(path);
+        }
+    }
+
+    private void setActionBarTitle(String path) {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar == null)
+            return;
+        if (path.contains(File.separator) && path.contains(".")) {
+            String title = path.substring(path.lastIndexOf(File.separatorChar) + 1, path.lastIndexOf('.'));
+            actionBar.setTitle(title);
+        }
     }
 
     private void setStatusBarColor() {
@@ -129,6 +142,7 @@ public class VideoActivity extends BaseActivity implements View.OnClickListener,
         mDurationTextView = (TextView) findViewById(R.id.time);
         mPlayedTextView = (TextView) findViewById(R.id.time_current);
 
+        mVideoView.setOnClickListener(this);
         mPlayPauseBtn.setOnClickListener(this);
         mSeekBar.setOnSeekBarChangeListener(this);
         mVideoView.setOnPreparedListener(this);
@@ -277,7 +291,7 @@ public class VideoActivity extends BaseActivity implements View.OnClickListener,
         if (command.length != 0) {
             execFFmpegBinary(command);
         } else {
-            Toast.makeText(this, "command == null", Toast.LENGTH_LONG).show();
+            Snackbar.make(mVideoView, R.string.video_to_gif_failed, Snackbar.LENGTH_SHORT).show();
         }
         return true;
     }
@@ -288,11 +302,11 @@ public class VideoActivity extends BaseActivity implements View.OnClickListener,
             FFmpeg.getInstance(this.getApplicationContext()).loadBinary(new LoadBinaryResponseHandler() {
                 @Override
                 public void onFailure() {
-                    Toast.makeText(VideoActivity.this, R.string.not_support_devices, Toast.LENGTH_SHORT).show();
+                    Snackbar.make(mVideoView, R.string.not_support_devices, Snackbar.LENGTH_SHORT).show();
                 }
             });
         } catch (FFmpegNotSupportedException e) {
-            Toast.makeText(VideoActivity.this, R.string.not_support_devices, Toast.LENGTH_SHORT).show();
+            Snackbar.make(mVideoView, R.string.not_support_devices, Snackbar.LENGTH_SHORT).show();
         }
 
     }

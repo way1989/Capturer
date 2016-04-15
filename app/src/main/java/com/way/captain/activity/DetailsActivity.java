@@ -17,7 +17,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.format.Formatter;
-import android.transition.Transition;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Menu;
@@ -32,7 +31,6 @@ import com.way.captain.data.DataInfo;
 import com.way.captain.fragment.DetailsFragment;
 import com.way.captain.fragment.ScreenshotFragment;
 import com.way.captain.utils.AppUtils;
-import com.way.captain.utils.TransitionListenerAdapter;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -81,20 +79,13 @@ public class DetailsActivity extends BaseActivity {
         setContentView(R.layout.activity_details);
         postponeEnterTransition();
         setEnterSharedElementCallback(mCallback);
-        final android.view.Window window = getWindow();
-        ObjectAnimator animator = ObjectAnimator.ofInt(window,
-                "statusBarColor", window.getStatusBarColor(), Color.BLACK);
-        animator.setEvaluator(new ArgbEvaluator());
-        animator.setDuration(200L);
-        animator.start();
+        setStatusBarColor();
+        initDatas(savedInstanceState);//初始化必要数据
+        initToolbar();
+        initViewPager();
+    }
 
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        if (toolbar != null)
-            toolbar.setAlpha(0f);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null)
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+    private void initDatas(Bundle savedInstanceState) {
         Intent intent = getIntent();
         mType = intent.getIntExtra(ScreenshotFragment.ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT);
         mDatas = getIntent().getStringArrayListExtra(ScreenshotFragment.EXTRA_DATAS);
@@ -104,8 +95,43 @@ public class DetailsActivity extends BaseActivity {
         } else {
             mCurrentPosition = savedInstanceState.getInt(STATE_CURRENT_PAGE_POSITION);
         }
-        setActionBarTitle(mCurrentPosition);
+    }
 
+    private void setStatusBarColor() {
+        final android.view.Window window = getWindow();
+        ObjectAnimator animator = ObjectAnimator.ofInt(window,
+                "statusBarColor", window.getStatusBarColor(), Color.BLACK);
+        animator.setEvaluator(new ArgbEvaluator());
+        animator.setDuration(200L);
+        animator.start();
+    }
+
+    private void initToolbar() {
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            toolbar.setAlpha(0f);
+            toolbar.animate().alpha(1f).setDuration(500L);
+        }
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            setActionBarTitle();
+        }
+    }
+
+    private void setActionBarTitle() {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar == null)
+            return;
+        String path = mDatas.get(mCurrentPosition);
+        if (path.contains(File.separator) && path.contains(".")) {
+            String title = path.substring(path.lastIndexOf(File.separatorChar) + 1, path.lastIndexOf('.'));
+            Log.i("liweiping", "title = " + title);
+            actionBar.setTitle(title);
+        }
+    }
+
+    private void initViewPager() {
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
         if (pager != null) {
             pager.setAdapter(new DetailsFragmentPagerAdapter(getSupportFragmentManager()));
@@ -115,29 +141,9 @@ public class DetailsActivity extends BaseActivity {
                 @Override
                 public void onPageSelected(int position) {
                     mCurrentPosition = position;
-                    setActionBarTitle(position);
+                    setActionBarTitle();
                 }
             });
-        }
-        getWindow().getSharedElementEnterTransition().addListener(new TransitionListenerAdapter() {
-
-            @Override
-            public void onTransitionEnd(Transition transition) {
-                if (toolbar != null)
-                    toolbar.animate().alpha(1f);
-            }
-        });
-    }
-
-    private void setActionBarTitle(int position) {
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar == null)
-            return;
-        String path = mDatas.get(position);
-        if (path.contains(File.separator) && path.contains(".")) {
-            String title = path.substring(path.lastIndexOf(File.separatorChar) + 1, path.lastIndexOf('.'));
-            Log.i("liweiping", "title = " + title);
-            actionBar.setTitle(title);
         }
     }
 

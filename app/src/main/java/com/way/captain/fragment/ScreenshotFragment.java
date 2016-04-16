@@ -3,7 +3,6 @@ package com.way.captain.fragment;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -47,14 +46,8 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     public static final String EXTRA_DATAS = "extra_datas";
     public static final String EXTRA_STARTING_POSITION = "extra_starting_item_position";
     public static final String EXTRA_CURRENT_POSITION = "extra_current_item_position";
-    private static final int SCREENSHOT_LOADER_ID = 0;
-
-    @Override
-    public Context getContext() {
-        return super.getContext();
-    }
-
     public static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
+    private static final int SCREENSHOT_LOADER_ID = 0;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
     private DataProvider mDataProvider = new DataProvider();
@@ -116,9 +109,11 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
         }
     }
 
+    //private ExplosionField mExplosionField;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //mExplosionField =  ExplosionField.attach2Window(getActivity());
     }
 
     @Override
@@ -234,7 +229,14 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
                 shareScreenshot();
                 return true;
             case R.id.gif_item_delete:
+//                final View itemView = mRecyclerView.findViewHolderForAdapterPosition(mClickPosition).itemView;
+//                mExplosionField.explode(itemView);
+//                itemView.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
                 deleteScreenshot();
+//                    }
+//                }, getResources().getInteger(android.R.integer.config_mediumAnimTime));
                 return true;
             default:
                 break;
@@ -255,8 +257,9 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     }
 
     private void deleteScreenshot() {
-        mScreenshotAdapter.removeItem(mClickPosition);
-        mScreenshotAdapter.notifyItemRemoved(mClickPosition);
+        mDataProvider.deleteLastRemoval();//删除上一个，如果存在的话
+        mDataProvider.removeItem(mClickPosition);
+        mScreenshotAdapter.notifyDataSetChanged();
         Snackbar snackbar = Snackbar.make(
                 mRecyclerView,
                 R.string.snack_bar_text_item_removed,
@@ -267,17 +270,21 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
             public void onClick(View v) {
                 int position = mDataProvider.undoLastRemoval();
                 if (position >= 0) {
-                    mScreenshotAdapter.notifyItemInserted(position);
+                    //reset(view);
+                    //mExplosionField.clear();
+                    mScreenshotAdapter.notifyDataSetChanged();
                     mRecyclerView.scrollToPosition(position);
                     mLoadingEmptyContainer.setVisibility(View.INVISIBLE);
                 }
             }
         });
-        snackbar.setActionTextColor(Color.WHITE);
         snackbar.setCallback(new Snackbar.Callback() {
             @Override
             public void onDismissed(Snackbar snackbar, int event) {
                 super.onDismissed(snackbar, event);
+                //如果是新显示snackbar或者点击撤销，都不能删除数据
+                if (event == DISMISS_EVENT_ACTION || event == DISMISS_EVENT_CONSECUTIVE)
+                    return;
                 mDataProvider.deleteLastRemoval();
             }
         });
@@ -286,6 +293,19 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
             mLoadingEmptyContainer.showNoResults();
         } else {
             mLoadingEmptyContainer.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private void reset(View root) {
+        if (root instanceof ViewGroup) {
+            ViewGroup parent = (ViewGroup) root;
+            for (int i = 0; i < parent.getChildCount(); i++) {
+                reset(parent.getChildAt(i));
+            }
+        } else {
+            root.setScaleX(1);
+            root.setScaleY(1);
+            root.setAlpha(1);
         }
     }
 

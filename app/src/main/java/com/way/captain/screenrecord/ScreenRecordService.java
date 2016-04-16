@@ -32,12 +32,9 @@ public final class ScreenRecordService extends Service {
     private static final String EXTRA_DATA = "data";
     private static final int NOTIFICATION_ID = 99118822;
     private static final String SHOW_TOUCHES = "show_touches";
-    Boolean showCountdownProvider;
-    Integer videoSizePercentageProvider;
     Boolean showTouchesProvider;
     ContentResolver contentResolver;
     private long startTime;
-    private Timer mTimer;
     private Notification.Builder mBuilder;
     private final RecordingSession.Listener listener = new RecordingSession.Listener() {
         private int showTouch = 0;
@@ -54,8 +51,7 @@ public final class ScreenRecordService extends Service {
                     .getBoolean(SettingsFragment.VIDEO_STOP_METHOD_KEY, true)) {
                 startTime = SystemClock.elapsedRealtime();
                 mBuilder = createNotificationBuilder();
-                mTimer = new Timer();
-                mTimer.scheduleAtFixedRate(new TimerTask() {
+                new Timer().scheduleAtFixedRate(new TimerTask() {
                     @Override
                     public void run() {
                         updateNotification(ScreenRecordService.this);
@@ -86,7 +82,6 @@ public final class ScreenRecordService extends Service {
                 if (!AppUtils.isMarshmallow())
                     Settings.System.putInt(contentResolver, SHOW_TOUCHES, showTouch);
             }
-
             stopForeground(true /* remove notification */);
         }
 
@@ -166,10 +161,7 @@ public final class ScreenRecordService extends Service {
             throw new IllegalStateException("Result code or data missing.");
         }
         showTouchesProvider = mSharedPreferences.getBoolean(SettingsFragment.SHOW_TOUCHES_KEY, true);
-        showCountdownProvider = mSharedPreferences.getBoolean(SettingsFragment.SHOW_COUNTDOWN_KEY, false);
-        videoSizePercentageProvider = Integer.valueOf(mSharedPreferences.getString(SettingsFragment.VIDEO_SIZE_KEY, "100"));
-        recordingSession = new RecordingSession(this, listener, resultCode, data, showCountdownProvider,
-                videoSizePercentageProvider);
+        recordingSession = new RecordingSession(this, listener, resultCode, data);
         recordingSession.showOverlay();
 
         return START_NOT_STICKY;

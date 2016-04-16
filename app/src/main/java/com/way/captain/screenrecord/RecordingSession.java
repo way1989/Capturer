@@ -60,8 +60,6 @@ final class RecordingSession {
     private final Listener listener;
     private final int resultCode;
     private final Intent data;
-    private final boolean showCountDown;
-    private final Integer videoSizePercentage;
     private final File outputRoot;
     private final DateFormat fileFormat = new SimpleDateFormat("'ScreenRecord_'yyyy-MM-dd-HH-mm-ss'.mp4'");
     private final NotificationManager notificationManager;
@@ -81,15 +79,12 @@ final class RecordingSession {
     };
 
 
-    RecordingSession(Context context, Listener listener, int resultCode, Intent data, Boolean showCountDown,
-                     Integer videoSizePercentage) {
+    RecordingSession(Context context, Listener listener, int resultCode, Intent data) {
         this.context = context;
         this.listener = listener;
         this.resultCode = resultCode;
         this.data = data;
 
-        this.showCountDown = showCountDown;
-        this.videoSizePercentage = videoSizePercentage;
 
         File picturesDir = Environment.getExternalStoragePublicDirectory(DIRECTORY_MOVIES);
         outputRoot = new File(picturesDir, DISPLAY_NAME);
@@ -162,7 +157,7 @@ final class RecordingSession {
                 stopRecording();
             }
         };
-        overlayView = OverlayView.create(context, overlayListener, showCountDown);
+        overlayView = OverlayView.create(context, overlayListener);
         windowManager.addView(overlayView, OverlayView.createLayoutParams(context));
     }
 
@@ -201,7 +196,8 @@ final class RecordingSession {
         int cameraHeight = camcorderProfile != null ? camcorderProfile.videoFrameHeight : -1;
         Log.d("way", "Camera size: " + cameraWidth + " x " + cameraHeight);
 
-        int sizePercentage = videoSizePercentage;
+        int sizePercentage = Integer.valueOf(PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(SettingsFragment.VIDEO_SIZE_KEY, "100"));
         Log.d("way", "Size percentage: " + sizePercentage);
 
         return calculateRecordingInfo(displayWidth, displayHeight, displayDensity, isLandscape, cameraWidth,

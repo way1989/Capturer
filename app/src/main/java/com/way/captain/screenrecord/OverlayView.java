@@ -40,10 +40,11 @@ final class OverlayView extends FrameLayout implements View.OnClickListener{
     private long mRecordingStartTime;
 
 
-    private OverlayView(Context context, Listener listener, boolean showCountDown) {
+    private OverlayView(Context context, Listener listener) {
         super(context);
         this.mListener = listener;
-        this.mIsShowCountDown = showCountDown;
+        this.mIsShowCountDown = PreferenceManager.getDefaultSharedPreferences(getContext())
+                .getBoolean(SettingsFragment.SHOW_COUNTDOWN_KEY, true);
 
         initViews(context);
         CheatSheet.setup(mCancelButton);
@@ -51,8 +52,8 @@ final class OverlayView extends FrameLayout implements View.OnClickListener{
         CheatSheet.setup(mQualityButton);
     }
 
-    static OverlayView create(Context context, Listener listener, boolean showCountDown) {
-        return new OverlayView(context, listener, showCountDown);
+    static OverlayView create(Context context, Listener listener) {
+        return new OverlayView(context, listener);
     }
 
     static WindowManager.LayoutParams createLayoutParams(Context context) {
@@ -135,7 +136,7 @@ final class OverlayView extends FrameLayout implements View.OnClickListener{
     }
 
     private void countdownComplete() {
-        mCountDownTextView.animate().alpha(0).setDuration(COUNTDOWN_DELAY).withEndAction(new Runnable() {
+        mCountDownTextView.animate().alpha(0).withEndAction(new Runnable() {
             @Override
             public void run() {
                 startRecording();
@@ -163,12 +164,10 @@ final class OverlayView extends FrameLayout implements View.OnClickListener{
         long delta = now - mRecordingStartTime;
 
         String text = AppUtils.getVideoRecordTime(delta, false);
-        long targetNextUpdateDelay = 1000;
-
+        final long targetNextUpdateDelay = 1000;
         mRecordingTimeTextView.setText(text);
 
-        long actualNextUpdateDelay = targetNextUpdateDelay
-                - (delta % targetNextUpdateDelay);
+        long actualNextUpdateDelay = targetNextUpdateDelay - (delta % targetNextUpdateDelay);
         postDelayed(new Runnable() {
             @Override
             public void run() {

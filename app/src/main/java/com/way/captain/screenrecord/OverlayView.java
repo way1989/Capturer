@@ -1,10 +1,12 @@
 package com.way.captain.screenrecord;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -14,6 +16,7 @@ import android.widget.TextView;
 import com.way.captain.R;
 import com.way.captain.fragment.SettingsFragment;
 import com.way.captain.utils.AppUtils;
+import com.way.captain.widget.timely.TimelyView;
 
 import static android.graphics.PixelFormat.TRANSLUCENT;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
@@ -23,33 +26,24 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
-final class OverlayView extends FrameLayout implements View.OnClickListener{
+final class OverlayView extends FrameLayout implements View.OnClickListener {
     private static final String TAG = "OverlayView";
-    private static final int COUNTDOWN_DELAY = 1000;
+    private static final int COUNTDOWN_DELAY = 1500;
+    private static final int COUNTDOWN_MAX = 3;
     private final Listener mListener;
-    private final boolean mIsShowCountDown;
     private View mStartContainer;
-    private View mCancelButton;
-    private View mQualityButton;
     private TextView mQualityTextView;
-    private View mStartButton;
     private View mStopContainer;
-    private View mStopButton;
-    private TextView mCountDownTextView;
+    private View mCountDownContainer;
+    private TimelyView mCountDownTextView;
+
     private TextView mRecordingTimeTextView;
     private long mRecordingStartTime;
-
 
     private OverlayView(Context context, Listener listener) {
         super(context);
         this.mListener = listener;
-        this.mIsShowCountDown = PreferenceManager.getDefaultSharedPreferences(getContext())
-                .getBoolean(SettingsFragment.SHOW_COUNTDOWN_KEY, true);
-
         initViews(context);
-        CheatSheet.setup(mCancelButton);
-        CheatSheet.setup(mStartButton);
-        CheatSheet.setup(mQualityButton);
     }
 
     static OverlayView create(Context context, Listener listener) {
@@ -73,21 +67,25 @@ final class OverlayView extends FrameLayout implements View.OnClickListener{
         inflate(context, R.layout.float_screen_record_control, this);
 
         mStartContainer = findViewById(R.id.record_overlay_buttons);
-        mCancelButton = findViewById(R.id.record_overlay_cancel);
-        mQualityButton = findViewById(R.id.record_change_quality);
+        View cancelButton = findViewById(R.id.record_overlay_cancel);
+        View qualityButton = findViewById(R.id.record_change_quality);
         mQualityTextView = (TextView) findViewById(R.id.show_record_quality);
-        mStartButton = findViewById(R.id.record_overlay_start);
+        View startButton = findViewById(R.id.record_overlay_start);
         mStopContainer = findViewById(R.id.recorder_layout);
-        mStopButton = findViewById(R.id.record_overlay_stop);
-        mCountDownTextView = (TextView) findViewById(R.id.record_overlay_recording);
+        mCountDownContainer = findViewById(R.id.record_overlay_recording_root);
+        mCountDownTextView = (TimelyView) findViewById(R.id.record_overlay_recording);
         mRecordingTimeTextView = (TextView) findViewById(R.id.recording_time);
-        mCancelButton.setOnClickListener(this);
-        mStartButton.setOnClickListener(this);
-        mQualityButton.setOnClickListener(this);
-        mStopButton.setOnClickListener(this);
+        cancelButton.setOnClickListener(this);
+        startButton.setOnClickListener(this);
+        qualityButton.setOnClickListener(this);
+        findViewById(R.id.record_overlay_stop).setOnClickListener(this);
+
+        CheatSheet.setup(cancelButton);
+        CheatSheet.setup(startButton);
+        CheatSheet.setup(qualityButton);
+
         int videoSizePercentageProvider = Integer.valueOf(PreferenceManager
                 .getDefaultSharedPreferences(getContext()).getString(SettingsFragment.VIDEO_SIZE_KEY, "100"));
-        Log.i(TAG, "initView videoSizePercentageProvider = " + videoSizePercentageProvider);
         switch (videoSizePercentageProvider) {
             case 100:
                 mQualityTextView.setText(R.string.float_record_super_hd_quality);
@@ -105,57 +103,60 @@ final class OverlayView extends FrameLayout implements View.OnClickListener{
     }
 
     void onStartClicked() {
-        if (!mIsShowCountDown) {
+        boolean isCountDown = PreferenceManager.getDefaultSharedPreferences(getContext())
+                .getBoolean(SettingsFragment.SHOW_COUNTDOWN_KEY, true);
+        if (!isCountDown) {
             mStartContainer.animate().alpha(0).withEndAction(new Runnable() {
                 @Override
                 public void run() {
                     startRecording();
                 }
             });
-            return;
+        } else {
+            mStartContainer.animate().alpha(0);
+            mCountDownContainer.setVisibility(VISIBLE);
+            mCountDownContainer.animate().alpha(1).withEndAction(new Runnable() {
+                @Override
+                public void run() {
+                    countdown(COUNTDOWN_MAX);
+                }
+            });
         }
-        mStartContainer.animate().alpha(0);
-        mCountDownTextView.setVisibility(VISIBLE);
-        mCountDownTextView.animate().alpha(1);
-        showCountDown();
     }
 
     private void startRecording() {
-        mCountDownTextView.setVisibility(INVISIBLE);
         mStopContainer.setVisibility(View.VISIBLE);
         mStopContainer.animate().alpha(1);
-        mStopButton.setVisibility(VISIBLE);
         mListener.onStart();
         mRecordingStartTime = SystemClock.uptimeMillis();
         updateRecordingTime();
     }
 
-    private void showCountDown() {
-        String[] countdown = getResources().getStringArray(R.array.countdown);
-        countdown(countdown, 0); // array resource must not be empty
+    private void countdown(final int index) {
+        if (index == 0) {// countdown to end
+            countdownComplete();
+            return;
+        }
+        ObjectAnimator countDownAnimator = mCountDownTextView.animate(index, index - 1);
+        countDownAnimator.setDuration(COUNTDOWN_DELAY);
+        countDownAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                countdown(index - 1);
+            }
+        });
+        countDownAnimator.start();
     }
 
     private void countdownComplete() {
-        mCountDownTextView.animate().alpha(0).withEndAction(new Runnable() {
+        mCountDownContainer.animate().alpha(0).withEndAction(new Runnable() {
             @Override
             public void run() {
+                mCountDownContainer.setVisibility(View.GONE);
                 startRecording();
             }
         });
-    }
-
-    private void countdown(final String[] countdownArr, final int index) {
-        mCountDownTextView.setText(countdownArr[index]);
-        postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (index < countdownArr.length - 1) {
-                    countdown(countdownArr, index + 1);
-                } else {
-                    countdownComplete();
-                }
-            }
-        }, COUNTDOWN_DELAY);
     }
 
     private void updateRecordingTime() {
@@ -199,7 +200,6 @@ final class OverlayView extends FrameLayout implements View.OnClickListener{
     private void changVideoQuality() {
         int videoSizePercentageProvider = Integer.valueOf(PreferenceManager
                 .getDefaultSharedPreferences(getContext()).getString(SettingsFragment.VIDEO_SIZE_KEY, "100"));
-        Log.i(TAG, "onClick... videoSizePercentageProvider = " + videoSizePercentageProvider);
         switch (videoSizePercentageProvider) {
             case 100:
                 PreferenceManager.getDefaultSharedPreferences(getContext()).edit()

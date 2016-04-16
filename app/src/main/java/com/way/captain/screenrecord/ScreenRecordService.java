@@ -32,24 +32,24 @@ public final class ScreenRecordService extends Service {
     private static final String EXTRA_DATA = "data";
     private static final int NOTIFICATION_ID = 99118822;
     private static final String SHOW_TOUCHES = "show_touches";
-    Boolean showTouchesProvider;
-    ContentResolver contentResolver;
-    private long startTime;
+    private boolean mIsShowTouchesr;
+    private ContentResolver mContentResolver;
+    private long mStartTime;
     private Notification.Builder mBuilder;
-    private final RecordingSession.Listener listener = new RecordingSession.Listener() {
+    private final RecordingSession.Listener mListener = new RecordingSession.Listener() {
         private int showTouch = 0;
 
         @TargetApi(Build.VERSION_CODES.M)
         @Override
         public void onStart() {
-            if (showTouchesProvider) {
-                showTouch = Settings.System.getInt(contentResolver, SHOW_TOUCHES, 0);
+            if (mIsShowTouchesr) {
+                showTouch = Settings.System.getInt(mContentResolver, SHOW_TOUCHES, 0);
                 if (!AppUtils.isMarshmallow())
-                    Settings.System.putInt(contentResolver, SHOW_TOUCHES, 1);
+                    Settings.System.putInt(mContentResolver, SHOW_TOUCHES, 1);
             }
             if (!PreferenceManager.getDefaultSharedPreferences(ScreenRecordService.this)
                     .getBoolean(SettingsFragment.VIDEO_STOP_METHOD_KEY, true)) {
-                startTime = SystemClock.elapsedRealtime();
+                mStartTime = SystemClock.elapsedRealtime();
                 mBuilder = createNotificationBuilder();
                 new Timer().scheduleAtFixedRate(new TimerTask() {
                     @Override
@@ -75,12 +75,11 @@ public final class ScreenRecordService extends Service {
             }
         }
 
-        @TargetApi(Build.VERSION_CODES.M)
         @Override
         public void onStop() {
-            if (showTouchesProvider) {
+            if (mIsShowTouchesr) {
                 if (!AppUtils.isMarshmallow())
-                    Settings.System.putInt(contentResolver, SHOW_TOUCHES, showTouch);
+                    Settings.System.putInt(mContentResolver, SHOW_TOUCHES, showTouch);
             }
             stopForeground(true /* remove notification */);
         }
@@ -92,8 +91,8 @@ public final class ScreenRecordService extends Service {
         }
     };
     private SharedPreferences mSharedPreferences;
-    private boolean running;
-    private RecordingSession recordingSession;
+    private boolean mIsRunning;
+    private RecordingSession mRecordingSession;
 
     public static Intent newIntent(Context context, int resultCode, Intent data) {
         Intent intent = new Intent(context, ScreenRecordService.class);
@@ -115,7 +114,6 @@ public final class ScreenRecordService extends Service {
                 .setSmallIcon(R.drawable.ic_videocam)
                 .setContentTitle(getString(R.string.notification_recording_title));
         Intent stopRecording = new Intent(ACTION_STOP_SCREENRECORD);
-        //stopRecording.setClass(this, ScreenRecordService.class);
         stopRecording.putExtra("id", NOTIFICATION_ID);
         builder.addAction(R.drawable.ic_stop, getString(R.string.stop),
                 PendingIntent.getBroadcast(this, 0, stopRecording, PendingIntent.FLAG_CANCEL_CURRENT));
@@ -123,7 +121,7 @@ public final class ScreenRecordService extends Service {
     }
 
     public void updateNotification(Context context) {
-        long timeElapsed = SystemClock.elapsedRealtime() - startTime;
+        long timeElapsed = SystemClock.elapsedRealtime() - mStartTime;
         mBuilder.setContentText(getString(R.string.video_length,
                 DateUtils.formatElapsedTime(timeElapsed / 1000)));
         startForeground(NOTIFICATION_ID, mBuilder.build());
@@ -132,18 +130,18 @@ public final class ScreenRecordService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        contentResolver = getContentResolver();
+        mContentResolver = getContentResolver();
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (running) {
+        if (mIsRunning) {
             Log.d("way", "Already running! Ignoring...");
             return START_NOT_STICKY;
         }
         Log.d("way", "Starting up!");
-        running = true;
+        mIsRunning = true;
 
         if (intent == null) {
             stopSelf();
@@ -152,6 +150,7 @@ public final class ScreenRecordService extends Service {
 
         if (!hasAvailableSpace()) {
             Toast.makeText(this, R.string.not_enough_storage, Toast.LENGTH_LONG).show();
+            stopSelf();
             return START_NOT_STICKY;
         }
 
@@ -160,16 +159,16 @@ public final class ScreenRecordService extends Service {
         if (resultCode == 0 || data == null) {
             throw new IllegalStateException("Result code or data missing.");
         }
-        showTouchesProvider = mSharedPreferences.getBoolean(SettingsFragment.SHOW_TOUCHES_KEY, true);
-        recordingSession = new RecordingSession(this, listener, resultCode, data);
-        recordingSession.showOverlay();
+        mIsShowTouchesr = mSharedPreferences.getBoolean(SettingsFragment.SHOW_TOUCHES_KEY, true);
+        mRecordingSession = new RecordingSession(this, mListener, resultCode, data);
+        mRecordingSession.showOverlay();
 
         return START_NOT_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        recordingSession.destroy();
+        mRecordingSession.destroy();
         super.onDestroy();
     }
 

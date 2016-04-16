@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
@@ -103,19 +104,23 @@
         </LinearLayout>
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/record_overlay_recording"
-        android:layout_width="46dip"
-        android:layout_height="46dip"
+    <FrameLayout
+        android:id="@+id/record_overlay_recording_root"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
         android:layout_centerHorizontal="true"
         android:alpha="0"
         android:background="@drawable/bg_float_record_countdown"
-        android:gravity="center"
-        android:text="@string/countdown_three"
-        android:textAllCaps="true"
-        android:textColor="#fff"
-        android:textStyle="bold"
-        android:visibility="invisible" />
+        android:visibility="gone">
+
+        <com.way.captain.widget.timely.TimelyView
+            android:id="@+id/record_overlay_recording"
+            android:layout_width="32dip"
+            android:layout_height="32dip"
+            android:layout_gravity="center"
+            android:gravity="center"
+            app:text_color="#ffffff" />
+    </FrameLayout>
 
     <include
         layout="@layout/float_view_record"

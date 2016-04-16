@@ -18,7 +18,6 @@
         <attr name="simple_tag_round_radius" format="dimension" />
     </declare-styleable>
 
-
     <declare-styleable name="DownloadProgressView">
         <attr name="circleRadius" format="dimension" />
         <attr name="strokeWidth" format="dimension" />
@@ -30,5 +29,9 @@
         <attr name="progressColor" format="color" />
         <attr name="circleBackgroundColor" format="color" />
         <attr name="overshootValue" format="float" />
+    </declare-styleable>
+
+    <declare-styleable name="TimelyView">
+        <attr name="text_color" format="color"></attr>
     </declare-styleable>
 </resources>

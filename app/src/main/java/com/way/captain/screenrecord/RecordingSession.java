@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 import static android.content.Context.MEDIA_PROJECTION_SERVICE;
 import static android.content.Context.NOTIFICATION_SERVICE;
@@ -55,23 +54,23 @@ final class RecordingSession {
 
     private static final String DISPLAY_NAME = "ScreenRecord";
     private static final String MIME_TYPE = "video/mp4";
-    private final Handler mainThread = new Handler(Looper.getMainLooper());
-    private final Context context;
-    private final Listener listener;
-    private final int resultCode;
-    private final Intent data;
-    private final File outputRoot;
-    private final DateFormat fileFormat = new SimpleDateFormat("'ScreenRecord_'yyyy-MM-dd-HH-mm-ss'.mp4'");
-    private final NotificationManager notificationManager;
-    private final WindowManager windowManager;
-    private final MediaProjectionManager projectionManager;
-    private OverlayView overlayView;
-    private MediaRecorder recorder;
-    private MediaProjection projection;
-    private VirtualDisplay display;
-    private String outputFile;
-    private boolean running;
-    BroadcastReceiver stopReceiver = new BroadcastReceiver() {
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private final Context mContext;
+    private final Listener mListener;
+    private final int mResultCode;
+    private final Intent mIntentData;
+    private final File mOutputDir;
+    private final DateFormat mFileFormat = new SimpleDateFormat("'ScreenRecord_'yyyy-MM-dd-HH-mm-ss'.mp4'");
+    private final NotificationManager mNotificationManager;
+    private final WindowManager mWindowManager;
+    private final MediaProjectionManager mProjectionManager;
+    private OverlayView mOverlayView;
+    private MediaRecorder mMediaRecorder;
+    private MediaProjection mMediaProjection;
+    private VirtualDisplay mVirtualDisplay;
+    private String mOutputFile;
+    private boolean mIsRunning;
+    BroadcastReceiver mStopReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             stopRecording();
@@ -80,35 +79,35 @@ final class RecordingSession {
 
 
     RecordingSession(Context context, Listener listener, int resultCode, Intent data) {
-        this.context = context;
-        this.listener = listener;
-        this.resultCode = resultCode;
-        this.data = data;
+        this.mContext = context;
+        this.mListener = listener;
+        this.mResultCode = resultCode;
+        this.mIntentData = data;
 
 
         File picturesDir = Environment.getExternalStoragePublicDirectory(DIRECTORY_MOVIES);
-        outputRoot = new File(picturesDir, DISPLAY_NAME);
+        mOutputDir = new File(picturesDir, DISPLAY_NAME);
 
-        notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-        windowManager = (WindowManager) context.getSystemService(WINDOW_SERVICE);
-        projectionManager = (MediaProjectionManager) context.getSystemService(MEDIA_PROJECTION_SERVICE);
+        mNotificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+        mWindowManager = (WindowManager) context.getSystemService(WINDOW_SERVICE);
+        mProjectionManager = (MediaProjectionManager) context.getSystemService(MEDIA_PROJECTION_SERVICE);
     }
 
     static RecordingInfo calculateRecordingInfo(int displayWidth, int displayHeight, int displayDensity,
                                                 boolean isLandscapeDevice, int cameraWidth, int cameraHeight, int sizePercentage) {
-        // Scale the display size before any maximum size calculations.
+        // Scale the mVirtualDisplay size before any maximum size calculations.
         displayWidth = displayWidth * sizePercentage / 100;
         displayHeight = displayHeight * sizePercentage / 100;
 
         if (cameraWidth == -1 && cameraHeight == -1) {
-            // No cameras. Fall back to the display size.
+            // No cameras. Fall back to the mVirtualDisplay size.
             return new RecordingInfo(displayWidth, displayHeight, displayDensity);
         }
 
         int frameWidth = isLandscapeDevice ? cameraWidth : cameraHeight;
         int frameHeight = isLandscapeDevice ? cameraHeight : cameraWidth;
         if (frameWidth >= displayWidth && frameHeight >= displayHeight) {
-            // Frame can hold the entire display. Use exact values.
+            // Frame can hold the entire mVirtualDisplay. Use exact values.
             return new RecordingInfo(displayWidth, displayHeight, displayDensity);
         }
 
@@ -157,35 +156,34 @@ final class RecordingSession {
                 stopRecording();
             }
         };
-        overlayView = OverlayView.create(context, overlayListener);
-        windowManager.addView(overlayView, OverlayView.createLayoutParams(context));
+        mOverlayView = OverlayView.create(mContext, overlayListener);
+        mWindowManager.addView(mOverlayView, OverlayView.createLayoutParams(mContext));
     }
 
     private void hideOverlay() {
-        if (overlayView != null) {
+        if (mOverlayView != null) {
             Log.d("way", "Removing overlay view from window.");
-            windowManager.removeView(overlayView);
-            overlayView = null;
+            mWindowManager.removeView(mOverlayView);
+            mOverlayView = null;
 
         }
     }
 
     private void cancelOverlay() {
         hideOverlay();
-        listener.onEnd();
-
+        mListener.onEnd();
     }
 
     private RecordingInfo getRecordingInfo() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        WindowManager wm = (WindowManager) context.getSystemService(WINDOW_SERVICE);
+        WindowManager wm = (WindowManager) mContext.getSystemService(WINDOW_SERVICE);
         wm.getDefaultDisplay().getRealMetrics(displayMetrics);
         int displayWidth = displayMetrics.widthPixels;
         int displayHeight = displayMetrics.heightPixels;
         int displayDensity = displayMetrics.densityDpi;
         Log.d("way", "Display size: " + displayWidth + " x " + displayHeight + " @ " + displayDensity);
 
-        Configuration configuration = context.getResources().getConfiguration();
+        Configuration configuration = mContext.getResources().getConfiguration();
         boolean isLandscape = configuration.orientation == ORIENTATION_LANDSCAPE;
         Log.d("way", "Display landscape: " + isLandscape);
 
@@ -196,61 +194,60 @@ final class RecordingSession {
         int cameraHeight = camcorderProfile != null ? camcorderProfile.videoFrameHeight : -1;
         Log.d("way", "Camera size: " + cameraWidth + " x " + cameraHeight);
 
-        int sizePercentage = Integer.valueOf(PreferenceManager.getDefaultSharedPreferences(context)
+        int sizePercentage = Integer.valueOf(PreferenceManager.getDefaultSharedPreferences(mContext)
                 .getString(SettingsFragment.VIDEO_SIZE_KEY, "100"));
         Log.d("way", "Size percentage: " + sizePercentage);
 
-        return calculateRecordingInfo(displayWidth, displayHeight, displayDensity, isLandscape, cameraWidth,
-                cameraHeight, sizePercentage);
+        return calculateRecordingInfo(displayWidth, displayHeight, displayDensity, isLandscape,
+                cameraWidth, cameraHeight, sizePercentage);
     }
 
     private void startRecording() {
         Log.d("way", "Starting screen recording...");
-        if (!PreferenceManager.getDefaultSharedPreferences(context)
+        if (!PreferenceManager.getDefaultSharedPreferences(mContext)
                 .getBoolean(SettingsFragment.VIDEO_STOP_METHOD_KEY, true)) {
             hideOverlay();
             IntentFilter intentFilter = new IntentFilter(ScreenRecordService.ACTION_STOP_SCREENRECORD);
-            context.registerReceiver(stopReceiver, intentFilter);
+            mContext.registerReceiver(mStopReceiver, intentFilter);
         }
 
-        if (!outputRoot.mkdirs()) {
-            Log.e("way", "Unable to create output directory '" + outputRoot.getAbsolutePath() + "'.");
-            // We're probably about to crash, but at least the log will indicate
-            // as to why.
+        if (!mOutputDir.mkdirs()) {
+            Log.e("way", "Unable to create output directory '" + mOutputDir.getAbsolutePath());
+            // We're probably about to crash, but at least the log will indicate as to why.
         }
 
         RecordingInfo recordingInfo = getRecordingInfo();
-        Log.d("way",
-                "Recording: " + recordingInfo.width + " x " + recordingInfo.height + " @ " + recordingInfo.density);
+        Log.d("way", "Recording: " + recordingInfo.width + " x "
+                + recordingInfo.height + " @ " + recordingInfo.density);
 
-        recorder = new MediaRecorder();
-        recorder.setVideoSource(SURFACE);
-        recorder.setOutputFormat(MPEG_4);
-        recorder.setVideoFrameRate(30);
-        recorder.setVideoEncoder(H264);
-        recorder.setVideoSize(recordingInfo.width, recordingInfo.height);
-        recorder.setVideoEncodingBitRate(8 * 1000 * 1000);
+        mMediaRecorder = new MediaRecorder();
+        mMediaRecorder.setVideoSource(SURFACE);
+        mMediaRecorder.setOutputFormat(MPEG_4);
+        mMediaRecorder.setVideoFrameRate(25);
+        mMediaRecorder.setVideoEncoder(H264);
+        mMediaRecorder.setVideoSize(recordingInfo.width, recordingInfo.height);
+        mMediaRecorder.setVideoEncodingBitRate(8 * 1000 * 1000);
 
-        String outputName = fileFormat.format(new Date());
-        outputFile = new File(outputRoot, outputName).getAbsolutePath();
-        Log.i("way", "Output file '" + outputFile + "'.");
-        recorder.setOutputFile(outputFile);
+        String outputName = mFileFormat.format(new Date());
+        mOutputFile = new File(mOutputDir, outputName).getAbsolutePath();
+        Log.i("way", "Output file '" + mOutputFile);
+        mMediaRecorder.setOutputFile(mOutputFile);
 
         try {
-            recorder.prepare();
+            mMediaRecorder.prepare();
         } catch (IOException e) {
             throw new RuntimeException("Unable to prepare MediaRecorder.", e);
         }
 
-        projection = projectionManager.getMediaProjection(resultCode, data);
+        mMediaProjection = mProjectionManager.getMediaProjection(mResultCode, mIntentData);
 
-        Surface surface = recorder.getSurface();
-        display = projection.createVirtualDisplay(DISPLAY_NAME, recordingInfo.width, recordingInfo.height,
+        Surface surface = mMediaRecorder.getSurface();
+        mVirtualDisplay = mMediaProjection.createVirtualDisplay(DISPLAY_NAME, recordingInfo.width, recordingInfo.height,
                 recordingInfo.density, VIRTUAL_DISPLAY_FLAG_PRESENTATION, surface, null, null);
 
-        recorder.start();
-        running = true;
-        listener.onStart();
+        mMediaRecorder.start();
+        mIsRunning = true;
+        mListener.onStart();
 
         Log.d("way", "Screen recording started.");
 
@@ -259,36 +256,36 @@ final class RecordingSession {
     private void stopRecording() {
         Log.d("way", "Stopping screen recording...");
 
-        if (!running) {
-            throw new IllegalStateException("Not running.");
+        if (!mIsRunning) {
+            throw new IllegalStateException("Not mIsRunning.");
         }
-        running = false;
-        if (!PreferenceManager.getDefaultSharedPreferences(context)
+        mIsRunning = false;
+        if (!PreferenceManager.getDefaultSharedPreferences(mContext)
                 .getBoolean(SettingsFragment.VIDEO_STOP_METHOD_KEY, true)) {
-            context.unregisterReceiver(stopReceiver);
+            mContext.unregisterReceiver(mStopReceiver);
         } else {
             hideOverlay();
         }
 
-        // Stop the projection in order to flush everything to the recorder.
-        projection.stop();
+        // Stop the mMediaProjection in order to flush everything to the mMediaRecorder.
+        mMediaProjection.stop();
 
-        // Stop the recorder which writes the contents to the file.
-        recorder.stop();
+        // Stop the mMediaRecorder which writes the contents to the file.
+        mMediaRecorder.stop();
 
-        recorder.release();
-        display.release();
+        mMediaRecorder.release();
+        mVirtualDisplay.release();
 
-        listener.onStop();
+        mListener.onStop();
 
         Log.d("way", "Screen recording stopped. Notifying media scanner of new video.");
 
-        MediaScannerConnection.scanFile(context, new String[]{outputFile}, null,
+        MediaScannerConnection.scanFile(mContext, new String[]{mOutputFile}, null,
                 new MediaScannerConnection.OnScanCompletedListener() {
                     @Override
                     public void onScanCompleted(String path, final Uri uri) {
                         Log.d("way", "Media scanner completed.");
-                        mainThread.post(new Runnable() {
+                        mHandler.post(new Runnable() {
                             @Override
                             public void run() {
                                 showNotification(uri, null);
@@ -300,26 +297,26 @@ final class RecordingSession {
 
     private void showNotification(final Uri uri, Bitmap bitmap) {
         Intent viewIntent = new Intent(ACTION_VIEW, uri);
-        PendingIntent pendingViewIntent = PendingIntent.getActivity(context, 0, viewIntent, 0);
+        PendingIntent pendingViewIntent = PendingIntent.getActivity(mContext, 0, viewIntent, 0);
 
         Intent shareIntent = new Intent(ACTION_SEND);
         shareIntent.setType(MIME_TYPE);
         shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
         shareIntent = Intent.createChooser(shareIntent, null);
-        PendingIntent pendingShareIntent = PendingIntent.getActivity(context, 0, shareIntent, 0);
+        PendingIntent pendingShareIntent = PendingIntent.getActivity(mContext, 0, shareIntent, 0);
 
-        Intent deleteIntent = new Intent(context, DeleteRecordingBroadcastReceiver.class);
+        Intent deleteIntent = new Intent(mContext, DeleteRecordingBroadcastReceiver.class);
         deleteIntent.setData(uri);
-        PendingIntent pendingDeleteIntent = PendingIntent.getBroadcast(context, 0, deleteIntent, 0);
+        PendingIntent pendingDeleteIntent = PendingIntent.getBroadcast(mContext, 0, deleteIntent, 0);
 
-        CharSequence title = context.getText(R.string.notification_captured_title);
-        CharSequence subtitle = context.getText(R.string.notification_captured_subtitle);
-        CharSequence share = context.getText(R.string.notification_captured_share);
-        CharSequence delete = context.getText(R.string.notification_captured_delete);
-        Notification.Builder builder = new Notification.Builder(context) //
+        CharSequence title = mContext.getText(R.string.notification_captured_title);
+        CharSequence subtitle = mContext.getText(R.string.notification_captured_subtitle);
+        CharSequence share = mContext.getText(R.string.notification_captured_share);
+        CharSequence delete = mContext.getText(R.string.notification_captured_delete);
+        Notification.Builder builder = new Notification.Builder(mContext) //
                 .setContentTitle(title).setContentText(subtitle).setWhen(System.currentTimeMillis()).setShowWhen(true)
                 .setSmallIcon(R.drawable.ic_videocam)
-                .setColor(context.getResources().getColor(R.color.colorPrimary)).setContentIntent(pendingViewIntent)
+                .setColor(mContext.getResources().getColor(R.color.colorPrimary)).setContentIntent(pendingViewIntent)
                 .setAutoCancel(true).addAction(R.drawable.ic_menu_share, share, pendingShareIntent)
                 .addAction(R.drawable.ic_menu_delete, delete, pendingDeleteIntent);
 
@@ -331,10 +328,10 @@ final class RecordingSession {
                             .bigPicture(bitmap));
         }
 
-        notificationManager.notify(NOTIFICATION_ID, builder.build());
+        mNotificationManager.notify(NOTIFICATION_ID, builder.build());
 
         if (bitmap != null) {
-            listener.onEnd();
+            mListener.onEnd();
             return;
         }
 
@@ -342,7 +339,7 @@ final class RecordingSession {
             @Override
             protected Bitmap doInBackground(Void... none) {
                 MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-                retriever.setDataSource(context, uri);
+                retriever.setDataSource(mContext, uri);
                 return retriever.getFrameAtTime();
             }
 
@@ -351,15 +348,15 @@ final class RecordingSession {
                 if (bitmap != null) {
                     showNotification(uri, bitmap);
                 } else {
-                    listener.onEnd();
+                    mListener.onEnd();
                 }
             }
         }.execute();
     }
 
     public void destroy() {
-        if (running) {
-            Log.w("way", "Destroyed while running!");
+        if (mIsRunning) {
+            Log.w("way", "Destroyed while mIsRunning!");
             try {
                 stopRecording();
             } catch (Exception e) {

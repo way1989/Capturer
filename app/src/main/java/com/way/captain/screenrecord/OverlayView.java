@@ -28,7 +28,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 final class OverlayView extends FrameLayout implements View.OnClickListener {
     private static final String TAG = "OverlayView";
-    private static final int COUNTDOWN_DELAY = 1500;
+    private static final int COUNTDOWN_DELAY = 1200;
     private static final int COUNTDOWN_MAX = 3;
     private final Listener mListener;
     private View mStartContainer;

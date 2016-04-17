@@ -11,4 +11,6 @@
     <item name="tag_holder" type="id" />
     <item name="tag_item" type="id" />
 
+    <!-- FloatingActionMenu -->
+    <item name="fab_label" type="id"/>
 </resources>

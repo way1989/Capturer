@@ -44,4 +44,21 @@
         <attr name="tileBackgroundColor" format="color"/>
     </declare-styleable>
 
+    <!-- FloatingActionMenu -->
+    <declare-styleable name="FloatingActionMenu">
+        <attr name="fabMenuExpandDirection" format="enum">
+            <enum name="up" value="0" />
+            <enum name="down" value="1" />
+            <enum name="left" value="2" />
+            <enum name="right" value="3" />
+        </attr>
+        <attr name="fabMenuLabelPosition" format="enum">
+            <enum name="left" value="0" />
+            <enum name="right" value="1" />
+        </attr>
+        <attr name="fabMenuLabelStyle" format="reference" />
+        <attr name="fabMenuCloseIconSrc" format="reference" />
+        <attr name="fabMenuCloseIconAngle" format="float" />
+        <attr name="fabMenuSpacing" format="dimension" />
+    </declare-styleable>
 </resources>

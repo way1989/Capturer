@@ -1073,7 +1073,7 @@ public class CropImageView extends ImageView {
 
     /**
      * Get cropped rect image bitmap
-     * <p/>
+     * <p>
      * This method always returns rect image.
      * (If you need a square image with CropMode.CIRCLE, you can use this method.)
      *
@@ -1260,7 +1260,7 @@ public class CropImageView extends ImageView {
 
     /**
      * Set crop frame handle touch padding(touch area) in density-independent pixels.
-     * <p/>
+     * <p>
      * handle touch area : a circle of radius R.(R = handle size + touch padding)
      *
      * @param paddingDp crop frame handle touch padding(touch area) in density-independent pixels

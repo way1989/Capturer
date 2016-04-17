@@ -48,4 +48,9 @@
     <dimen name="global_font_large">14sp</dimen>
     <dimen name="global_margin_standard">8dp</dimen>
     <dimen name="status_bar_height">25dp</dimen>
+
+    <!-- FloatingActionMenu -->
+    <dimen name="fam_spacing">16dp</dimen>
+    <dimen name="fam_label_spacing">16dp</dimen>
+    <dimen name="dim_elevation">5dp</dimen>
 </resources>

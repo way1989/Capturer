@@ -35,9 +35,11 @@ import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunnin
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 import com.way.captain.R;
 import com.way.captain.utils.AppUtils;
+import com.way.captain.utils.DensityUtil;
 import com.way.captain.utils.GifUtils;
 import com.way.captain.widget.FastVideoView;
 import com.way.captain.widget.UpdateDownloadListener;
+import com.way.captain.widget.drawable.MediaControlDrawable;
 import com.way.downloadlibrary.DownloadManager;
 import com.way.downloadlibrary.DownloadRequest;
 
@@ -133,7 +135,7 @@ public class VideoActivity extends BaseActivity implements View.OnClickListener,
         mVideoView.start();
         showControler();
     }
-
+    private MediaControlDrawable controlDrawable;
     private void initPlayControlerView() {
         mVideoView = (FastVideoView) findViewById(R.id.video_view);
         mPlayControlerView = findViewById(R.id.video_control_view);
@@ -147,6 +149,13 @@ public class VideoActivity extends BaseActivity implements View.OnClickListener,
         mSeekBar.setOnSeekBarChangeListener(this);
         mVideoView.setOnPreparedListener(this);
         mVideoView.setOnCompletionListener(this);
+        controlDrawable =
+                new MediaControlDrawable.Builder(this)
+                        .setColor(Color.WHITE)
+                        .setPadding(DensityUtil.px2dip(this, 8))
+                        .setInitialState(MediaControlDrawable.State.PLAY)
+                        .build();
+        mPlayPauseBtn.setImageDrawable(controlDrawable);
     }
 
     @Override
@@ -183,10 +192,12 @@ public class VideoActivity extends BaseActivity implements View.OnClickListener,
             case R.id.pause:
                 if (mVideoView.isPlaying()) {
                     mVideoView.pause();
-                    mPlayPauseBtn.setImageResource(R.drawable.ic_play_arrow);
+                    controlDrawable.setMediaControlState(MediaControlDrawable.State.PLAY);
+                    //mPlayPauseBtn.setImageResource(R.drawable.ic_play_arrow);
                 } else {
                     mVideoView.start();
-                    mPlayPauseBtn.setImageResource(R.drawable.ic_pause);
+                    //mPlayPauseBtn.setImageResource(R.drawable.ic_pause);
+                    controlDrawable.setMediaControlState(MediaControlDrawable.State.PAUSE);
                 }
                 break;
             case R.id.video_view:
@@ -234,13 +245,15 @@ public class VideoActivity extends BaseActivity implements View.OnClickListener,
         mSeekBar.setMax(duration);
         mDurationTextView.setText(AppUtils.getVideoFormatTime(duration));
         mVideoView.start();
-        mPlayPauseBtn.setImageResource(R.drawable.ic_pause);
+//        mPlayPauseBtn.setImageResource(R.drawable.ic_pause);
+        controlDrawable.setMediaControlState(MediaControlDrawable.State.PAUSE);
         mHandler.sendEmptyMessage(PROGRESS_CHANGED);
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        mPlayPauseBtn.setImageResource(R.drawable.ic_play_arrow);
+//        mPlayPauseBtn.setImageResource(R.drawable.ic_play_arrow);
+        controlDrawable.setMediaControlState(MediaControlDrawable.State.PLAY);
         mSeekBar.setProgress(0);
         mVideoView.seekTo(0);
     }

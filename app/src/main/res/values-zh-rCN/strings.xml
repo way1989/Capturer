@@ -8,8 +8,8 @@
     <string name="countdown">三秒倒计时</string>
     <string name="recents_hide">隐藏最近使用程序</string>
     <string name="video_size_percentage">视频尺寸</string>
-    <string name="notification_captured_title">已保存屏幕录制视频.</string>
-    <string name="notification_captured_subtitle">触摸查看屏幕录制视频.</string>
+    <string name="notification_captured_title">已保存录制的屏幕视频.</string>
+    <string name="notification_captured_subtitle">触摸查看录制的屏幕视频.</string>
     <string name="notification_captured_share">分享</string>
     <string name="notification_captured_delete">删除</string>
     <string name="notification_recording_title">录制屏幕中.</string>

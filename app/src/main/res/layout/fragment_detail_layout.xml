@@ -3,11 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.alexvasilkov.gestures.views.GestureImageView
+    <com.way.captain.widget.photoview.PhotoView
         android:id="@+id/detail_image"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop" />
+        android:layout_height="match_parent" />
 
     <ImageView
         android:id="@+id/video_indicator"

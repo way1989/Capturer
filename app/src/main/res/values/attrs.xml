@@ -34,4 +34,14 @@
     <declare-styleable name="TimelyView">
         <attr name="text_color" format="color"></attr>
     </declare-styleable>
+
+    <declare-styleable name="SubsamplingScaleImageView">
+        <attr name="src" format="reference"/>
+        <attr name="assetName" format="string"/>
+        <attr name="panEnabled" format="boolean"/>
+        <attr name="zoomEnabled" format="boolean"/>
+        <attr name="quickScaleEnabled" format="boolean"/>
+        <attr name="tileBackgroundColor" format="color"/>
+    </declare-styleable>
+
 </resources>

@@ -79,7 +79,7 @@ public class VideoActivity extends BaseActivity implements View.OnClickListener,
     };
     private boolean mIsShowControler;
 
-    public static void startVideoActivity(Activity context, String path, ImageView imageView) {
+    public static void startVideoActivity(Activity context, String path, View imageView) {
         Intent i = new Intent(context, VideoActivity.class);
         i.putExtra(ARG_IMAGE_PATH, path);
 //        context.startActivity(i, ActivityOptions.makeSceneTransitionAnimation(context, imageView,

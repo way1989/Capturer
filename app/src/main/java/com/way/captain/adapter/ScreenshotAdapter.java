@@ -60,7 +60,7 @@ public class ScreenshotAdapter extends RecyclerView.Adapter<ScreenshotAdapter.Vi
     @Override
     public void onBindViewHolder(ScreenshotAdapter.ViewHolder holder, int position) {
         String info = mDataProvider.getItem(position);
-        GlideHelper.loadResourceBitmap(info, holder.image);
+        GlideHelper.loadResourceBitmapCenterCrop(info, holder.image);
         switch (mType) {
             case DataInfo.TYPE_SCREEN_SHOT:
                 holder.image.setTagEnable(false);

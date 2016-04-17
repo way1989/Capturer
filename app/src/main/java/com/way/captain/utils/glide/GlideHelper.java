@@ -77,4 +77,14 @@ public class GlideHelper {
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(image);
     }
+
+    public static void loadResourceBitmapCenterCrop(String path, @NonNull ImageView image) {
+        Glide.with(image.getContext())
+                .load(path)
+                .asBitmap()
+                .animate(ANIMATOR)
+                .centerCrop()
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .into(image);
+    }
 }

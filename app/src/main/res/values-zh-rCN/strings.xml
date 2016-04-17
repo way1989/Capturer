@@ -141,4 +141,6 @@
 
     <string name="video_to_gif_success">转换成功!</string>
     <string name="video_to_gif_failed">转换失败!</string>
+
+    <string name="heigh_quality">原图</string>
 </resources>

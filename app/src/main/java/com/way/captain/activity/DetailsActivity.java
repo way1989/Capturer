@@ -25,12 +25,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.alexvasilkov.gestures.commons.DepthPageTransformer;
 import com.way.captain.R;
 import com.way.captain.data.DataInfo;
 import com.way.captain.fragment.DetailsFragment;
 import com.way.captain.fragment.ScreenshotFragment;
 import com.way.captain.utils.AppUtils;
+import com.way.captain.widget.DepthPageTransformer;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -51,7 +51,7 @@ public class DetailsActivity extends BaseActivity {
         @Override
         public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
             if (mIsReturning) {
-                ImageView sharedElement = mCurrentDetailsFragment.getAlbumImage();
+                View sharedElement = mCurrentDetailsFragment.getAlbumImage();
                 if (sharedElement == null) {
                     // If shared element is null, then it has been scrolled off screen and
                     // no longer visible. In this case we cancel the shared element transition by
@@ -108,10 +108,7 @@ public class DetailsActivity extends BaseActivity {
 
     private void initToolbar() {
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        if (toolbar != null) {
-            toolbar.setAlpha(0f);
-            toolbar.animate().alpha(1f).setDuration(500L);
-        }
+
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);

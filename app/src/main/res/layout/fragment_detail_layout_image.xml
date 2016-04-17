@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.way.captain.widget.subscaleview.SubsamplingScaleImageView
+        android:id="@+id/detail_image_height_quality"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <com.way.captain.widget.photoview.PhotoView
+        android:id="@+id/detail_image"
+        android:src="@drawable/theme_captain"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <Button
+        android:id="@+id/height_quality_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="24dp"
+        android:backgroundTint="@color/colorAccent"
+        android:textColor="@android:color/white"
+        android:layout_marginEnd="24dp"
+        android:text="@string/heigh_quality" />
+</FrameLayout>

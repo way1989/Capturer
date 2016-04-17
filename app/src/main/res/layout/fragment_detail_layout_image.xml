@@ -5,15 +5,15 @@
 
     <com.way.captain.widget.subscaleview.SubsamplingScaleImageView
         android:id="@+id/detail_image_height_quality"
-        android:visibility="gone"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:visibility="gone" />
 
-    <com.way.captain.widget.photoview.PhotoView
+    <com.alexvasilkov.gestures.views.GestureImageView
         android:id="@+id/detail_image"
-        android:src="@drawable/theme_captain"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:src="@drawable/theme_captain" />
 
     <Button
         android:id="@+id/height_quality_btn"
@@ -21,8 +21,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginBottom="24dp"
-        android:backgroundTint="@color/colorAccent"
-        android:textColor="@android:color/white"
         android:layout_marginEnd="24dp"
-        android:text="@string/heigh_quality" />
+        android:backgroundTint="@color/colorAccent"
+        android:text="@string/heigh_quality"
+        android:textColor="@android:color/white"
+        android:visibility="gone" />
 </FrameLayout>

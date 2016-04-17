@@ -47,4 +47,5 @@
     <dimen name="global_margin_great">16dp</dimen>
     <dimen name="global_font_large">14sp</dimen>
     <dimen name="global_margin_standard">8dp</dimen>
+    <dimen name="status_bar_height">25dp</dimen>
 </resources>

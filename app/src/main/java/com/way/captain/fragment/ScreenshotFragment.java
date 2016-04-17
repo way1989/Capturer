@@ -1,7 +1,6 @@
 package com.way.captain.fragment;
 
 import android.app.ActivityOptions;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,6 +27,7 @@ import com.way.captain.adapter.ScreenshotAdapter;
 import com.way.captain.data.DataInfo;
 import com.way.captain.data.DataLoader;
 import com.way.captain.data.DataProvider;
+import com.way.captain.utils.explosion.ExplosionField;
 import com.way.captain.widget.LoadingEmptyContainer;
 
 import java.io.File;
@@ -58,6 +58,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     private LoadingEmptyContainer mLoadingEmptyContainer;
     private int mClickPosition;
     private boolean mIsDetailsActivityStarted;
+    private ExplosionField mExplosionField;
 
     public static BaseFragment newInstance(int type) {
         Bundle args = new Bundle();
@@ -109,11 +110,10 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
         }
     }
 
-    //private ExplosionField mExplosionField;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //mExplosionField =  ExplosionField.attach2Window(getActivity());
+        mExplosionField = ExplosionField.attach2Window(getActivity());
     }
 
     @Override
@@ -223,20 +223,20 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     }
 
     @Override
-    public boolean onMenuItemClick(MenuItem item) {
+    public boolean onMenuItemClick(final MenuItem item) {
         switch (item.getItemId()) {
             case R.id.gif_item_share:
                 shareScreenshot();
                 return true;
             case R.id.gif_item_delete:
-//                final View itemView = mRecyclerView.findViewHolderForAdapterPosition(mClickPosition).itemView;
-//                mExplosionField.explode(itemView);
-//                itemView.postDelayed(new Runnable() {
-//                    @Override
-//                    public void run() {
-                deleteScreenshot();
-//                    }
-//                }, getResources().getInteger(android.R.integer.config_mediumAnimTime));
+                final View itemView = mRecyclerView.findViewHolderForAdapterPosition(mClickPosition).itemView;
+                mExplosionField.explode(itemView);
+                itemView.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        deleteScreenshot(itemView);
+                    }
+                }, getResources().getInteger(android.R.integer.config_mediumAnimTime));
                 return true;
             default:
                 break;
@@ -256,7 +256,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
         startActivity(chooserIntent);
     }
 
-    private void deleteScreenshot() {
+    private void deleteScreenshot(final View view) {
         mDataProvider.deleteLastRemoval();//删除上一个，如果存在的话
         mDataProvider.removeItem(mClickPosition);
         mScreenshotAdapter.notifyDataSetChanged();
@@ -270,8 +270,8 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
             public void onClick(View v) {
                 int position = mDataProvider.undoLastRemoval();
                 if (position >= 0) {
-                    //reset(view);
-                    //mExplosionField.clear();
+                    reset(view);
+                    mExplosionField.clear();
                     mScreenshotAdapter.notifyDataSetChanged();
                     mRecyclerView.scrollToPosition(position);
                     mLoadingEmptyContainer.setVisibility(View.INVISIBLE);
@@ -297,16 +297,16 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     }
 
     private void reset(View root) {
-        if (root instanceof ViewGroup) {
-            ViewGroup parent = (ViewGroup) root;
-            for (int i = 0; i < parent.getChildCount(); i++) {
-                reset(parent.getChildAt(i));
-            }
-        } else {
-            root.setScaleX(1);
-            root.setScaleY(1);
-            root.setAlpha(1);
-        }
+//        if (root instanceof ViewGroup) {
+//            ViewGroup parent = (ViewGroup) root;
+//            for (int i = 0; i < parent.getChildCount(); i++) {
+//                reset(parent.getChildAt(i));
+//            }
+//        } else {
+        root.setScaleX(1);
+        root.setScaleY(1);
+        root.setAlpha(1);
+//        }
     }
 
 }

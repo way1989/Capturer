@@ -234,7 +234,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
                 itemView.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        deleteScreenshot(itemView);
+                        deleteScreenshot();
                     }
                 }, getResources().getInteger(android.R.integer.config_mediumAnimTime));
                 return true;
@@ -256,7 +256,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
         startActivity(chooserIntent);
     }
 
-    private void deleteScreenshot(final View view) {
+    private void deleteScreenshot() {
         mDataProvider.deleteLastRemoval();//删除上一个，如果存在的话
         mDataProvider.removeItem(mClickPosition);
         mScreenshotAdapter.notifyDataSetChanged();
@@ -270,7 +270,6 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
             public void onClick(View v) {
                 int position = mDataProvider.undoLastRemoval();
                 if (position >= 0) {
-                    reset(view);
                     mExplosionField.clear();
                     mScreenshotAdapter.notifyDataSetChanged();
                     mRecyclerView.scrollToPosition(position);
@@ -294,19 +293,6 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
         } else {
             mLoadingEmptyContainer.setVisibility(View.INVISIBLE);
         }
-    }
-
-    private void reset(View root) {
-//        if (root instanceof ViewGroup) {
-//            ViewGroup parent = (ViewGroup) root;
-//            for (int i = 0; i < parent.getChildCount(); i++) {
-//                reset(parent.getChildAt(i));
-//            }
-//        } else {
-        root.setScaleX(1);
-        root.setScaleY(1);
-        root.setAlpha(1);
-//        }
     }
 
 }

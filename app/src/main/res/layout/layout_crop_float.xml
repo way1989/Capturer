@@ -36,6 +36,8 @@
             android:layout_marginStart="24dp"
             android:gravity="center"
             android:shadowColor="@android:color/black"
+            android:drawableTop="@drawable/ic_touch_app_white"
+            android:drawablePadding="8dp"
             android:shadowRadius="2"
             android:text="@string/crop_toast"
             android:textAppearance="?android:attr/textAppearanceMedium"

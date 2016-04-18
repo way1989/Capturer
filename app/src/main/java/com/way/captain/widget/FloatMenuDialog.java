@@ -17,6 +17,7 @@ import android.view.animation.OvershootInterpolator;
 
 import com.ogaclejapan.arclayout.ArcLayout;
 import com.way.captain.R;
+import com.way.captain.screenrecord.CheatSheet;
 import com.way.captain.utils.AnimatorUtils;
 import com.way.captain.utils.ViewUtils;
 
@@ -49,6 +50,7 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
         setContentView(R.layout.float_dialog_menu);
         mArcLayout = (ArcLayout) findViewById(R.id.arc_layout);
         mCenterItem = findViewById(R.id.menu_screnshot_center);
+        CheatSheet.setup(mCenterItem);
         mArcLayout.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
@@ -61,6 +63,7 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
         mCenterItem.setOnClickListener(this);
         for (int i = 0, size = mArcLayout.getChildCount(); i < size; i++) {
             View button = mArcLayout.getChildAt(i);
+            CheatSheet.setup(button);
             button.setOnClickListener(this);
         }
     }

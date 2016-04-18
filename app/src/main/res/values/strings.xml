@@ -72,8 +72,8 @@
     <string name="float_record_start">REC</string>
     <string name="float_record_start_content">Start</string>
     <string name="float_record_quality_content">Quality</string>
-    <string name="float_record_normal_quality">Normal</string>
-    <string name="float_record_super_hd_quality">SHD</string>
+    <string name="float_record_normal_quality">WVGA</string>
+    <string name="float_record_super_hd_quality">FHD</string>
     <string name="settings_with_arrow">Settings &gt;</string>
     <string name="exit">Exit</string>
     <string name="next_with_arrow">Next &gt;</string>
@@ -111,11 +111,12 @@
 
     <string name="scroll_screenshot_toast_title">Long screenshot is working</string>
     <string name="scroll_screenshot_toast_text">Tap the screen to stop</string>
-    <string name="long_screenshot">Long</string>
-    <string name="free_screenshot">Free</string>
-    <string name="rect_screenshot">Rect</string>
-    <string name="record_screenshot">Record</string>
-    <string name="normal_screen_shot">Normal</string>
+    <string name="home">Home</string>
+    <string name="long_screenshot">Full page</string>
+    <string name="free_screenshot">Free screenshot</string>
+    <string name="rect_screenshot">Area screenshot</string>
+    <string name="record_screenshot">Screen record</string>
+    <string name="normal_screen_shot">Screenshot</string>
     <string name="free_crop_toast">Slide select picture taken part in need.</string>
     <string name="crop_toast">Double tap to get the result</string>
     <string name="feedback">Feedback</string>
@@ -165,4 +166,5 @@
     <string name="video_to_gif_success">Video to gif is succeed!</string>
     <string name="video_to_gif_failed">Video to gif is failed!</string>
     <string name="heigh_quality">Origin</string>
+
 </resources>

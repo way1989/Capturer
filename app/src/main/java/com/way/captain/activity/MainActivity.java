@@ -158,6 +158,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         int uiMode = getResources().getConfiguration().uiMode;
         boolean isCurrentNightMode = (uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
         item.setTitle(isCurrentNightMode ? R.string.nav_day_mode : R.string.nav_night_mode);
+        item.setIcon(isCurrentNightMode ? R.drawable.ic_mode_day : R.drawable.ic_mode_night);
     }
 
     @Override

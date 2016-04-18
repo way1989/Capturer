@@ -144,4 +144,9 @@
     <string name="video_to_gif_failed">转换失败!</string>
 
     <string name="heigh_quality">原图</string>
+    <string name="accessibility_play_video" msgid="7596298365794810207">"播放视频"</string>
+    <string name="accessibility_pause_video" msgid="6526344477133046653">"暂停视频"</string>
+    <string name="accessibility_reload_video" msgid="3250335917598607232">"重新加载视频"</string>
+    <string name="accessibility_time_bar" msgid="1414029843602604531">"视频播放器时间栏"</string>
+    <string name="gif_length_error"> 请选择合适的gif长度!</string>
 </resources>

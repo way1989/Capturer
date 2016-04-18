@@ -45,5 +45,6 @@
     <color name="colorNavEnd">#1a237e</color>
 
     <color name="black_overlay">#66000000</color>
-    <color name="tool_bar_bg">#40000000</color>
+    <color name="tool_bar_bg">#60000000</color>
+    <color name="darker_transparent">#C1000000</color>
 </resources>

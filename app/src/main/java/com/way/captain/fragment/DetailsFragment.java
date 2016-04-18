@@ -14,6 +14,10 @@ import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.way.captain.R;
 import com.way.captain.activity.VideoActivity;
 import com.way.captain.data.DataInfo;
@@ -65,34 +69,61 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
         super.onViewCreated(view, savedInstanceState);
         final int type = getArguments().getInt(ARG_IMAGE_TYPE, DataInfo.TYPE_SCREEN_SHOT);
         final String path = getArguments().getString(ARG_IMAGE_PATH);
+        loadImage(view, type, path);
+    }
+
+    private void loadImage(View view, int type, String path) {
         mImageView = (ImageView) view.findViewById(R.id.detail_image);
         mImageView.setTransitionName(path);
-        GlideHelper.loadResourceBitmap(path, mImageView);
 
-        if (type == DataInfo.TYPE_SCREEN_SHOT) {
-            subsamplingScaleImageView = (SubsamplingScaleImageView) view.findViewById(R.id.detail_image_height_quality);
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(path, options);
-            int height = options.outHeight;
-            boolean isLongImage = height > 2 * DensityUtil.getDisplayHeight(getContext());
-            if (isLongImage) {
-                Button button = (Button) view.findViewById(R.id.height_quality_btn);
-                button.setOnClickListener(this);
-                button.setVisibility(View.VISIBLE);
-            }
-        } else {
-            ImageView videoIndicator = (ImageView) view.findViewById(R.id.video_indicator);
-            videoIndicator.setVisibility(View.VISIBLE);
-            videoIndicator.setOnClickListener(this);
+        switch (type) {
+            case DataInfo.TYPE_SCREEN_SHOT:
+                subsamplingScaleImageView = (SubsamplingScaleImageView) view.findViewById(R.id.detail_image_height_quality);
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(path, options);
+                int height = options.outHeight;
+                boolean isLongImage = height > 2 * DensityUtil.getDisplayHeight(getContext());
+                if (isLongImage) {
+                    Button button = (Button) view.findViewById(R.id.height_quality_btn);
+                    button.setOnClickListener(this);
+                    button.setVisibility(View.VISIBLE);
+                }
+                break;
+            case DataInfo.TYPE_SCREEN_GIF:
+                GlideHelper.loadResourceBitmap(path, mImageView);
+                mImageView.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        startPostponedEnterTransition();
+                    }
+                }, 200L);
+                break;
+            case DataInfo.TYPE_SCREEN_RECORD:
+                break;
         }
-        mImageView.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                startPostponedEnterTransition();
 
-            }
-        }, 200L);
+        if (type != DataInfo.TYPE_SCREEN_GIF) {
+            Glide.with(mImageView.getContext()).load(path).dontAnimate()
+                    .listener(new RequestListener<String, GlideDrawable>() {
+                        @Override
+                        public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                            startPostponedEnterTransition();
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                            startPostponedEnterTransition();
+                            return false;
+                        }
+                    }).fitCenter().into(mImageView);
+        }
+        if (type != DataInfo.TYPE_SCREEN_SHOT) {
+            ImageView playIndicator = (ImageView) view.findViewById(R.id.video_indicator);
+            playIndicator.setVisibility(View.VISIBLE);
+            playIndicator.setOnClickListener(this);
+        }
     }
 
     private void startPostponedEnterTransition() {

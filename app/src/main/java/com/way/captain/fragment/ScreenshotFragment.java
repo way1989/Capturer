@@ -119,6 +119,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     @Override
     public void onResume() {
         super.onResume();
+        getLoaderManager().initLoader(SCREENSHOT_LOADER_ID, null, this);
         mIsDetailsActivityStarted = false;
     }
 
@@ -145,7 +146,6 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
         mSwipeRefreshLayout.setOnRefreshListener(this);
-        getLoaderManager().initLoader(SCREENSHOT_LOADER_ID, null, this);
     }
 
     private void initLoadingEmptyView(View view, int type) {

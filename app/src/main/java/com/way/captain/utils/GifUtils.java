@@ -22,7 +22,7 @@ public class GifUtils {
     public static final int DEFAULT_GIF_LENGTH = 30;
     public static final int MIN_GIF_LENGTH = 2;
     public static final int MAX_GIF_LENGTH = 30;
-    public static final int DEFAULT_GIF_SIZE = 9;
+    public static final int DEFAULT_GIF_SIZE = 4;
     public static final int DEFAULT_GIF_FRAME = 12;
     public static final String KEY_GIF_LENGTH = "gif_length";
     public static final String KEY_GIF_FRAME = "gif_frame";

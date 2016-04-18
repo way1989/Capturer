@@ -18,10 +18,15 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:layout_marginTop="@dimen/status_bar_height"
-        android:background="@color/overlay"
+        android:background="@color/tool_bar_bg"
         android:theme="@style/AppTheme.AppBarOverlay"
         app:popupTheme="@style/AppTheme.DayNight" />
 
-    <include layout="@layout/video_player_controler" />
+    <FrameLayout
+        android:id="@+id/trim_view_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"/>
+
+    <!--<include layout="@layout/video_player_controler" />-->
 </FrameLayout>

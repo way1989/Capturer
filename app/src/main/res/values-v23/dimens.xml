@@ -1,6 +1,0 @@
-<resources>
-
-    <!-- TODO move to values-23/ as overlay_height overload when M is released. -->
-    <dimen name="status_bar_height">24dp</dimen>
-
-</resources>

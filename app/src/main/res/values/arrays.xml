@@ -33,4 +33,9 @@
         <!-- Do not translate. -->
         <item>1</item>
     </string-array>
+    <string-array name="gif_quality_items" >
+        <item>@string/gif_quality_high</item>
+        <item>@string/gif_quality_normal</item>
+        <item>@string/gif_quality_low</item>
+    </string-array>
 </resources>

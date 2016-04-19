@@ -10,7 +10,7 @@
 <!--    <item
         android:id="@+id/video_menu_length"
         android:title="@string/video_set_length"
-        app:showAsAction="never" />-->
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/video_menu_frame"
@@ -21,4 +21,5 @@
         android:id="@+id/video_menu_scale"
         android:title="@string/video_set_scale"
         app:showAsAction="never" />
+        -->
 </menu>

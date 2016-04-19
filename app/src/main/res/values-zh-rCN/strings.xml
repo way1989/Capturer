@@ -148,5 +148,9 @@
     <string name="accessibility_pause_video" msgid="6526344477133046653">"暂停视频"</string>
     <string name="accessibility_reload_video" msgid="3250335917598607232">"重新加载视频"</string>
     <string name="accessibility_time_bar" msgid="1414029843602604531">"视频播放器时间栏"</string>
-    <string name="gif_length_error"> 请选择合适的gif长度!</string>
+    <string name="gif_length_error">请选择合适的gif长度!</string>
+    <string name="gif_quality_title">选择压缩质量</string>
+    <string name="gif_quality_high">精细</string>
+    <string name="gif_quality_normal">标准</string>
+    <string name="gif_quality_low">压缩</string>
 </resources>

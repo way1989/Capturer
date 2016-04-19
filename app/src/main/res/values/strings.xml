@@ -177,4 +177,8 @@
     <string name="accessibility_time_bar">Video player time bar</string>
     <string name="loading_video">Loading video\\u2026</string>
     <string name="gif_length_error">Please select right gif time!</string>
+    <string name="gif_quality_title">Select gif quality</string>
+    <string name="gif_quality_high">High</string>
+    <string name="gif_quality_normal">Normal</string>
+    <string name="gif_quality_low">Low</string>
 </resources>

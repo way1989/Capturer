@@ -6,12 +6,10 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
@@ -155,15 +153,6 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
             case R.id.video_menu_to_gif:
                 toGif();
                 break;
-            case R.id.video_menu_frame:
-                GifUtils.framePicker(this);
-                break;
-            //case R.id.video_menu_length:
-            //    GifUtils.lengthPicker(this);
-            //    break;
-            case R.id.video_menu_scale:
-                GifUtils.sizePicker(this);
-                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -183,15 +172,43 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
         mVideoView.pause();
         if (!loadFFmpeg()) return;
 
+        showGifQualityDialog();
+    }
+
+    private void showGifQualityDialog() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.gif_quality_title)
+                .setItems(R.array.gif_quality_items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        toGif(which);
+                    }
+                }).setNegativeButton(android.R.string.cancel, null)
+                .create().show();
+    }
+
+    private void toGif(int which) {
+        Log.i("broncho1", "toGif dialog onClick which = " + which);
+        int minSize = 480;
+        int frame = 12;
+        switch (which) {
+            case 0:
+                minSize = 480;
+                frame = 12;
+                break;
+            case 1:
+                minSize = 360;
+                frame = 10;
+                break;
+            case 2:
+                minSize = 240;
+                frame = 8;
+                break;
+        }
         String outputFile = getOutputFileName();
-
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        int maxGifLength = GifUtils.MAX_GIF_LENGTH;
-        int customGifFrame = prefs.getInt(GifUtils.KEY_GIF_FRAME, GifUtils.DEFAULT_GIF_FRAME);
-        int customGifScale = prefs.getInt(GifUtils.KEY_GIF_SIZE, GifUtils.DEFAULT_GIF_SIZE);
-
         String path = (String) mVideoView.getTag();
 
+        int maxGifLength = GifUtils.MAX_GIF_LENGTH;
         mTrimStartTime = mTrimStartTime < 0 ? 0 : mTrimStartTime;
         mTrimEndTime = mTrimEndTime < 0 ? mVideoView.getDuration() : mTrimEndTime;
         int start = mTrimStartTime / 1000;
@@ -199,11 +216,30 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
         if (gifLength > maxGifLength) {
             gifLength = start + maxGifLength;
         }
-        Log.i("broncho", "to gif start = " + start + ", length = " + gifLength
-                + ", frame = " + customGifFrame + ", scale = " + customGifScale);
         Pair<Integer, Integer> pair = AppUtils.getVideoWidthHeight(path);
-        String[] command = GifUtils.getVideo2gifCommand(start, gifLength, customGifFrame, path,
-                outputFile, (int) (pair.first / Math.sqrt(customGifScale)), (int) (pair.second / Math.sqrt(customGifScale)));
+        int width = pair.first;
+        int height = pair.second;
+
+        if (Math.min(width, height) > minSize) {
+            Log.i("broncho1","width or height > minSize");
+            if (width < height) {
+                float scale = ((minSize * 1.00f) / width);
+                width = minSize;
+                height = (int) (height * scale);
+                Log.i("broncho1","width < height width = " + width + ", height = " + height + ", scale = " + scale);
+            } else {
+                float scale = ((minSize * 1.00f) / height);
+                height = minSize;
+                width = (int) (width * scale);
+                Log.i("broncho1","width > height width = " + width + ", height = " + height + ", scale = " + scale);
+            }
+        }
+
+        Log.i("broncho1", "to gif start = " + start + ", length = " + gifLength
+                + ", frame = " + frame + ", width = " + width + ", height = " + height);
+
+        String[] command = GifUtils.getVideo2gifCommand(start, gifLength, frame, path,
+                outputFile, width, height);
         if (command.length != 0) {
             execFFmpegBinary(command);
         } else {

@@ -12,6 +12,7 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -44,7 +45,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class VideoActivity extends BaseActivity implements MediaPlayer.OnCompletionListener, ControllerOverlay.Listener {
+public class VideoActivity extends BaseActivity implements MediaPlayer.OnCompletionListener,
+        ControllerOverlay.Listener {
     private static final String TAG = "VideoActivity";
     private static final String ARG_IMAGE_PATH = "arg_image_path";
     private final static int PROGRESS_CHANGED = 0;
@@ -131,7 +133,8 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
 
         mController = new TrimControllerOverlay(this);
         View rootView = findViewById(R.id.trim_view_root);
-        ((ViewGroup) rootView).addView(mController.getView());
+        if (rootView != null)
+            ((ViewGroup) rootView).addView(mController.getView());
         mController.setListener(this);
         mController.setCanReplay(true);
         playVideo();
@@ -150,14 +153,14 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
                 finishAfterTransition();
                 break;
             case R.id.video_menu_to_gif:
-                onGifSettingsClick();
+                toGif();
                 break;
             case R.id.video_menu_frame:
                 GifUtils.framePicker(this);
                 break;
-            case R.id.video_menu_length:
-                GifUtils.lengthPicker(this);
-                break;
+            //case R.id.video_menu_length:
+            //    GifUtils.lengthPicker(this);
+            //    break;
             case R.id.video_menu_scale:
                 GifUtils.sizePicker(this);
                 break;
@@ -172,14 +175,53 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
         mController.showEnded();
     }
 
-    private boolean onGifSettingsClick() {
-        if (mVideoView.getVisibility() != View.VISIBLE)
-            return false;
-        if(!isModified()){
+    private void toGif() {
+        if (!isModified()) {
             Snackbar.make(mVideoView, R.string.gif_length_error, Snackbar.LENGTH_SHORT).show();
-            return false;
+            return;
         }
         mVideoView.pause();
+        if (!loadFFmpeg()) return;
+
+        String outputFile = getOutputFileName();
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        int maxGifLength = GifUtils.MAX_GIF_LENGTH;
+        int customGifFrame = prefs.getInt(GifUtils.KEY_GIF_FRAME, GifUtils.DEFAULT_GIF_FRAME);
+        int customGifScale = prefs.getInt(GifUtils.KEY_GIF_SIZE, GifUtils.DEFAULT_GIF_SIZE);
+
+        String path = (String) mVideoView.getTag();
+
+        mTrimStartTime = mTrimStartTime < 0 ? 0 : mTrimStartTime;
+        mTrimEndTime = mTrimEndTime < 0 ? mVideoView.getDuration() : mTrimEndTime;
+        int start = mTrimStartTime / 1000;
+        int gifLength = (mTrimEndTime - mTrimStartTime) / 1000;
+        if (gifLength > maxGifLength) {
+            gifLength = start + maxGifLength;
+        }
+        Log.i("broncho", "to gif start = " + start + ", length = " + gifLength
+                + ", frame = " + customGifFrame + ", scale = " + customGifScale);
+        Pair<Integer, Integer> pair = AppUtils.getVideoWidthHeight(path);
+        String[] command = GifUtils.getVideo2gifCommand(start, gifLength, customGifFrame, path,
+                outputFile, (int) (pair.first / Math.sqrt(customGifScale)), (int) (pair.second / Math.sqrt(customGifScale)));
+        if (command.length != 0) {
+            execFFmpegBinary(command);
+        } else {
+            Snackbar.make(mVideoView, R.string.video_to_gif_failed, Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
+    @NonNull
+    private String getOutputFileName() {
+        File outputRoot = new File(AppUtils.GIF_PRODUCTS_FOLDER_PATH);
+        if (!outputRoot.exists()) {
+            outputRoot.mkdir();
+        }
+        String outputName = fileFormat.format(new Date());
+        return new File(outputRoot, outputName).getAbsolutePath();
+    }
+
+    private boolean loadFFmpeg() {
         if (!FFmpeg.getInstance(this).hasLibrary()) {
             String platform = FFmpeg.getInstance(this).getLibraryPlatform();
             if (TextUtils.isEmpty(platform)) {
@@ -190,46 +232,6 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
             return false;
         }
         loadFFMpegBinary();
-
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        File outputRoot = new File(AppUtils.GIF_PRODUCTS_FOLDER_PATH);
-        if (!outputRoot.exists()) {
-            outputRoot.mkdir();
-        }
-        String outputName = fileFormat.format(new Date());
-        String outputFile = new File(outputRoot, outputName).getAbsolutePath();
-
-        int customGifLength = prefs.getInt(GifUtils.KEY_GIF_LENGTH, GifUtils.DEFAULT_GIF_LENGTH);
-        int customGifFrame = prefs.getInt(GifUtils.KEY_GIF_FRAME, GifUtils.DEFAULT_GIF_FRAME);
-        int customGifScale = prefs.getInt(GifUtils.KEY_GIF_SIZE, GifUtils.DEFAULT_GIF_SIZE);
-
-        String info = (String) mVideoView.getTag();
-//        int videoDuration = mVideoView.getDuration() / 1000;
-//        int videoCurrenPosition = mVideoView.getCurrentPosition() / 1000;
-//        int gifLength = videoDuration - videoCurrenPosition;
-//        if (gifLength <= GifUtils.MIN_GIF_LENGTH) {
-//            gifLength = GifUtils.MIN_GIF_LENGTH;
-//            videoCurrenPosition = videoDuration - GifUtils.DEFAULT_GIF_LENGTH < 0 ? 0 : (videoDuration - GifUtils.DEFAULT_GIF_LENGTH);
-//        } else if (gifLength > customGifLength) {
-//            gifLength = customGifLength;
-//        }
-
-        int start = mTrimStartTime / 1000;
-        int gifLength = (mTrimEndTime - mTrimStartTime) / 1000;
-        if(mTrimStartTime == 0 && mTrimEndTime == 0){
-            gifLength = start + customGifLength;
-        }
-        Log.i("broncho", "to gif start = " + start + ", length = " + gifLength
-                + ", frame = " + customGifFrame + ", scale = " + customGifScale);
-        Pair<Integer, Integer> pair = AppUtils.getVideoWidthHeight(info);
-        String cmd = GifUtils.getVideo2gifCommand(start, gifLength, customGifFrame, info,
-                outputFile, (int) (pair.first / Math.sqrt(customGifScale)), (int) (pair.second / Math.sqrt(customGifScale)));
-        String[] command = cmd.split(" ");
-        if (command.length != 0) {
-            execFFmpegBinary(command);
-        } else {
-            Snackbar.make(mVideoView, R.string.video_to_gif_failed, Snackbar.LENGTH_SHORT).show();
-        }
         return true;
     }
 
@@ -348,14 +350,25 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
 
     @Override
     public void onSeekEnd(int time, int trimStartTime, int trimEndTime) {
-        int customGifLength = PreferenceManager.getDefaultSharedPreferences(this)
-                .getInt(GifUtils.KEY_GIF_LENGTH, GifUtils.DEFAULT_GIF_LENGTH) * 1000;
+        time = time < 0 ? 0 : time;
+        trimStartTime = trimStartTime < 0 ? 0 : trimStartTime;
+        trimEndTime = trimEndTime < 0 ? mVideoView.getDuration() : trimEndTime;
+
         mDragging = false;
         mVideoView.seekTo(time);
-        mTrimStartTime = trimStartTime < 0 ? 0 : trimStartTime;
-        mTrimEndTime = trimEndTime <= 0 ? mVideoView.getDuration() : trimEndTime;
-        if(mTrimEndTime - mTrimStartTime > customGifLength)
-            mTrimEndTime = mTrimStartTime + customGifLength;
+        int maxLength = GifUtils.MAX_GIF_LENGTH * 1000;
+        Log.i("broncho1", "mTrimStartTime = " + mTrimStartTime / 1000 + ", trimStartTime = " + trimStartTime / 1000);
+        mTrimEndTime = trimEndTime;//结束时间
+        if (mTrimStartTime / 1000 != trimStartTime / 1000) {//拖动了起始位置
+            mTrimStartTime = trimStartTime;
+            if (mTrimEndTime - mTrimStartTime > maxLength)
+                mTrimEndTime = mTrimStartTime + maxLength;
+        } else {//两个都拖动或者值拖动了后面
+            mTrimStartTime = trimStartTime;
+            if (mTrimEndTime - mTrimStartTime > maxLength)
+                mTrimStartTime = (mTrimEndTime - maxLength) < 0 ? 0 : (mTrimEndTime - maxLength);
+        }
+
         mIsInProgressCheck = false;
         // If the position is bigger than the end point of trimming, show the
         setProgress();
@@ -398,9 +411,8 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
         int duration = mVideoView.getDuration();
         if (duration > 0 && mTrimEndTime <= 0) {
             mTrimEndTime = duration;
-            int max = PreferenceManager.getDefaultSharedPreferences(this)
-                    .getInt(GifUtils.KEY_GIF_LENGTH, GifUtils.DEFAULT_GIF_LENGTH) * 1000;
-            if(mTrimEndTime - mTrimStartTime > max)
+            int max = GifUtils.MAX_GIF_LENGTH * 1000;
+            if (mTrimEndTime - mTrimStartTime > max)
                 mTrimEndTime = mTrimStartTime + max;
         }
 
@@ -415,7 +427,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
 
         // Considering that we only trim at sync frame, we don't want to trim
         // when the time interval is too short or too close to the origin.
-        if (delta < 100 || Math.abs(mVideoView.getDuration() - delta) < 100) {
+        if (delta < 100 /*|| Math.abs(mVideoView.getDuration() - delta) < 100*/) {
             return false;
         } else {
             return true;

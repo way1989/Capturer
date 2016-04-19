@@ -63,10 +63,7 @@ public class AppUtils {
             // 取得视频的长度(单位为毫秒)
             String time = retriever
                     .extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-            // 取得视频的长度(单位为秒)
-            int totalSeconds = Integer.valueOf(time) / 1000;
-
-            totalDuration = getVideoFormatTime(totalSeconds);
+            totalDuration = getVideoFormatTime(Integer.valueOf(time));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

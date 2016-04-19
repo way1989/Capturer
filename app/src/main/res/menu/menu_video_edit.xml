@@ -7,10 +7,10 @@
         android:id="@+id/video_menu_to_gif"
         android:title="@string/video_to_gif"
         app:showAsAction="ifRoom" />
-    <item
+<!--    <item
         android:id="@+id/video_menu_length"
         android:title="@string/video_set_length"
-        app:showAsAction="never" />
+        app:showAsAction="never" />-->
 
     <item
         android:id="@+id/video_menu_frame"

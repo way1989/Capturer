@@ -58,6 +58,5 @@ public interface ControllerOverlay {
         void onHidden();
 
         void onReplay();
-        // void onPlayTrimVideo();//add by guanjw
     }
 }

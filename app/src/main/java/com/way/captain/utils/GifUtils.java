@@ -19,8 +19,6 @@ import com.way.captain.R;
  */
 public class GifUtils {
 
-    public static final int DEFAULT_GIF_LENGTH = 30;
-    public static final int MIN_GIF_LENGTH = 2;
     public static final int MAX_GIF_LENGTH = 30;
     public static final int DEFAULT_GIF_SIZE = 4;
     public static final int DEFAULT_GIF_FRAME = 12;
@@ -28,7 +26,7 @@ public class GifUtils {
     public static final String KEY_GIF_FRAME = "gif_frame";
     public static final String KEY_GIF_SIZE = "gif_size";
 
-    public static String getVideo2gifCommand(long start, long length, int frame,
+    public static String[] getVideo2gifCommand(long start, long length, int frame,
                                              String sourcePath, String outPath, int width, int height) {
         StringBuilder command = new StringBuilder("-ss ");
         command.append(start);
@@ -45,12 +43,12 @@ public class GifUtils {
         command.append(" ");
         command.append(outPath);
         Log.i("broncho", "command = " + command.toString());
-        return command.toString();
+        return command.toString().split(" ");
     }
 
     public static void lengthPicker(final Activity activity) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
-        int length = prefs.getInt(KEY_GIF_LENGTH, DEFAULT_GIF_LENGTH);
+        int length = prefs.getInt(KEY_GIF_LENGTH, MAX_GIF_LENGTH);
         final SharedPreferences.Editor editor = prefs.edit();
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         View view = LayoutInflater.from(activity).inflate(R.layout.number_picker, null);
@@ -77,7 +75,7 @@ public class GifUtils {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                editor.putInt(KEY_GIF_LENGTH, DEFAULT_GIF_LENGTH).apply();
+                editor.putInt(KEY_GIF_LENGTH, MAX_GIF_LENGTH).apply();
             }
         });
         AlertDialog dialog = builder.create();

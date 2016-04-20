@@ -181,4 +181,5 @@
     <string name="gif_quality_high">High</string>
     <string name="gif_quality_normal">Normal</string>
     <string name="gif_quality_low">Low</string>
+    <string name="all_rights_reserved">Copyright © 2012-2016 Broncho. All Rights Reserved.</string>
 </resources>

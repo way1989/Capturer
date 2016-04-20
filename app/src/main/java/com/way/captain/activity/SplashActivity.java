@@ -43,7 +43,7 @@ public class SplashActivity extends AppCompatActivity {
         finish();
     }
 
-    private void setStatusBarColor() {
+    private void setStatusBarNavigationBarColor() {
         final android.view.Window window = getWindow();
         ObjectAnimator statusBarColor = ObjectAnimator.ofInt(window,
                 "statusBarColor", window.getStatusBarColor(), getResources().getColor(R.color.colorPrimaryDark));
@@ -72,7 +72,7 @@ public class SplashActivity extends AppCompatActivity {
                 mHandler.sendEmptyMessageDelayed(HANDLER_MESSAGE_NEXT_ACTIVITY, 500L);
             }
         }).setDuration(750);
-        setStatusBarColor();
+        setStatusBarNavigationBarColor();
         setBackgroundColor();
     }
 

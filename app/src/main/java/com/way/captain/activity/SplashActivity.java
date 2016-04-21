@@ -1,5 +1,8 @@
 package com.way.captain.activity;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
@@ -8,12 +11,16 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.way.captain.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SplashActivity extends AppCompatActivity {
     private static final ArgbEvaluator ARGB_EVALUATOR = new ArgbEvaluator();
@@ -23,12 +30,14 @@ public class SplashActivity extends AppCompatActivity {
     TextView title;
     View foreMask;
     View logo;
+    ColorDrawable colorDrawable;
     Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.what == HANDLER_MESSAGE_ANIMATION) {
-                playAnimator();
+                //playAnimator();
+                playColorAnimator();
             } else if (msg.what == HANDLER_MESSAGE_NEXT_ACTIVITY) {
                 next();
             }
@@ -43,26 +52,37 @@ public class SplashActivity extends AppCompatActivity {
         finish();
     }
 
-    private void setStatusBarNavigationBarColor() {
+    private void playColorAnimator() {
+        foreMask.setAlpha(0f);//rest the foreMask alpha to 0
+        final List<Animator> animList = new ArrayList<>();
+        final int toColor = getResources().getColor(R.color.colorPrimaryDark);
         final android.view.Window window = getWindow();
         ObjectAnimator statusBarColor = ObjectAnimator.ofInt(window,
-                "statusBarColor", window.getStatusBarColor(), getResources().getColor(R.color.colorPrimaryDark));
-        statusBarColor.setEvaluator(new ArgbEvaluator());
-        statusBarColor.setDuration(1500L);
-        statusBarColor.start();
+                "statusBarColor", window.getStatusBarColor(), toColor);
+        statusBarColor.setEvaluator(ARGB_EVALUATOR);
+        animList.add(statusBarColor);
 
         ObjectAnimator navigationBarColor = ObjectAnimator.ofInt(window,
-                "navigationBarColor", window.getNavigationBarColor(), getResources().getColor(R.color.colorPrimaryDark));
-        navigationBarColor.setEvaluator(new ArgbEvaluator());
-        navigationBarColor.setDuration(1500L);
-        navigationBarColor.start();
-    }
+                "navigationBarColor", window.getNavigationBarColor(), toColor);
+        navigationBarColor.setEvaluator(ARGB_EVALUATOR);
+        animList.add(navigationBarColor);
 
-    protected void setBackgroundColor() {
-        ColorDrawable colorDrawable = new ColorDrawable(Color.BLACK);
-        ObjectAnimator.ofObject(colorDrawable, "color", ARGB_EVALUATOR, getResources().getColor(R.color.colorPrimaryDark))
-                .setDuration(1500L).start();
-        image.setBackground(colorDrawable);
+        ObjectAnimator backgroundColor = ObjectAnimator.ofObject(colorDrawable, "color", ARGB_EVALUATOR, toColor);
+        animList.add(backgroundColor);
+
+        final AnimatorSet animSet = new AnimatorSet();
+        animSet.setInterpolator(new LinearOutSlowInInterpolator());
+        animSet.setDuration(1500L);
+        animSet.playTogether(animList);
+        animSet.start();
+
+        animSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                mHandler.sendEmptyMessageDelayed(HANDLER_MESSAGE_NEXT_ACTIVITY, 500L);
+            }
+        });
     }
 
     private void playAnimator() {
@@ -72,8 +92,6 @@ public class SplashActivity extends AppCompatActivity {
                 mHandler.sendEmptyMessageDelayed(HANDLER_MESSAGE_NEXT_ACTIVITY, 500L);
             }
         }).setDuration(750);
-        setStatusBarNavigationBarColor();
-        setBackgroundColor();
     }
 
     @Override
@@ -85,7 +103,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void settingBackground() {
-
+        // TODO: 16-4-21 may add AD...
 //        Glide.with(image.getContext()).load(R.drawable.zhongqiu_init_photo)
 //                .override(DensityUtil.getDisplayWidth(this), DensityUtil.getDisplayHeight(this))
 //                .into(image);
@@ -97,6 +115,8 @@ public class SplashActivity extends AppCompatActivity {
         title = (TextView) findViewById(R.id.title);
         foreMask = findViewById(R.id.foreMask);
         logo = findViewById(R.id.logo);
+        colorDrawable = new ColorDrawable(Color.BLACK);
+        image.setBackground(colorDrawable);
         mHandler.sendEmptyMessageDelayed(HANDLER_MESSAGE_ANIMATION, 900L);
     }
 }

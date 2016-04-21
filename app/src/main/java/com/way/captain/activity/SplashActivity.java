@@ -14,6 +14,7 @@ import android.os.Message;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -36,6 +37,7 @@ public class SplashActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.what == HANDLER_MESSAGE_ANIMATION) {
+                logo.animate().scaleX(1f).scaleY(1f).setInterpolator(new OvershootInterpolator()).setDuration(500Lw);
                 //playAnimator();
                 playColorAnimator();
             } else if (msg.what == HANDLER_MESSAGE_NEXT_ACTIVITY) {
@@ -115,6 +117,8 @@ public class SplashActivity extends AppCompatActivity {
         title = (TextView) findViewById(R.id.title);
         foreMask = findViewById(R.id.foreMask);
         logo = findViewById(R.id.logo);
+        logo.setScaleX(0f);
+        logo.setScaleY(0f);
         colorDrawable = new ColorDrawable(Color.BLACK);
         image.setBackground(colorDrawable);
         mHandler.sendEmptyMessageDelayed(HANDLER_MESSAGE_ANIMATION, 900L);

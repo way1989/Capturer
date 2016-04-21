@@ -29,6 +29,7 @@ import com.way.captain.data.DataInfo;
 import com.way.captain.fragment.BaseFragment;
 import com.way.captain.fragment.ScreenshotFragment;
 import com.way.captain.service.ShakeService;
+import com.way.captain.utils.AppUtils;
 import com.way.captain.utils.OsUtil;
 
 import java.util.ArrayList;
@@ -116,6 +117,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         if (OsUtil.redirectToPermissionCheckIfNeeded(this)) {
             return;
         }
+        if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean(AppUtils.APP_FIRST_RUN, true))
+            startActivity(new Intent(MainActivity.this, GuideActivity.class));
         setContentView(R.layout.activity_main);
         setExitSharedElementCallback(mCallback);
 

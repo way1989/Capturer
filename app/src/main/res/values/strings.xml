@@ -182,4 +182,12 @@
     <string name="gif_quality_normal">Normal</string>
     <string name="gif_quality_low">Low</string>
     <string name="all_rights_reserved">Copyright © 2012-2016 Broncho. All Rights Reserved.</string>
+    <string name="skip">skip</string>
+    <string name="done">done</string>
+    <string name="welcome_head_1">Shake you phone to show main menu</string>
+    <string name="welcome_content_1">It\'s easy to take screenshot,screen record,full page,free screenshot,rect screenshot</string>
+    <string name="welcome_head_2">One key to share you screenshot or screen record</string>
+    <string name="welcome_content_2">It\'s easy to share screenshot, screen record or screen gif to your friends</string>
+    <string name="welcome_head_3">Screen record can translate to gif picture</string>
+    <string name="welcome_content_3">It\'s easy to translate your screen record to gif picture</string>
 </resources>

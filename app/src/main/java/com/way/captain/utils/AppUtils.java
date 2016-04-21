@@ -30,6 +30,7 @@ public class AppUtils {
     public static final String VIDEOS_FOLDER_NAME = "ScreenRecord";
     public static final String VIDEOS_FOLDER_PATH = new File(APP_ABSOLUTE_ROOT_PATH,
             VIDEOS_FOLDER_NAME).getAbsolutePath();
+    public static final String APP_FIRST_RUN = "app_first_run";
 
     public static boolean isMarshmallow() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;

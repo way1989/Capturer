@@ -11,8 +11,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Vibrator;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.view.View;
@@ -77,7 +79,13 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
             return START_STICKY;
         }
         mIsRunning = true;
-        startForeground(NOTIFICATION_ID, createNotification());
+        if (Build.VERSION.SDK_INT < 18) {
+            startForeground(NOTIFICATION_ID, createNotification());//API < 18 ，此方法能有效隐藏Notification上的图标
+        } else {
+            Intent innerIntent = new Intent(this, GrayInnerService.class);
+            startService(innerIntent);
+            startForeground(NOTIFICATION_ID, new Notification());
+        }
         return START_REDELIVER_INTENT;
     }
 
@@ -217,5 +225,26 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
 
     public boolean isShowDialog() {
         return mFloatMenuDialog != null && mFloatMenuDialog.isShowing();
+    }
+
+    /**
+     * 给 API >= 18 的平台上用的灰色保活手段
+     */
+    public static class GrayInnerService extends Service {
+
+        @Override
+        public int onStartCommand(Intent intent, int flags, int startId) {
+            startForeground(NOTIFICATION_ID, new Notification());
+            stopForeground(true);
+            stopSelf();
+            return super.onStartCommand(intent, flags, startId);
+        }
+
+        @Nullable
+        @Override
+        public IBinder onBind(Intent intent) {
+            return null;
+        }
+
     }
 }

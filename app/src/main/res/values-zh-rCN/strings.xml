@@ -153,4 +153,13 @@
     <string name="gif_quality_high">精细</string>
     <string name="gif_quality_normal">标准</string>
     <string name="gif_quality_low">压缩</string>
+
+    <string name="skip">跳过</string>
+    <string name="done">完成</string>
+    <string name="welcome_head_1">摇一摇手机启动主功能菜单</string>
+    <string name="welcome_content_1">轻松实现截屏,录屏,长截屏,任意截屏以及矩形区域截屏</string>
+    <string name="welcome_head_2">图片和视频支持一键分享</string>
+    <string name="welcome_content_2">轻松实现将截屏内容,录制的屏幕或者GIF图分享给朋友</string>
+    <string name="welcome_head_3">视频支持快速转换成GIF动态图</string>
+    <string name="welcome_content_3">轻松实现将录制的屏幕内容视频制作成GIF动态图</string>
 </resources>

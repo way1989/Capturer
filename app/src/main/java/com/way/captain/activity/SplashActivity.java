@@ -37,7 +37,6 @@ public class SplashActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.what == HANDLER_MESSAGE_ANIMATION) {
-                logo.animate().scaleX(1f).scaleY(1f).setInterpolator(new OvershootInterpolator()).setDuration(500L);
                 //playAnimator();
                 playColorAnimator();
             } else if (msg.what == HANDLER_MESSAGE_NEXT_ACTIVITY) {
@@ -73,8 +72,7 @@ public class SplashActivity extends AppCompatActivity {
         animList.add(backgroundColor);
 
         final AnimatorSet animSet = new AnimatorSet();
-        animSet.setInterpolator(new LinearOutSlowInInterpolator());
-        animSet.setDuration(1500L);
+        animSet.setDuration(1000L);
         animSet.playTogether(animList);
         animSet.start();
 
@@ -117,8 +115,9 @@ public class SplashActivity extends AppCompatActivity {
         title = (TextView) findViewById(R.id.title);
         foreMask = findViewById(R.id.foreMask);
         logo = findViewById(R.id.logo);
-        logo.setScaleX(0f);
-        logo.setScaleY(0f);
+//        logo.setScaleX(0f);
+//        logo.setScaleY(0f);
+//        logo.animate().scaleX(1.0f).scaleY(1.0f).setInterpolator(new OvershootInterpolator()).setDuration(300L);
         colorDrawable = new ColorDrawable(Color.BLACK);
         image.setBackground(colorDrawable);
         mHandler.sendEmptyMessageDelayed(HANDLER_MESSAGE_ANIMATION, 900L);

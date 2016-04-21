@@ -37,7 +37,7 @@ public class SplashActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.what == HANDLER_MESSAGE_ANIMATION) {
-                logo.animate().scaleX(1f).scaleY(1f).setInterpolator(new OvershootInterpolator()).setDuration(500Lw);
+                logo.animate().scaleX(1f).scaleY(1f).setInterpolator(new OvershootInterpolator()).setDuration(500L);
                 //playAnimator();
                 playColorAnimator();
             } else if (msg.what == HANDLER_MESSAGE_NEXT_ACTIVITY) {

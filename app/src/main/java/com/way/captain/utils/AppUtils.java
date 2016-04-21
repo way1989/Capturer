@@ -1,11 +1,23 @@
 package com.way.captain.utils;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.support.v7.app.AlertDialog;
 import android.util.Pair;
 
+import com.way.captain.R;
+import com.way.captain.data.DataInfo;
+
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Formatter;
 import java.util.Locale;
 
@@ -31,6 +43,9 @@ public class AppUtils {
     public static final String VIDEOS_FOLDER_PATH = new File(APP_ABSOLUTE_ROOT_PATH,
             VIDEOS_FOLDER_NAME).getAbsolutePath();
     public static final String APP_FIRST_RUN = "app_first_run";
+    public static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
+    public static final String GIF_SHARE_SUBJECT_TEMPLATE = "Gif (%s)";
+    public static final String SCREEN_RECORD_SHARE_SUBJECT_TEMPLATE = "Screen record (%s)";
 
     public static boolean isMarshmallow() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
@@ -138,9 +153,70 @@ public class AppUtils {
 
         return timeStringBuilder.toString();
     }
+
     // Throws NullPointerException if the input is null.
     public static <T> T checkNotNull(T object) {
         if (object == null) throw new NullPointerException();
         return object;
+    }
+
+    public static void showDetails(Activity activity, String path, int type) {
+        String message = getDetails(activity, path, type);
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(R.string.image_info).setMessage(message).setPositiveButton(android.R.string.ok, null);
+        builder.create().show();
+    }
+
+    private static String getDetails(Activity activity, String path, int type) {
+        File file = new File(path);
+        String length = android.text.format.Formatter.formatFileSize(activity, file.length());
+        length = activity.getString(R.string.image_info_length, length);
+        String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(file.lastModified()));
+        time = activity.getString(R.string.image_info_time, time);
+        String location = activity.getString(R.string.image_info_path, path);
+        switch (type) {
+            case DataInfo.TYPE_SCREEN_SHOT:
+            case DataInfo.TYPE_SCREEN_GIF:
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(path, options);
+                int height = options.outHeight;
+                int width = options.outWidth;
+                String size = activity.getString(R.string.image_info_size, width, height);
+
+                return size + "\n" + length + "\n" + time + "\n" + location;
+            case DataInfo.TYPE_SCREEN_RECORD:
+                Pair<Integer, Integer> pair = AppUtils.getVideoWidthHeight(path);
+                String sizeVideo = activity.getString(R.string.image_info_size, pair.first, pair.second);
+                String duration = AppUtils.getVideoDuration(path);
+                duration = activity.getString(R.string.image_info_duration, duration);
+                return sizeVideo + "\n" + duration + "\n" + length + "\n" + time + "\n" + location;
+
+        }
+        return "";
+    }
+
+    public static void shareScreenshot(Context context, String path, int type) {
+        String subjectDate = DateFormat.getDateTimeInstance().format(new Date(System.currentTimeMillis()));
+        String subjectString = SCREENSHOT_SHARE_SUBJECT_TEMPLATE;
+        switch (type) {
+            case DataInfo.TYPE_SCREEN_SHOT:
+                subjectString = SCREENSHOT_SHARE_SUBJECT_TEMPLATE;
+                break;
+            case DataInfo.TYPE_SCREEN_GIF:
+                subjectString = GIF_SHARE_SUBJECT_TEMPLATE;
+                break;
+            case DataInfo.TYPE_SCREEN_RECORD:
+                subjectString = SCREEN_RECORD_SHARE_SUBJECT_TEMPLATE;
+                break;
+        }
+        String subject = String.format(subjectString, subjectDate);
+        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+        sharingIntent.setType("image/png");
+        sharingIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(path)));
+        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        Intent chooserIntent = Intent.createChooser(sharingIntent, null);
+        chooserIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(chooserIntent);
     }
 }

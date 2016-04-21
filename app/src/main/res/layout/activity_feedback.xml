@@ -9,15 +9,18 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.way.captain.activity.FeedbackActivity">
-
-    <EditText
-        android:id="@+id/inputText"
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/feedback_text_width"
-        android:gravity="top"
-        android:hint="@string/feedback_hint"
-        android:padding="@dimen/global_margin_standard"
-        android:textSize="@dimen/global_font_large" />
+        android:layout_height="@dimen/feedback_text_width">
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/inputText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="top"
+            android:hint="@string/feedback_hint"
+            android:padding="@dimen/global_margin_standard"
+            android:textSize="@dimen/global_font_large" />
+    </android.support.design.widget.TextInputLayout>
 
     <Button
         android:id="@+id/postButton"

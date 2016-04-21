@@ -59,6 +59,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             startActivity(new Intent(MainActivity.this, FeedbackActivity.class));
         }
     };
+    Runnable navigateHelp = new Runnable() {
+        public void run() {
+            startActivity(new Intent(MainActivity.this, HelpActivity.class));
+        }
+    };
     Runnable navigateSettings = new Runnable() {
         public void run() {
             startActivity(new Intent(MainActivity.this, SettingsActivity.class));
@@ -234,6 +239,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 break;
             case R.id.nav_feedback:
                 mNavigationView.post(navigateFeedback);
+                break;
+            case R.id.nav_help:
+                mNavigationView.post(navigateHelp);
                 break;
             case R.id.nav_settings:
                 mNavigationView.post(navigateSettings);

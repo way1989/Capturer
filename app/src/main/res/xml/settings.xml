@@ -59,7 +59,7 @@
             android:title="@string/settings_author_title">
             <intent
                 android:action="android.intent.action.VIEW"
-                android:data="http://blog.csdn.net/way_ping_li" />
+                android:data="https://github.com/way1989" />
         </Preference>
         <Preference
             android:key="key_version"

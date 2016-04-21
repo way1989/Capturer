@@ -22,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
@@ -221,17 +222,17 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
         int height = pair.second;
 
         if (Math.min(width, height) > minSize) {
-            Log.i("broncho1","width or height > minSize");
+            Log.i("broncho1", "width or height > minSize");
             if (width < height) {
                 float scale = ((minSize * 1.00f) / width);
                 width = minSize;
                 height = (int) (height * scale);
-                Log.i("broncho1","width < height width = " + width + ", height = " + height + ", scale = " + scale);
+                Log.i("broncho1", "width < height width = " + width + ", height = " + height + ", scale = " + scale);
             } else {
                 float scale = ((minSize * 1.00f) / height);
                 height = minSize;
                 width = (int) (width * scale);
-                Log.i("broncho1","width > height width = " + width + ", height = " + height + ", scale = " + scale);
+                Log.i("broncho1", "width > height width = " + width + ", height = " + height + ", scale = " + scale);
             }
         }
 
@@ -294,12 +295,15 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
             FFmpeg.getInstance(this).execute(command, new ExecuteBinaryResponseHandler() {
                 @Override
                 public void onFailure(String s) {
-                    Snackbar.make(mVideoView, R.string.video_to_gif_failed, Snackbar.LENGTH_SHORT).show();
+                    //Snackbar.make(mVideoView, R.string.video_to_gif_failed, Snackbar.LENGTH_SHORT).show();
+                    Toast.makeText(VideoActivity.this, R.string.video_to_gif_failed, Toast.LENGTH_SHORT).show();
+
                 }
 
                 @Override
                 public void onSuccess(String s) {
-                    Snackbar.make(mVideoView, R.string.video_to_gif_success, Snackbar.LENGTH_SHORT).show();
+                    //Snackbar.make(mVideoView, R.string.video_to_gif_success, Snackbar.LENGTH_SHORT).show();
+                    Toast.makeText(VideoActivity.this, R.string.video_to_gif_success, Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
@@ -319,7 +323,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
                 public void onFinish() {
                     Log.d(TAG, "Finished command : ffmpeg " + command);
                     progressDialog.dismiss();
-                    //onBackPressed();
+                    onBackPressed();
                 }
             });
         } catch (FFmpegCommandAlreadyRunningException e) {

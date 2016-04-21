@@ -7,11 +7,11 @@
         android:orderInCategory="100"
         android:icon="@drawable/ic_info"
         android:title="@string/image_info"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/image_share"
         android:orderInCategory="100"
         android:icon="@drawable/ic_menu_share"
-        app:showAsAction="never"
+        app:showAsAction="ifRoom"
         android:title="@string/share" />
 </menu>

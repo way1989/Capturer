@@ -162,4 +162,6 @@
     <string name="welcome_content_2">轻松实现将截屏内容,录制的屏幕或者GIF图分享给朋友</string>
     <string name="welcome_head_3">视频支持快速转换成GIF动态图</string>
     <string name="welcome_content_3">轻松实现将录制的屏幕内容视频制作成GIF动态图</string>
+    <string name="screenshot_title">截屏</string>
+    <string name="help">帮助</string>
 </resources>

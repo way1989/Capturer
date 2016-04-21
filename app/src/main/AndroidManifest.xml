@@ -87,8 +87,9 @@
         <service
             android:name=".service.ShakeService"
             android:exported="false" />
-        <service android:name=".service.ShakeService$GrayInnerService"
-            android:exported="false"/>
+        <service
+            android:name=".service.ShakeService$GrayInnerService"
+            android:exported="false" />
 
         <activity
             android:name=".activity.SettingsActivity"
@@ -135,7 +136,8 @@
         </activity>
         <activity
             android:name=".activity.GuideActivity"
-            android:theme="@style/AppTheme.DayNight.NoActionBar"></activity>
+            android:theme="@style/AppTheme.DayNight.NoActionBar" />
+        <activity android:name=".activity.HelpActivity"></activity>
     </application>
 
 </manifest>

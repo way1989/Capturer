@@ -55,7 +55,7 @@
     <string name="show_touches_summary">show a touch indicator when take a screen record</string>
     <string name="use_atouch">Shake</string>
     <string name="about_menu">About</string>
-    <string name="settings_self_title" translatable="false">way</string>
+    <string name="settings_self_title" translatable="false">Broncho</string>
     <string name="settings_author_title">Author</string>
     <string name="settings_version_title">Version</string>
     <string name="settings_happen_category">Trigger Method</string>
@@ -132,7 +132,7 @@
     <string name="nav_day_mode">Day mode</string>
     <string name="screenshot_title">Screenshot</string>
 
-    <string name="image_transition">transition_image</string>
+    <string name="image_transition" translatable="false">transition_image</string>
     <string name="turn_screen_orientation">Keep your device orientation is portrait</string>
 
     <string name="title_activity_details">DetailsActivity</string>
@@ -190,4 +190,5 @@
     <string name="welcome_content_2">It\'s easy to share screenshot, screen record or screen gif to your friends</string>
     <string name="welcome_head_3">Screen record can translate to gif picture</string>
     <string name="welcome_content_3">It\'s easy to translate your screen record to gif picture</string>
+    <string name="help">Help</string>
 </resources>

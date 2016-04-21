@@ -2,7 +2,6 @@ package com.way.captain.fragment;
 
 import android.app.ActivityOptions;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -27,12 +26,10 @@ import com.way.captain.adapter.ScreenshotAdapter;
 import com.way.captain.data.DataInfo;
 import com.way.captain.data.DataLoader;
 import com.way.captain.data.DataProvider;
+import com.way.captain.utils.AppUtils;
 import com.way.captain.utils.explosion.ExplosionField;
 import com.way.captain.widget.LoadingEmptyContainer;
 
-import java.io.File;
-import java.text.DateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +43,6 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     public static final String EXTRA_DATAS = "extra_datas";
     public static final String EXTRA_STARTING_POSITION = "extra_starting_item_position";
     public static final String EXTRA_CURRENT_POSITION = "extra_current_item_position";
-    public static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
     private static final int SCREENSHOT_LOADER_ID = 0;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
@@ -224,9 +220,12 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
 
     @Override
     public boolean onMenuItemClick(final MenuItem item) {
+        int type = getArguments().getInt(ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT);
+        String path = mDataProvider.getItem(mClickPosition);
+
         switch (item.getItemId()) {
             case R.id.gif_item_share:
-                shareScreenshot();
+                AppUtils.shareScreenshot(getContext(), path, type);
                 return true;
             case R.id.gif_item_delete:
                 final View itemView = mRecyclerView.findViewHolderForAdapterPosition(mClickPosition).itemView;
@@ -238,22 +237,13 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
                     }
                 }, getResources().getInteger(android.R.integer.config_mediumAnimTime));
                 return true;
+            case R.id.image_info:
+                AppUtils.showDetails(getActivity(), path, type);
+                break;
             default:
                 break;
         }
         return false;
-    }
-
-    private void shareScreenshot() {
-        String subjectDate = DateFormat.getDateTimeInstance().format(new Date(System.currentTimeMillis()));
-        String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
-        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-        sharingIntent.setType("image/png");
-        sharingIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(mScreenshotAdapter.getItem(mClickPosition))));
-        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-        Intent chooserIntent = Intent.createChooser(sharingIntent, null);
-        chooserIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(chooserIntent);
     }
 
     private void deleteScreenshot() {

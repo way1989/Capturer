@@ -66,6 +66,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
         }
     };
     private boolean mDragging;
+    private int mChoiceQualityItem;
 
     public static void startVideoActivity(Activity context, String path, View imageView) {
         Intent i = new Intent(context, VideoActivity.class);
@@ -182,9 +183,16 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
                 .setSingleChoiceItems(R.array.gif_quality_items, 0, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        toGif(which);
+                        //toGif(which);
+                        mChoiceQualityItem = which;
                     }
                 }).setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        toGif(mChoiceQualityItem);
+                    }
+                })
                 .create().show();
     }
 

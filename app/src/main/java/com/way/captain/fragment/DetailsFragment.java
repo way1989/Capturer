@@ -35,6 +35,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
     private static final String ARG_IMAGE_PATH = "arg_image_path";
     private static final String ARG_IMAGE_TYPE = "arg_image_type";
     private ImageView mImageView;
+    private ImageView mPlayButton;
     private SubsamplingScaleImageView subsamplingScaleImageView;
 
     public static DetailsFragment newInstance(int type, String path) {
@@ -53,6 +54,20 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
         Rect containerBounds = new Rect();
         container.getHitRect(containerBounds);
         return view.getLocalVisibleRect(containerBounds);
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if(mImageView == null || mImageView.getVisibility() != View.VISIBLE)
+            return;
+        final int type = getArguments().getInt(ARG_IMAGE_TYPE, DataInfo.TYPE_SCREEN_SHOT);
+        final String path = getArguments().getString(ARG_IMAGE_PATH);
+        if(type == DataInfo.TYPE_SCREEN_GIF && !isVisibleToUser && mImageView != null){
+            Glide.clear(mImageView);
+            GlideHelper.loadResourceBitmap(path, mImageView);
+            mPlayButton.setVisibility(View.VISIBLE);
+        }
     }
 
     @Nullable
@@ -120,9 +135,9 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
                     }).fitCenter().into(mImageView);
         }
         if (type != DataInfo.TYPE_SCREEN_SHOT) {
-            ImageView playIndicator = (ImageView) view.findViewById(R.id.video_indicator);
-            playIndicator.setVisibility(View.VISIBLE);
-            playIndicator.setOnClickListener(this);
+            mPlayButton = (ImageView) view.findViewById(R.id.video_indicator);
+            mPlayButton.setVisibility(View.VISIBLE);
+            mPlayButton.setOnClickListener(this);
         }
     }
 

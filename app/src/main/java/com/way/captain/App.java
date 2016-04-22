@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatDelegate;
 
 import com.bugtags.library.Bugtags;
+import com.bumptech.glide.Glide;
 import com.way.captain.fragment.SettingsFragment;
 import com.way.captain.service.ShakeService;
 import com.way.downloadlibrary.WDMSharPre;
@@ -46,5 +47,11 @@ public class App extends Application {
         //start shake service
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsFragment.SHAKE_KEY, true))
             startService(new Intent(this, ShakeService.class));
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        Glide.with(this).onTrimMemory(level);
     }
 }

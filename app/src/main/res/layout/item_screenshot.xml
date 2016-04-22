@@ -8,8 +8,8 @@
     android:layout_margin="4dp"
     android:foreground="?selectableItemBackground"
     card_view:cardBackgroundColor="?android:colorBackground"
-    card_view:cardCornerRadius="4dp"
-    card_view:cardElevation="2dp">
+    card_view:cardCornerRadius="2dp"
+    card_view:cardElevation="4dp">
 
     <com.way.captain.widget.SimpleTagImageView xmlns:simple="http://schemas.android.com/apk/res-auto"
         android:id="@+id/ic_screenshot"

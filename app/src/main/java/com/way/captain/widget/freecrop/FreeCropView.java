@@ -173,21 +173,19 @@ public class FreeCropView extends ViewGroup {
         canvas.drawBitmap(resizeBitmap, 0, 0, paint);
         Log.i("FreeCrop", "clipPath = " + clipStroke.boundingBox);
         canvas.save();
-        if (resizeBitmap != null && !resizeBitmap.isRecycled())
+        if (!resizeBitmap.isRecycled())
             resizeBitmap.recycle();
         int x = 0, y = 0, w = 0, h = 0;
-        if (bitmap != null) {
-            int l = (int) (clipStroke.boundingBox.left);
-            int t = (int) (clipStroke.boundingBox.top);
-            int r = (int) (clipStroke.boundingBox.right);
-            int b = (int) (clipStroke.boundingBox.bottom);
-            x = l;
-            y = t;
-            w = r - l;
-            h = b - t;
-        }
+        int l = (int) (clipStroke.boundingBox.left);
+        int t = (int) (clipStroke.boundingBox.top);
+        int r = (int) (clipStroke.boundingBox.right);
+        int b = (int) (clipStroke.boundingBox.bottom);
+        x = l;
+        y = t;
+        w = r - l;
+        h = b - t;
         Bitmap cropped = Bitmap.createBitmap(bitmap, x, y, w, h, null, false);
-        if (bitmap != null && !bitmap.isRecycled())
+        if (!bitmap.isRecycled())
             bitmap.recycle();
         return cropped;
     }

@@ -179,7 +179,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
     private void showGifQualityDialog() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.gif_quality_title)
-                .setItems(R.array.gif_quality_items, new DialogInterface.OnClickListener() {
+                .setSingleChoiceItems(R.array.gif_quality_items, 0, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         toGif(which);

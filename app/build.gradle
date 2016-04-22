@@ -105,4 +105,5 @@ dependencies {
     compile 'com.ogaclejapan.arclayout:library:1.0.1@aar'
     compile 'com.bugtags.library:bugtags-lib:latest.integration'
     compile 'com.android.support:support-v4:23.3.0'
+    compile 'com.thefinestartist:finestwebview:1.2.5'
 }

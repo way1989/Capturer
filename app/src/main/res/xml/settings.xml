@@ -56,11 +56,7 @@
         <Preference
             android:key="about_author"
             android:summary="@string/settings_self_title"
-            android:title="@string/settings_author_title">
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:data="https://github.com/way1989" />
-        </Preference>
+            android:title="@string/settings_author_title"/>
         <Preference
             android:key="key_version"
             android:title="@string/settings_version_title" />

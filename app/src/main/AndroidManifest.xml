@@ -138,6 +138,11 @@
             android:name=".activity.GuideActivity"
             android:theme="@style/AppTheme.DayNight.NoActionBar" />
         <activity android:name=".activity.HelpActivity"></activity>
+        <activity
+            android:name="com.thefinestartist.finestwebview.FinestWebViewActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="sensor"
+            android:theme="@style/AppTheme.DayNight.NoActionBar" />
     </application>
 
 </manifest>

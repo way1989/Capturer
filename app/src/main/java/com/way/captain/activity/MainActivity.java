@@ -23,6 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.thefinestartist.finestwebview.FinestWebView;
 import com.way.captain.App;
 import com.way.captain.R;
 import com.way.captain.data.DataInfo;
@@ -61,7 +62,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     };
     Runnable navigateHelp = new Runnable() {
         public void run() {
-            startActivity(new Intent(MainActivity.this, HelpActivity.class));
+            //startActivity(new Intent(MainActivity.this, HelpActivity.class));
+            new FinestWebView.Builder(MainActivity.this)
+                    .titleDefault(getString(R.string.help))
+                    .titleColorRes(R.color.finestWhite)
+                    .urlColorRes(R.color.finestWhite)
+                    .iconDefaultColorRes(R.color.finestWhite)
+                    .show("https://github.com/way1989/Captain");
         }
     };
     Runnable navigateSettings = new Runnable() {
@@ -238,13 +245,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 mNavigationView.post(navigateShare);
                 break;
             case R.id.nav_feedback:
-                mNavigationView.post(navigateFeedback);
+                mNavigationView.postDelayed(navigateFeedback, 200L);
                 break;
             case R.id.nav_help:
-                mNavigationView.post(navigateHelp);
+                mNavigationView.postDelayed(navigateHelp, 200L);
                 break;
             case R.id.nav_settings:
-                mNavigationView.post(navigateSettings);
+                mNavigationView.postDelayed(navigateSettings, 200L);
                 break;
             default:
                 break;

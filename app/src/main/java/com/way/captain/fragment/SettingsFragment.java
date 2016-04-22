@@ -14,7 +14,9 @@ import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 
+import com.thefinestartist.finestwebview.FinestWebView;
 import com.way.captain.R;
+import com.way.captain.activity.MainActivity;
 import com.way.captain.screenshot.ShellCmdUtils;
 import com.way.captain.service.ShakeService;
 import com.way.captain.utils.AppUtils;
@@ -76,6 +78,14 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             case "key_version":
                 //if(true) throw new NullPointerException("test");
                 FIRUtils.checkForUpdate(getActivity(), true);
+                break;
+            case "about_author":
+                new FinestWebView.Builder(getActivity())
+                        .titleDefault(getString(R.string.settings_self_title))
+                        .titleColorRes(R.color.finestWhite)
+                        .urlColorRes(R.color.finestWhite)
+                        .iconDefaultColorRes(R.color.finestWhite)
+                        .show("https://github.com/way1989");
                 break;
             default:
                 break;

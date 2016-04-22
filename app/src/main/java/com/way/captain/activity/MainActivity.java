@@ -215,7 +215,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             case R.id.action_settings:
                 startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                 return true;
+            case R.id.action_help:
+                navigateHelp.run();
+                return true;
             default:
+
                 break;
         }
         return super.onOptionsItemSelected(item);

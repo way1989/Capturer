@@ -30,6 +30,9 @@ public class FIRUtils {
     public final static void checkForUpdate(final Activity context, final boolean isShowToast) {
         if (context == null)
             return;
+        if (Preferences.getLastCheckTime(context) - System.currentTimeMillis() < 12 * 60 * 60 * 1000 && !isShowToast) {
+            return;
+        }
         final String api_token = context.getResources().getString(R.string.api_token);
         final String app_id = context.getResources().getString(R.string.app_id);
 
@@ -53,6 +56,7 @@ public class FIRUtils {
                 if (progressDialog != null && progressDialog.isShowing()) {
                     progressDialog.dismiss();
                 }
+                Preferences.setLastCheckTime(context, System.currentTimeMillis());
 
                 final AppVersion appVersion = getAppVersion(response);
                 if (appVersion == null) {
@@ -61,7 +65,7 @@ public class FIRUtils {
                 }
                 int appVersionCode = getVersionCode(context);
                 String appVersionName = getVersionName(context);
-                if (appVersionCode < appVersion.getVersionCode()
+                if (appVersionCode != appVersion.getVersionCode()
                         && !TextUtils.equals(appVersionName, appVersion.getVersionName())) {
                     new AlertDialog.Builder(context).setTitle(resources.getString(R.string.new_version_dialog_title, appVersion.getVersionName()))
                             .setMessage(resources.getString(R.string.new_version_dialog_message, appVersion.getChangeLog()))

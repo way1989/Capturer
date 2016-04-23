@@ -113,7 +113,7 @@
         android:background="@drawable/bg_float_record_countdown"
         android:visibility="gone">
 
-        <com.way.captain.widget.timely.TimelyView
+        <com.way.capture.widget.timely.TimelyView
             android:id="@+id/record_overlay_recording"
             android:layout_width="32dip"
             android:layout_height="32dip"

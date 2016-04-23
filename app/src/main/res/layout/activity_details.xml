@@ -3,9 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.way.captain.activity.DetailsActivity">
+    tools:context="com.way.capture.activity.DetailsActivity">
 
-    <com.way.captain.widget.HackyViewPager
+    <com.way.capture.widget.HackyViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

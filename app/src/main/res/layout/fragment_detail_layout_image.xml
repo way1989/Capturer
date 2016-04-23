@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.way.captain.widget.subscaleview.SubsamplingScaleImageView
+    <com.way.capture.widget.subscaleview.SubsamplingScaleImageView
         android:id="@+id/detail_image_height_quality"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -12,17 +12,16 @@
     <com.alexvasilkov.gestures.views.GestureImageView
         android:id="@+id/detail_image"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/theme_captain" />
+        android:layout_height="match_parent" />
 
     <Button
         android:id="@+id/height_quality_btn"
+        style="?android:attr/buttonBarButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginBottom="24dp"
         android:layout_marginEnd="24dp"
-        style="?android:attr/buttonBarButtonStyle"
         android:text="@string/heigh_quality"
         android:visibility="gone" />
 </FrameLayout>

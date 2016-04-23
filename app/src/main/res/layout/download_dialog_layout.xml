@@ -6,7 +6,7 @@
     android:gravity="center"
     android:orientation="vertical">
 
-    <com.way.captain.widget.DownloadProgressBar
+    <com.way.capture.widget.DownloadProgressBar
         android:id="@+id/download_progressbar"
         android:layout_width="120dp"
         android:layout_height="120dp"

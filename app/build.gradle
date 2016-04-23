@@ -26,10 +26,10 @@ def buildTime() {
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
-        applicationId "com.way.captain"
+        applicationId "com.way.capture"
         minSdkVersion 21
         targetSdkVersion 23
         versionCode VERSION_CODE.toInteger()
@@ -77,7 +77,7 @@ android {
         variant.outputs.each { output ->
             def file = output.outputFile
             if (file != null && file.name.endsWith('release.apk')) {//变种名为以release.apk结尾时才修改名字
-                def fileName = file.name.replace(file.name, "Captain_V" + variant.versionName + "_${buildTime()}.apk")
+                def fileName = file.name.replace(file.name, "Capture_V" + variant.versionName + "_${buildTime()}.apk")
                 output.outputFile = new File(file.parentFile, fileName)
             }
         }

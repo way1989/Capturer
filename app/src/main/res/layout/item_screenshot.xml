@@ -11,7 +11,7 @@
     card_view:cardCornerRadius="2dp"
     card_view:cardElevation="4dp">
 
-    <com.way.captain.widget.SimpleTagImageView xmlns:simple="http://schemas.android.com/apk/res-auto"
+    <com.way.capture.widget.SimpleTagImageView xmlns:simple="http://schemas.android.com/apk/res-auto"
         android:id="@+id/ic_screenshot"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -13,12 +13,26 @@ public class Preferences {
     protected static final String KEY_VERSION_NAME = "version_name";
     protected static final String KEY_DOWNLOAD_PATH = "download_path";
     protected static final String KEY_DOWNLOAD_STATUS = "download_status";
+    protected static final String KEY_LAST_CHECK_UPGRADE_TIME = "download_status";
+
+    public static void setLastCheckTime(Context context, long time) {
+        SharedPreferences pref = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_APPEND);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putLong(KEY_LAST_CHECK_UPGRADE_TIME, time);
+        editor.apply();
+    }
+
+    public static long getLastCheckTime(Context context) {
+        SharedPreferences pref = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_APPEND);
+        return pref.getLong(KEY_LAST_CHECK_UPGRADE_TIME, -1);
+    }
+
 
     public static void setDownloadId(Context context, long downloadId) {
         SharedPreferences pref = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_APPEND);
         SharedPreferences.Editor editor = pref.edit();
         editor.putLong(KEY_DOWNLOAD_ID, downloadId);
-        editor.commit();
+        editor.apply();
     }
 
     public static long getDownloadId(Context context) {
@@ -30,7 +44,7 @@ public class Preferences {
         SharedPreferences pref = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_APPEND);
         SharedPreferences.Editor editor = pref.edit();
         editor.putString(KEY_DOWNLOAD_PATH, downloadPath);
-        editor.commit();
+        editor.apply();
     }
 
     public static String getDownloadPath(Context context) {
@@ -42,14 +56,14 @@ public class Preferences {
         SharedPreferences pref = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_APPEND);
         SharedPreferences.Editor editor = pref.edit();
         editor.clear();
-        editor.commit();
+        editor.apply();
     }
 
     public static void setDownloadStatus(Context context, int downloadId) {
         SharedPreferences pref = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_APPEND);
         SharedPreferences.Editor editor = pref.edit();
         editor.putInt(KEY_DOWNLOAD_STATUS, downloadId);
-        editor.commit();
+        editor.apply();
     }
 
     public static int getDownloadStatus(Context context) {
@@ -61,7 +75,7 @@ public class Preferences {
         SharedPreferences pref = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_APPEND);
         SharedPreferences.Editor editor = pref.edit();
         editor.putInt(KEY_VERSION_CODE, versionCode);
-        editor.commit();
+        editor.apply();
     }
 
     public static int getVersionCode(Context context) {
@@ -73,7 +87,7 @@ public class Preferences {
         SharedPreferences pref = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_APPEND);
         SharedPreferences.Editor editor = pref.edit();
         editor.putString(KEY_VERSION_NAME, versionName);
-        editor.commit();
+        editor.apply();
     }
 
     public static String getVersionName(Context context) {

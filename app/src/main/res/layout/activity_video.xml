@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.way.captain.activity.VideoActivity">
+    tools:context="com.way.capture.activity.VideoActivity">
 
-    <com.way.captain.widget.FastVideoView
+    <com.way.capture.widget.FastVideoView
         android:id="@+id/video_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -1,7 +1,7 @@
-package com.github.hiteshsondhi88.libffmpeg;
+package com.way.captain.utils.ffmpeg;
 
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
+import com.way.captain.utils.ffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
+import com.way.captain.utils.ffmpeg.exceptions.FFmpegNotSupportedException;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package com.github.hiteshsondhi88.libffmpeg;
+package com.way.captain.utils.ffmpeg;
 
 @SuppressWarnings("unused")
 class Log {

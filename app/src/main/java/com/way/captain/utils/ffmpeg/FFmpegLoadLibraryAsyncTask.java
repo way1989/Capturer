@@ -1,4 +1,4 @@
-package com.github.hiteshsondhi88.libffmpeg;
+package com.way.captain.utils.ffmpeg;
 
 import android.content.Context;
 import android.os.AsyncTask;

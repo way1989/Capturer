@@ -24,11 +24,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
-import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
+import com.way.captain.utils.ffmpeg.ExecuteBinaryResponseHandler;
+import com.way.captain.utils.ffmpeg.FFmpeg;
+import com.way.captain.utils.ffmpeg.LoadBinaryResponseHandler;
+import com.way.captain.utils.ffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
+import com.way.captain.utils.ffmpeg.exceptions.FFmpegNotSupportedException;
 import com.way.captain.R;
 import com.way.captain.utils.AppUtils;
 import com.way.captain.utils.GifUtils;

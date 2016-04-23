@@ -1,4 +1,4 @@
-package com.github.hiteshsondhi88.libffmpeg.exceptions;
+package com.way.captain.utils.ffmpeg.exceptions;
 
 public class FFmpegCommandAlreadyRunningException extends Exception {
 

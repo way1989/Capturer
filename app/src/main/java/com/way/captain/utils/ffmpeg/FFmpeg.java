@@ -1,10 +1,10 @@
-package com.github.hiteshsondhi88.libffmpeg;
+package com.way.captain.utils.ffmpeg;
 
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
+import com.way.captain.utils.ffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
+import com.way.captain.utils.ffmpeg.exceptions.FFmpegNotSupportedException;
 import com.way.captain.R;
 
 import java.io.File;

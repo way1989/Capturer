@@ -191,4 +191,5 @@
     <string name="welcome_head_3">Screen record can translate to gif picture</string>
     <string name="welcome_content_3">It\'s easy to translate your screen record to gif picture</string>
     <string name="help">Help</string>
+    <string name="share_app">Share a very nice app to you: %s</string>
 </resources>

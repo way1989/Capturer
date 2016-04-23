@@ -45,7 +45,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private static final int PAGE_SCREENRECORDS = 2;
     Runnable navigateShare = new Runnable() {
         public void run() {
-            String url = "http://fir.im/captain";
+            String url = "http://fir.im/capturer";
+            url = getString(R.string.share_app, url);
             Intent sharingIntent = new Intent(Intent.ACTION_SEND);
             sharingIntent.setType("text/plain");
             sharingIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name));

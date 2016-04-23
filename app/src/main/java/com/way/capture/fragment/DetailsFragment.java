@@ -36,7 +36,8 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
     private static final String ARG_IMAGE_TYPE = "arg_image_type";
     private ImageView mImageView;
     private ImageView mPlayButton;
-    private SubsamplingScaleImageView subsamplingScaleImageView;
+    private Button mShowHeighQualityButton;
+    private SubsamplingScaleImageView mSubsamplingScaleImageView;
 
     public static DetailsFragment newInstance(int type, String path) {
         Bundle args = new Bundle();
@@ -59,14 +60,29 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        if(mImageView == null || mImageView.getVisibility() != View.VISIBLE)
+        if (isVisibleToUser || mImageView == null)
             return;
+
         final int type = getArguments().getInt(ARG_IMAGE_TYPE, DataInfo.TYPE_SCREEN_SHOT);
         final String path = getArguments().getString(ARG_IMAGE_PATH);
-        if(type == DataInfo.TYPE_SCREEN_GIF && !isVisibleToUser && mImageView != null){
-            Glide.clear(mImageView);
-            GlideHelper.loadResourceBitmap(path, mImageView);
-            mPlayButton.setVisibility(View.VISIBLE);
+        switch (type) {
+            case DataInfo.TYPE_SCREEN_SHOT:
+                if (mSubsamplingScaleImageView != null) {
+                    mSubsamplingScaleImageView.recycle();
+                    mSubsamplingScaleImageView.setTransitionName("");
+                    mSubsamplingScaleImageView.setVisibility(View.GONE);
+                }
+                mImageView.setVisibility(View.VISIBLE);
+                GlideHelper.loadResourceBitmap(path, mImageView);
+                mImageView.setTransitionName(path);
+                if (mShowHeighQualityButton != null)
+                    mShowHeighQualityButton.setVisibility(View.VISIBLE);
+                break;
+            case DataInfo.TYPE_SCREEN_GIF:
+                Glide.clear(mImageView);
+                GlideHelper.loadResourceBitmap(path, mImageView);
+                mPlayButton.setVisibility(View.VISIBLE);
+                break;
         }
     }
 
@@ -93,16 +109,16 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
 
         switch (type) {
             case DataInfo.TYPE_SCREEN_SHOT:
-                subsamplingScaleImageView = (SubsamplingScaleImageView) view.findViewById(R.id.detail_image_height_quality);
+                mSubsamplingScaleImageView = (SubsamplingScaleImageView) view.findViewById(R.id.detail_image_height_quality);
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inJustDecodeBounds = true;
                 BitmapFactory.decodeFile(path, options);
                 int height = options.outHeight;
                 boolean isLongImage = height > 2 * DensityUtil.getDisplayHeight(getContext());
                 if (isLongImage) {
-                    Button button = (Button) view.findViewById(R.id.height_quality_btn);
-                    button.setOnClickListener(this);
-                    button.setVisibility(View.VISIBLE);
+                    mShowHeighQualityButton = (Button) view.findViewById(R.id.height_quality_btn);
+                    mShowHeighQualityButton.setOnClickListener(this);
+                    mShowHeighQualityButton.setVisibility(View.VISIBLE);
                 }
                 break;
             case DataInfo.TYPE_SCREEN_GIF:
@@ -180,14 +196,15 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
             case R.id.height_quality_btn:
                 String path = getArguments().getString(ARG_IMAGE_PATH);
                 v.setVisibility(View.GONE);
-                subsamplingScaleImageView.setVisibility(View.VISIBLE);
+                mSubsamplingScaleImageView.setVisibility(View.VISIBLE);
                 mImageView.setTransitionName("");
-                subsamplingScaleImageView.setTransitionName(path);
-                subsamplingScaleImageView.setImage(ImageSource.uri(Uri.fromFile(new File(path))));
-                subsamplingScaleImageView.postDelayed(new Runnable() {
+                mSubsamplingScaleImageView.setTransitionName(path);
+                mSubsamplingScaleImageView.setImage(ImageSource.uri(Uri.fromFile(new File(path))));
+                mSubsamplingScaleImageView.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         mImageView.setVisibility(View.GONE);
+                        Glide.clear(mImageView);
                     }
                 }, 300L);
                 break;

@@ -1,6 +1,7 @@
 package com.way.capture.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -18,6 +19,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +34,10 @@ import com.way.capture.fragment.ScreenshotFragment;
 import com.way.capture.service.ShakeService;
 import com.way.capture.utils.AppUtils;
 import com.way.capture.utils.OsUtil;
+import com.way.tourguide.Overlay;
+import com.way.tourguide.Pointer;
+import com.way.tourguide.ToolTip;
+import com.way.tourguide.TourGuide;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,6 +98,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private DrawerLayout mDrawerLayout;
     private BaseFragment mCurrentFragment;
     private long mLastPressTime;
+    private SharedPreferences mPreference;
+    private FloatingActionButton mFab;
+    private TourGuide mTourGuideHandler;
     private Bundle mTmpReenterState;
     private final SharedElementCallback mCallback = new SharedElementCallback() {
         @Override
@@ -130,25 +139,56 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         if (OsUtil.redirectToPermissionCheckIfNeeded(this)) {
             return;
         }
-        if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean(AppUtils.APP_FIRST_RUN, true))
+        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(AppUtils.APP_FIRST_RUN, true))
             startActivity(new Intent(MainActivity.this, GuideActivity.class));
         setContentView(R.layout.activity_main);
         setExitSharedElementCallback(mCallback);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mPreference = PreferenceManager.getDefaultSharedPreferences(this);
+        initToolbar();
+        initFab();
+        initViewPager();
+        syncNightMode();
+    }
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        if (fab != null)
-            fab.setOnClickListener(new View.OnClickListener() {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mFab != null && mTourGuideHandler != null && mPreference.getBoolean(TAG, true)) {
+            mTourGuideHandler.playOn(mFab);
+        }
+    }
+
+    private void initFab() {
+        mTourGuideHandler = TourGuide.init(this).with(TourGuide.Technique.Click)
+                .setPointer(new Pointer())
+                .setToolTip(new ToolTip().setGravity(Gravity.TOP | Gravity.START)
+                        .setTitle(getString(R.string.float_action_button_guide_title))
+                        .setDescription(getString(R.string.float_action_button_guide_desc)))
+                .setOverlay(new Overlay());
+        mFab = (FloatingActionButton) findViewById(R.id.fab);
+        if (mFab != null) {
+            mFab.setOnClickListener(new View.OnClickListener() {
 
                 @Override
                 public void onClick(View view) {
+                    if (mTourGuideHandler != null) {
+                        mTourGuideHandler.cleanUp();
+                        mPreference.edit().putBoolean(TAG, false).apply();
+                    }
                     startService(new Intent(MainActivity.this, ShakeService.class).setAction("com.way.action.SHOW_MENU"));
                 }
             });
+        }
+    }
 
+    private void initToolbar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        initNavigationView(toolbar);
+    }
 
+    private void initNavigationView(Toolbar toolbar) {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -158,7 +198,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         if (mNavigationView != null)
             mNavigationView.setNavigationItemSelectedListener(this);
+    }
 
+    private void initViewPager() {
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
         if (mViewPager != null) {
             setupViewPager(mViewPager);
@@ -169,7 +211,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         if (tabLayout != null)
             tabLayout.setupWithViewPager(mViewPager);
+    }
 
+    private void syncNightMode() {
         MenuItem item = mNavigationView.getMenu().findItem(R.id.nav_night_mode);
         int uiMode = getResources().getConfiguration().uiMode;
         boolean isCurrentNightMode = (uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;

@@ -32,6 +32,7 @@ import java.io.File;
  * Created by way on 16/4/10.
  */
 public class DetailsFragment extends Fragment implements View.OnClickListener {
+    private static final String TAG = "DetailsFragment";
     private static final String ARG_IMAGE_PATH = "arg_image_path";
     private static final String ARG_IMAGE_TYPE = "arg_image_type";
     private ImageView mImageView;

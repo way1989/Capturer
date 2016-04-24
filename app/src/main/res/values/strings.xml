@@ -192,4 +192,8 @@
     <string name="welcome_content_3">It\'s easy to translate your screen record to gif picture</string>
     <string name="help">Help</string>
     <string name="share_app">Share a very nice app to you: %s</string>
+    <string name="float_action_button_guide_title">Tap me to show main menu</string>
+    <string name="float_action_button_guide_desc">You can also shake your device to show it</string>
+    <string name="video_to_gif_title">Tap me to translate to gif</string>
+    <string name="video_to_gif_desc">The first time must download a FFmpeg file</string>
 </resources>

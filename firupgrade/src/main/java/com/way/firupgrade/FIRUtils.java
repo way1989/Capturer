@@ -30,7 +30,8 @@ public class FIRUtils {
     public final static void checkForUpdate(final Activity context, final boolean isShowToast) {
         if (context == null)
             return;
-        if (Preferences.getLastCheckTime(context) - System.currentTimeMillis() < 12 * 60 * 60 * 1000 && !isShowToast) {
+        if (!isShowToast && (System.currentTimeMillis()
+                - Preferences.getLastCheckTime(context) < 12 * 60 * 60 * 1000)) {
             return;
         }
         final String api_token = context.getResources().getString(R.string.api_token);
@@ -56,7 +57,6 @@ public class FIRUtils {
                 if (progressDialog != null && progressDialog.isShowing()) {
                     progressDialog.dismiss();
                 }
-                Preferences.setLastCheckTime(context, System.currentTimeMillis());
 
                 final AppVersion appVersion = getAppVersion(response);
                 if (appVersion == null) {
@@ -76,7 +76,12 @@ public class FIRUtils {
                                     // receiver
                                     DownloadUtils.DownloadApkWithProgress(context, appVersion);
                                 }
-                            }).setNegativeButton(android.R.string.cancel, null).create().show();
+                            }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Preferences.setLastCheckTime(context, System.currentTimeMillis());//防止频繁提示
+                        }
+                    }).create().show();
                 } else {
                     if (isShowToast)
                         Toast.makeText(context, R.string.latest_version, Toast.LENGTH_SHORT).show();

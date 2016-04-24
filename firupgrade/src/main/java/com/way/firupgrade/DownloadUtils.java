@@ -15,7 +15,7 @@ import java.io.File;
 
 public class DownloadUtils {
     public static final String APK_SUFFIX = ".apk";
-    public static final Integer DOWNLOAD_STATUS_RUNNING = 1;
+    public static final int DOWNLOAD_STATUS_RUNNING = 1;
     private static final long MAX_ALLOWED_DOWNLOAD_BYTES_BY_MOBILE = 3 * 1024 * 1024;//3M
 
     public static void DownloadApkWithProgress(Context context, final AppVersion appVersion) {
@@ -38,8 +38,8 @@ public class DownloadUtils {
 
             boolean allowMobileDownload = false;
             Long recommendedMaxBytes = DownloadManager.getRecommendedMaxBytesOverMobile(context);
-            // 可以在移动网络下下载
-            if (recommendedMaxBytes == null || recommendedMaxBytes.longValue() > MAX_ALLOWED_DOWNLOAD_BYTES_BY_MOBILE) {
+            // 小于3MB可以在移动网络下下载
+            if (recommendedMaxBytes == null || recommendedMaxBytes <= MAX_ALLOWED_DOWNLOAD_BYTES_BY_MOBILE) {
                 allowMobileDownload = true;
             }
 

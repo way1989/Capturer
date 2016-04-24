@@ -14,7 +14,7 @@ public class Preferences {
     protected static final String KEY_VERSION_NAME = "version_name";
     protected static final String KEY_DOWNLOAD_PATH = "download_path";
     protected static final String KEY_DOWNLOAD_STATUS = "download_status";
-    protected static final String KEY_LAST_CHECK_UPGRADE_TIME = "download_status";
+    protected static final String KEY_LAST_CHECK_UPGRADE_TIME = "key_last_check_upgrade_time";
 
     public static void setLastCheckTime(Context context, long time) {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);

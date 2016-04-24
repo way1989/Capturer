@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 import com.way.capture.R;
 import com.way.capture.fragment.GuideFragment;
 import com.way.capture.utils.AppUtils;
+import com.way.capture.widget.springindicator.SpringIndicator;
 
 public class GuideActivity extends AppCompatActivity {
     static final int NUM_PAGES = 4;
@@ -85,7 +86,7 @@ public class GuideActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-                setIndicator(position);
+                //setIndicator(position);
                 if (position == NUM_PAGES - 2) {
                     skip.setVisibility(View.GONE);
                     next.setVisibility(View.GONE);
@@ -104,8 +105,9 @@ public class GuideActivity extends AppCompatActivity {
 
             }
         });
-
-        buildCircles();
+        SpringIndicator springIndicator = (SpringIndicator) findViewById(R.id.indicator);
+        springIndicator.setViewPager(pager);
+        //buildCircles();
     }
 
     @Override
@@ -117,7 +119,7 @@ public class GuideActivity extends AppCompatActivity {
     }
 
     private void buildCircles() {
-        circles = LinearLayout.class.cast(findViewById(R.id.circles));
+        //circles = LinearLayout.class.cast(findViewById(R.id.circles));
 
         float scale = getResources().getDisplayMetrics().density;
         int padding = (int) (5 * scale + 0.5f);
@@ -167,6 +169,12 @@ public class GuideActivity extends AppCompatActivity {
 
         public ScreenSlidePagerAdapter(FragmentManager fm) {
             super(fm);
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            //return super.getPageTitle(position);
+            return String.valueOf(position + 1);
         }
 
         @Override

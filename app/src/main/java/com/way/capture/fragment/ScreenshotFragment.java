@@ -162,6 +162,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     @Override
     public void onRefresh() {
         mSwipeRefreshLayout.setRefreshing(true);
+        mSwipeRefreshLayout.setEnabled(false);
         getLoaderManager().restartLoader(SCREENSHOT_LOADER_ID, null, this);
     }
 
@@ -174,6 +175,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     @Override
     public void onLoadFinished(Loader<DataLoader.Result> loader, DataLoader.Result data) {
         mSwipeRefreshLayout.setRefreshing(false);
+        mSwipeRefreshLayout.setEnabled(true);
         if (data.dataInfoes != null && !data.dataInfoes.isEmpty()) {
             mLoadingEmptyContainer.setVisibility(View.INVISIBLE);
             mDataProvider.setData(data.dataInfoes);

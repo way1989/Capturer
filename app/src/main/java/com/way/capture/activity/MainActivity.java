@@ -154,18 +154,18 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     protected void onResume() {
         super.onResume();
-        if (mFab != null && mTourGuideHandler != null && mPreference.getBoolean(TAG, true)) {
-            mTourGuideHandler.playOn(mFab);
+        if (mFab != null && mTourGuideHandler == null && mPreference.getBoolean(TAG, true)) {
+            mTourGuideHandler = TourGuide.init(this).with(TourGuide.Technique.Click)
+                    .setPointer(new Pointer())
+                    .setToolTip(new ToolTip().setGravity(Gravity.TOP | Gravity.START)
+                            .setTitle(getString(R.string.float_action_button_guide_title))
+                            .setDescription(getString(R.string.float_action_button_guide_desc)))
+                    .setOverlay(new Overlay()).playOn(mFab);
         }
     }
 
     private void initFab() {
-        mTourGuideHandler = TourGuide.init(this).with(TourGuide.Technique.Click)
-                .setPointer(new Pointer())
-                .setToolTip(new ToolTip().setGravity(Gravity.TOP | Gravity.START)
-                        .setTitle(getString(R.string.float_action_button_guide_title))
-                        .setDescription(getString(R.string.float_action_button_guide_desc)))
-                .setOverlay(new Overlay());
+
         mFab = (FloatingActionButton) findViewById(R.id.fab);
         if (mFab != null) {
             mFab.setOnClickListener(new View.OnClickListener() {
@@ -174,6 +174,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 public void onClick(View view) {
                     if (mTourGuideHandler != null) {
                         mTourGuideHandler.cleanUp();
+                        mTourGuideHandler = null;
                         mPreference.edit().putBoolean(TAG, false).apply();
                     }
                     startService(new Intent(MainActivity.this, ShakeService.class).setAction("com.way.action.SHOW_MENU"));

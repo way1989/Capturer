@@ -29,6 +29,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="@dimen/global_margin_great"
         android:backgroundTint="@color/colorAccent"
+        android:textColor="@android:color/white"
         android:onClick="onPost"
         android:text="@string/global_send" />
 

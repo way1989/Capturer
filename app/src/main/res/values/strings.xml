@@ -196,4 +196,5 @@
     <string name="float_action_button_guide_desc">You can also shake your device to show it</string>
     <string name="video_to_gif_title">Tap me to translate to gif</string>
     <string name="video_to_gif_desc">The first time must download a FFmpeg file</string>
+    <string name="logo_title">What you see is what you get</string>
 </resources>

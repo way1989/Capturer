@@ -16,7 +16,10 @@
 
     <Button
         android:id="@+id/height_quality_btn"
-        style="?android:attr/buttonBarButtonStyle"
+        android:background="@drawable/btn_default_material"
+        android:textColor="@android:color/white"
+        android:shadowRadius="3"
+        android:shadowColor="@android:color/black"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"

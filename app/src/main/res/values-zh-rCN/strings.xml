@@ -170,4 +170,5 @@
     <string name="float_action_button_guide_desc">也可以通过摇一摇的方式启动哦</string>
     <string name="video_to_gif_title">点这里将视频转换成GIF图</string>
     <string name="video_to_gif_desc">第一次需要下载一个适合你手机的库文件</string>
+    <string name="logo_title">所见及所得</string>
 </resources>

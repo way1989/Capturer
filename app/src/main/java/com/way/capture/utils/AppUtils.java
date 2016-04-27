@@ -197,24 +197,23 @@ public class AppUtils {
     }
 
     public static void shareScreenshot(Context context, String path, int type) {
+        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+        sharingIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(path)));
         String subjectDate = DateFormat.getDateTimeInstance().format(new Date(System.currentTimeMillis()));
-        String subjectString = SCREENSHOT_SHARE_SUBJECT_TEMPLATE;
         switch (type) {
             case DataInfo.TYPE_SCREEN_SHOT:
-                subjectString = SCREENSHOT_SHARE_SUBJECT_TEMPLATE;
+                sharingIntent.setType("image/png");
+                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate));
                 break;
             case DataInfo.TYPE_SCREEN_GIF:
-                subjectString = GIF_SHARE_SUBJECT_TEMPLATE;
+                sharingIntent.setType("image/gif");
+                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, String.format(GIF_SHARE_SUBJECT_TEMPLATE, subjectDate));
                 break;
             case DataInfo.TYPE_SCREEN_RECORD:
-                subjectString = SCREEN_RECORD_SHARE_SUBJECT_TEMPLATE;
+                sharingIntent.setType("video/mp4");
+                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, String.format(SCREEN_RECORD_SHARE_SUBJECT_TEMPLATE, subjectDate));
                 break;
         }
-        String subject = String.format(subjectString, subjectDate);
-        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-        sharingIntent.setType("image/png");
-        sharingIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(path)));
-        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
         Intent chooserIntent = Intent.createChooser(sharingIntent, null);
         chooserIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(chooserIntent);

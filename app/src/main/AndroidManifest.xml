@@ -30,7 +30,7 @@
         <activity
             android:name=".activity.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="sensor"
+            android:screenOrientation="portrait"
             android:label="@string/app_name"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.DayNight.NoActionBar">
@@ -95,7 +95,7 @@
         <activity
             android:name=".activity.SettingsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="sensor"
+            android:screenOrientation="portrait"
             android:label="@string/action_settings" />
 
         <receiver
@@ -118,7 +118,7 @@
         <activity android:name=".activity.FeedbackActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/feedback"
-            android:screenOrientation="sensor"/>
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".activity.DetailsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
@@ -128,7 +128,7 @@
         <activity
             android:name=".activity.VideoActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="sensor"
+            android:screenOrientation="portrait"
             android:label="@string/title_activity_video"
             android:theme="@style/FullscreenTheme.NoActionBar" />
         <activity
@@ -144,12 +144,12 @@
         <activity
             android:name=".activity.GuideActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="sensor"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.DayNight.NoActionBar" />
         <activity
             android:name="com.thefinestartist.finestwebview.FinestWebViewActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="sensor"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.DayNight.NoActionBar" />
     </application>
 

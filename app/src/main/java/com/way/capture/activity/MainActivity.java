@@ -75,7 +75,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     .titleColorRes(R.color.finestWhite)
                     .urlColorRes(R.color.finestWhite)
                     .iconDefaultColorRes(R.color.finestWhite)
-                    .show("https://github.com/way1989/Captain/blob/master/help/HELP_zh-rCN.md");
+                    .show("http://way1989.github.io/Capturer-help");
         }
     };
     Runnable navigateSettings = new Runnable() {

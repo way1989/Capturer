@@ -47,7 +47,7 @@
     <string name="screenshot_delete_action">Delete</string>
     <string name="screenshot_delete_confirmation">Screenshot deleted.</string>
     <string name="screen_shot">Take Screenshot</string>
-    <string name="chathead_content_title">Captain is running</string>
+    <string name="chathead_content_title">Capturer is running</string>
     <string name="chathead_content_text">Please shake your device…</string>
     <string name="shipped_ffmpeg_version" translatable="false">n2.4.2</string>
     <string name="video_size_percentage_summary">select the size of screen record</string>
@@ -62,7 +62,7 @@
     <string name="advance_category">Advance settings</string>
     <string name="use_atouch_summary">Shake your device to show main menu</string>
     <string name="boot_auto">Auto Launch</string>
-    <string name="boot_auto_summary">Auto launch Captain after reboot</string>
+    <string name="boot_auto_summary">Auto launch Capturer after reboot</string>
     <string name="snack_bar_action_undo">UNDO</string>
     <string name="snack_bar_text_item_removed">1 item removed</string>
     <string name="float_record_cancel">Cancle</string>
@@ -79,9 +79,9 @@
     <string name="next_with_arrow">Next &gt;</string>
     <string name="next" translatable="false">Next</string>
     <string name="settings" translatable="false">Settings</string>
-    <string name="enable_permission_procedure">You can change permissions in Settings > Apps > Captain > Permissions.</string>
-    <string name="enable_permission_procedure_description">You can change permissions in Settings, Apps, Captain, Permissions.</string>
-    <string name="required_permissions_promo">Captain needs permission to Storage.</string>
+    <string name="enable_permission_procedure">You can change permissions in Settings > Apps > Capturer > Permissions.</string>
+    <string name="enable_permission_procedure_description">You can change permissions in Settings, Apps, Capturer, Permissions.</string>
+    <string name="required_permissions_promo">Capturer needs permission to Storage.</string>
     <string name="empty_generic_main">No Datas</string>
     <string name="empty_generic_secondary">No Datas</string>
     <string name="video_set_length">Length</string>

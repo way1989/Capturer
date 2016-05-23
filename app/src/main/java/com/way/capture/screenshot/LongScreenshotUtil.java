@@ -38,7 +38,7 @@ public class LongScreenshotUtil {
     private static final int USE_TO_COMPARE_PIXEL_HEIGHT_10 = 10;
     private static final int USE_TO_COMPARE_PIXEL_HEIGHT_5 = 5;
     private static final int REDUCE_PIXEL_BY_ONCE = 20;
-    private static final int MOVE_Y_MIN = 10;
+    private final int MOVE_Y_MIN ;
     private static final int SUCCEED_COMPARE = 0;
     private static final int ERROR_TWO_BITMAP_IS_SAME = -1;
     private static final int ERROR_COMPARE_FAILED = -2;
@@ -56,6 +56,7 @@ public class LongScreenshotUtil {
         mTopNotCompareHeight = DensityUtil.dip2px(context, 88);//顶部不用对比的高度，即长截屏提示界面的高度。
         mBottomNotCompareHeightMargin = DensityUtil.dip2px(context, 48);//底部不用对比的高度，在第一次对比的高度上再加上一些偏移
         mBorderNotCompareWidth = DensityUtil.dip2px(context, 16);//每行像素对比时，两边不用对比的宽度，去除滚动条之类的干扰
+        MOVE_Y_MIN = DensityUtil.dip2px(context, 4);
     }
 
     public static LongScreenshotUtil getInstance(Context context) {
@@ -90,7 +91,7 @@ public class LongScreenshotUtil {
         return -1;
     }
 
-    private int becompareTwoBitmap(Bitmap oldBitmap, Bitmap newBitmap) {
+    private boolean becompareTwoBitmap(Bitmap oldBitmap, Bitmap newBitmap) {
         final int oldBitmapWidth = oldBitmap.getWidth();
         final int newBitmapWidth = newBitmap.getWidth();
         final int oldBitmapHeight = oldBitmap.getHeight();
@@ -109,17 +110,70 @@ public class LongScreenshotUtil {
             //if (sameY > newBitmapHeight - mTopNotCompareHeight) {//two bitmap is same
             if (sameY == -1) {
                 Log.i(TAG, "two bitmap is same, to end");
-                return ERROR_TWO_BITMAP_IS_SAME;
+                return false;
             }
             mBottomNotCompareHeight = mBottomNotCompareHeightMargin + sameY;//增加底部不用对比的高度
             Log.i(TAG, " first compare mBottomNotCompareHeight = " + mBottomNotCompareHeight);
         }
 
-        int oldBitmapStartCompareY = getOldBitmapStartCompareY(oldBitmap);
+        int oldBitmapStartCompareY = getOldBitmapStartCompareY(oldBitmap, newBitmapHeight);
         if (oldBitmapStartCompareY == -1) {
             Log.i(TAG, "the front bitmap is pure error");
-            return ERROR_FRONT_BITMAP_PURE_COLOR;
+            return false;
         }
+
+        int oldBitmapStartCompareYDefault = oldBitmapStartCompareY;//临时保存一个默认值
+        mOldBitmapEndY = oldBitmapStartCompareY;
+        int newBitmapStartCompareY = newBottomY - (oldBottomY - oldBitmapStartCompareY);//new bitmap开始比较的高度，确保与old bitmap比较的高度一致
+        Log.i(TAG, "mBottomNotCompareHeight = " + mBottomNotCompareHeight
+                + ", oldBitmapStartCompareY = " + oldBitmapStartCompareY
+                + ", oldBitmapHeight = " + oldBitmapHeight
+                + ", newBitmapStartCompareY = " + newBitmapStartCompareY
+                + ", newBitmapHeight = " + newBitmapHeight
+                + ", (oldBottomY - oldBitmapStartCompareY) = " + (oldBottomY - oldBitmapStartCompareY));
+        if(newBitmapStartCompareY < 0) return false;
+        int sameStartY = 0;
+        int sameNum = 0;
+        while (newBitmapStartCompareY > mTopNotCompareHeight){
+            oldBitmap.getPixels(oldPixels, 0, oldBitmapWidth, 0, oldBitmapStartCompareY, oldBitmapWidth, 1);
+            newBitmap.getPixels(newPixels, 0, newBitmapWidth, 0, newBitmapStartCompareY, newBitmapWidth, 1);
+            boolean equal = isLinePixelsEqual(oldPixels, newPixels);
+            if (equal) {
+                sameNum++;
+                if (sameNum == 1) {
+                    sameStartY = newBitmapStartCompareY;
+                    Log.i(TAG, "same oldBitmapStartCompareY = " + oldBitmapStartCompareY
+                            + " sameNum = " + sameNum
+                            + " newBitmapStartCompareY = " + newBitmapStartCompareY);
+                }
+
+                oldBitmapStartCompareY--;
+            } else {
+                if (sameNum != 0)
+                    Log.i(TAG, "not same oldBitmapStartCompareY = " + oldBitmapStartCompareY
+                            + " sameNum = " + sameNum
+                            + " newBitmapStartCompareY = " + newBitmapStartCompareY
+                            + " sameStartY = " + sameStartY);
+                oldBitmapStartCompareY = oldBitmapStartCompareYDefault;
+                sameNum = 0;
+                if (sameStartY != 0 && sameStartY != newBitmapStartCompareY) {
+                    newBitmapStartCompareY = sameStartY;
+                }
+
+                sameStartY = 0;
+            }
+            newBitmapStartCompareY--;
+            if(sameNum == mTopNotCompareHeight){
+                mNewBitmapStartY = sameStartY;
+                int oldMoveHeight = oldBottomY - mOldBitmapEndY;
+                int newMoveHeight = newBottomY - mNewBitmapStartY;
+
+                return Math.abs(newMoveHeight - oldMoveHeight) > MOVE_Y_MIN;
+            }
+
+        }
+
+        /*
         int moveY = 0;
         int behindBitmapCompareStartY_5 = 0;
         int behindBitmapCompareStartY_10 = 0;
@@ -139,16 +193,6 @@ public class LongScreenshotUtil {
         int behindBitmapCompareStartY_350 = 0;
         int behindBitmapCompareStartY_400 = 0;
         int behindBitmapCompareStartY_450 = 0;
-
-        int oldBitmapStartCompareYDefault = oldBitmapStartCompareY;//临时保存一个默认值
-        mOldBitmapEndY = oldBitmapStartCompareY;
-        int newBitmapStartCompareY = newBottomY - (oldBottomY - oldBitmapStartCompareY);//new bitmap开始比较的高度，确保与old bitmap比较的高度一致
-        Log.i(TAG, "mBottomNotCompareHeight = " + mBottomNotCompareHeight
-                + ", oldBitmapStartCompareY = " + oldBitmapStartCompareY
-                + ", oldBitmapHeight = " + oldBitmapHeight
-                + ", newBitmapStartCompareY = " + newBitmapStartCompareY
-                + ", newBitmapHeight = " + newBitmapHeight
-                + ", (oldBottomY - oldBitmapStartCompareY) = " + (oldBottomY - oldBitmapStartCompareY));
 
         int oldBitmapEndCompareY = oldBitmapStartCompareY - USE_TO_COMPARE_PIXEL_HEIGHT_500;//比较500个像素
         int sameStartY = 0;
@@ -184,7 +228,7 @@ public class LongScreenshotUtil {
                 sameStartY = 0;
             }
 
-            /********* record 5 lines equal start ***************/
+            *//********* record 5 lines equal start ***************//*
             if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_5
                     && behindBitmapCompareStartY_5 == 0) {
                 behindBitmapCompareStartY_5 = sameStartY;
@@ -329,7 +373,7 @@ public class LongScreenshotUtil {
 
                 moveY = behind_move_height_to_compare - front_move_height_to_compare;
             }
-            /********* record 5 lines equal end ***************/
+            *//********* record 5 lines equal end ***************//*
 
             if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_500) {
                 mNewBitmapStartY = sameStartY;
@@ -347,7 +391,7 @@ public class LongScreenshotUtil {
             newBitmapStartCompareY--;
 
             if (newBitmapStartCompareY < mTopNotCompareHeight) {
-                /********* look if have 100 lines equal start ***************/
+                *//********* look if have 100 lines equal start ***************//*
                 if (behindBitmapCompareStartY_450 != 0) {
                     mNewBitmapStartY = behindBitmapCompareStartY_450;
 
@@ -444,9 +488,9 @@ public class LongScreenshotUtil {
                     }
                     return SUCCEED_COMPARE;
                 }
-                /********* look if have 100 lines equal end ***************/
+                *//********* look if have 100 lines equal end ***************//*
 
-                /****************equal height smaller than 100 start ***************************/
+                *//****************equal height smaller than 100 start ***************************//*
                 if (oldBitmapStartCompareYDefault - oldBitmapEndCompareY >= REDUCE_PIXEL_BY_ONCE) {
                     oldBitmapStartCompareYDefault -= REDUCE_PIXEL_BY_ONCE;//compare again
                     oldBitmapStartCompareY = oldBitmapStartCompareYDefault;
@@ -459,7 +503,7 @@ public class LongScreenshotUtil {
                             + " oldBitmapEndCompareY = " + oldBitmapEndCompareY);
                     continue;
                 }
-                /****************equal height smaller than 100 end*******************************/
+                *//****************equal height smaller than 100 end*******************************//*
 
                 Log.i(TAG, "error error error oldBitmapStartCompareY = " + oldBitmapStartCompareY +
                         " sameNum = " + sameNum + " newBitmapStartCompareY = " + newBitmapStartCompareY
@@ -470,7 +514,7 @@ public class LongScreenshotUtil {
             }
         }
 
-        /********* look if have 5 lines equal start ***************/
+        *//********* look if have 5 lines equal start ***************//*
         if (behindBitmapCompareStartY_90 != 0) {
             mNewBitmapStartY = behindBitmapCompareStartY_90;
 
@@ -590,10 +634,10 @@ public class LongScreenshotUtil {
                 return ERROR_TWO_BITMAP_IS_SAME;
             }
             return SUCCEED_COMPARE;
-        }
+        }*/
         /********* look if have 5 lines equal end ***************/
 
-        return ERROR_UNKNOW_STATE;
+        return false;
     }
 
     /**
@@ -663,12 +707,13 @@ public class LongScreenshotUtil {
      * @param bitmap
      * @return
      */
-    private int getOldBitmapStartCompareY(Bitmap bitmap) {
+    private int getOldBitmapStartCompareY(Bitmap bitmap, int minHeight) {
         final int width = bitmap.getWidth();
         final int height = bitmap.getHeight();
-
+        if(height < minHeight) return  -1;
+        final int end = height - minHeight;
         int[] pixels = new int[width];
-        for (int i = (height - mBottomNotCompareHeight - 1); i >= (USE_TO_COMPARE_PIXEL_HEIGHT_500 + mTopNotCompareHeight); i--) {
+        for (int i = (height - mBottomNotCompareHeight - 1); i >= (end + mTopNotCompareHeight + mBottomNotCompareHeightMargin); i--) {
             //将第i行宽度为width的像素点存入数组pixels中
             bitmap.getPixels(pixels, 0, width, 0, i, width, 1);
             if (!isPureColorLine(pixels)) return i;
@@ -680,10 +725,13 @@ public class LongScreenshotUtil {
         if (oldBitmap == null || oldBitmap.isRecycled()
                 || newBitmap == null || newBitmap.isRecycled())
             return null;
-        int state = becompareTwoBitmap(oldBitmap, newBitmap);
-        Log.i(TAG, "collageLongBitmap start state = " + state);
+        long start = System.currentTimeMillis();
+        boolean isSucceed = becompareTwoBitmap(oldBitmap, newBitmap);
+        long end = System.currentTimeMillis();
+        Log.i(TAG, "collageLongBitmap result isSucceed = " + isSucceed
+                + ", cost = " + (end - start) + "ms");
 
-        if (state != SUCCEED_COMPARE) {//failed, stop
+        if (!isSucceed) {//failed, stop
             return null;
         }
         int width = oldBitmap.getWidth();

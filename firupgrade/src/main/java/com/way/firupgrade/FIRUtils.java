@@ -28,7 +28,7 @@ public class FIRUtils {
     private static final String mBaseUrl = "http://api.fir.im/apps/latest/%1$s?api_token=%2$s";
 
     public final static void checkForUpdate(final Activity context, final boolean isShowToast) {
-        if (context == null)
+        if (context == null || context.isFinishing())
             return;
         if (!isShowToast && (System.currentTimeMillis()
                 - Preferences.getLastCheckTime(context) < 12 * 60 * 60 * 1000)) {
@@ -53,6 +53,8 @@ public class FIRUtils {
         JsonObjectRequest jr = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
+                if (context == null || context.isFinishing())
+                    return;
                 Log.i("broncho", "response = " + response);
                 if (progressDialog != null && progressDialog.isShowing()) {
                     progressDialog.dismiss();

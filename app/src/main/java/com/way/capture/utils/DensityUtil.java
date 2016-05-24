@@ -4,7 +4,13 @@ import android.content.Context;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
+import com.way.capture.App;
+
 public class DensityUtil {
+    public static int dp2px(float dip) {
+        return (int) (0.5F + dip * App.getContext().getResources().getDisplayMetrics().density);
+    }
+
     public static int dip2px(Context context, float dip) {
         return (int) (0.5F + dip * context.getResources().getDisplayMetrics().density);
     }

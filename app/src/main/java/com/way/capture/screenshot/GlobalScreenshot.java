@@ -800,7 +800,7 @@ class GlobalScreenshot {
         Bitmap collageBitmap = null;
         try {
             //collage a new bitmap
-            collageBitmap = LongScreenshotUtil.getInstance(mContext.getApplicationContext())
+            collageBitmap = LongScreenshotUtil.getInstance()
                     .collageLongBitmap(oldBitmap, newBitmap);
         } catch (OutOfMemoryError e) {
             //out of memory, so stop it.

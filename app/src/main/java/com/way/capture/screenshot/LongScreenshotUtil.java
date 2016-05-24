@@ -1,6 +1,5 @@
 package com.way.capture.screenshot;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -18,53 +17,32 @@ public class LongScreenshotUtil {
     private static final int GRAY_PIXEL_RED_DIF_MAX = 50;
     private static final int GRAY_PIXEL_GREEN_DIF_MAX = 16;
     private static final int GRAY_PIXEL_BLUE_DIF_MAX = 40;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_500 = 500;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_450 = 450;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_400 = 400;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_350 = 350;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_300 = 300;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_250 = 250;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_200 = 200;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_150 = 150;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_100 = 100;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_90 = 90;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_80 = 80;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_70 = 70;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_60 = 60;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_50 = 50;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_40 = 40;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_30 = 30;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_20 = 20;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_10 = 10;
-    private static final int USE_TO_COMPARE_PIXEL_HEIGHT_5 = 5;
-    private static final int REDUCE_PIXEL_BY_ONCE = 20;
-    private final int MOVE_Y_MIN ;
-    private static final int SUCCEED_COMPARE = 0;
-    private static final int ERROR_TWO_BITMAP_IS_SAME = -1;
-    private static final int ERROR_COMPARE_FAILED = -2;
-    private static final int ERROR_FRONT_BITMAP_PURE_COLOR = -3;
-    private static final int ERROR_UNKNOW_STATE = -5;
+
     private static LongScreenshotUtil sLongScreenshotUtil;
-    private final int mTopNotCompareHeight;
-    private final int mBorderNotCompareWidth;
-    private final int mBottomNotCompareHeightMargin;
-    private int mBottomNotCompareHeight;
+    private final int TOP_NOT_COMPARE_HEIGHT;
+    private final int BORDER_NOT_COMPARE_WIDTH;
+    private final int BOTTOM_NOT_COMPARE_EXTRA_HEIGHT;
+    private final int MOVE_Y_MIN;
+    private int BOTTOM_NOT_COMPARE_HEIGHT;
     private int mOldBitmapEndY = 0;
     private int mNewBitmapStartY = 0;
 
-    private LongScreenshotUtil(Context context) {
-        mTopNotCompareHeight = DensityUtil.dip2px(context, 88);//顶部不用对比的高度，即长截屏提示界面的高度。
-        mBottomNotCompareHeightMargin = DensityUtil.dip2px(context, 48);//底部不用对比的高度，在第一次对比的高度上再加上一些偏移
-        mBorderNotCompareWidth = DensityUtil.dip2px(context, 16);//每行像素对比时，两边不用对比的宽度，去除滚动条之类的干扰
-        MOVE_Y_MIN = DensityUtil.dip2px(context, 4);
+    private LongScreenshotUtil() {
+        TOP_NOT_COMPARE_HEIGHT = DensityUtil.dp2px(88);//顶部不用对比的高度，即长截屏提示界面的高度。
+        BOTTOM_NOT_COMPARE_EXTRA_HEIGHT = DensityUtil.dp2px(48);//底部不用对比的高度，在第一次对比的高度上再加上一些偏移
+        BORDER_NOT_COMPARE_WIDTH = DensityUtil.dp2px(16);//每行像素对比时，两边不用对比的宽度，去除滚动条之类的干扰
+        MOVE_Y_MIN = DensityUtil.dp2px(4);
     }
 
-    public static LongScreenshotUtil getInstance(Context context) {
+    public static LongScreenshotUtil getInstance() {
         if (sLongScreenshotUtil == null)
-            sLongScreenshotUtil = new LongScreenshotUtil(context);
+            sLongScreenshotUtil = new LongScreenshotUtil();
         return sLongScreenshotUtil;
     }
-
+    private boolean mIsStop;
+    public void stop(){
+        mIsStop = true;
+    }
     /**
      * 从下往上比较两张图的每一行像素，返回像素开始不同时的行数值，如果两张图片完全相同返回-1
      * 主要用来第一次对比时判断两张图是不是相同，如果不同时，获取两张图底部相同部分的高度，比如虚拟按键的高度或者底部tab的高度
@@ -73,7 +51,7 @@ public class LongScreenshotUtil {
      * @param newBitmap 被比较的图
      * @return 像素开始不同时的行数值
      */
-    private int getFromBottomSameY(Bitmap oldBitmap, Bitmap newBitmap) {
+    private int getBottomSameHeight(Bitmap oldBitmap, Bitmap newBitmap) {
         final int oldBitmapWidth = oldBitmap.getWidth();
         final int newBitmapWidth = newBitmap.getWidth();
         final int oldBitmapHeight = oldBitmap.getHeight();
@@ -82,7 +60,7 @@ public class LongScreenshotUtil {
         int[] oldPixels = new int[oldBitmapWidth];
         int[] newPixels = new int[newBitmapWidth];
 
-        for (int i = 0; i < (newBitmapHeight - mTopNotCompareHeight); i++) {
+        for (int i = 0; i < (newBitmapHeight - TOP_NOT_COMPARE_HEIGHT); i++) {
             //将oldBitmap中第（oldBitmapHeight - 1 - i）行宽度为oldBitmapWidth的像素取出存入oldPixels数组中。
             oldBitmap.getPixels(oldPixels, 0, oldBitmapWidth, 0, (oldBitmapHeight - 1) - i, oldBitmapWidth, 1);
             newBitmap.getPixels(newPixels, 0, newBitmapWidth, 0, (newBitmapHeight - 1) - i, newBitmapWidth, 1);
@@ -94,549 +72,85 @@ public class LongScreenshotUtil {
     private boolean becompareTwoBitmap(Bitmap oldBitmap, Bitmap newBitmap) {
         final int oldBitmapWidth = oldBitmap.getWidth();
         final int newBitmapWidth = newBitmap.getWidth();
+
         final int oldBitmapHeight = oldBitmap.getHeight();
         final int newBitmapHeight = newBitmap.getHeight();
-
-        final int oldBottomY = oldBitmapHeight - 1;
-        final int newBottomY = newBitmapHeight - 1;
 
         int[] oldPixels = new int[oldBitmapWidth];
         int[] newPixels = new int[newBitmapWidth];
 
         if (oldBitmapHeight == newBitmapHeight) {//first compare
-            //sameY compute once only
-            int sameY = getFromBottomSameY(oldBitmap, newBitmap);
-            Log.i(TAG, " first compare sameY = " + sameY);
-            //if (sameY > newBitmapHeight - mTopNotCompareHeight) {//two bitmap is same
-            if (sameY == -1) {
-                Log.i(TAG, "two bitmap is same, to end");
+            //bottomSameHeight compute once only
+            int bottomSameHeight = getBottomSameHeight(oldBitmap, newBitmap);
+            if (bottomSameHeight < 0) {
+                Log.i(TAG, "FAILED_COMPARE two bitmap is same, to end");
                 return false;
             }
-            mBottomNotCompareHeight = mBottomNotCompareHeightMargin + sameY;//增加底部不用对比的高度
-            Log.i(TAG, " first compare mBottomNotCompareHeight = " + mBottomNotCompareHeight);
+            BOTTOM_NOT_COMPARE_HEIGHT = BOTTOM_NOT_COMPARE_EXTRA_HEIGHT + bottomSameHeight;//增加底部不用对比的高度
+            Log.i(TAG, " first compare BOTTOM_NOT_COMPARE_HEIGHT = " + BOTTOM_NOT_COMPARE_HEIGHT);
         }
 
-        int oldBitmapStartCompareY = getOldBitmapStartCompareY(oldBitmap, newBitmapHeight);
-        if (oldBitmapStartCompareY == -1) {
-            Log.i(TAG, "the front bitmap is pure error");
+        int oldBitmapCompareEndY = getOldBitmapCompareEndY(oldBitmap, newBitmapHeight);
+        if (oldBitmapCompareEndY < 0) {
+            Log.i(TAG, "FAILED_COMPARE the old bitmap is pure error");
             return false;
         }
-
-        int oldBitmapStartCompareYDefault = oldBitmapStartCompareY;//临时保存一个默认值
-        mOldBitmapEndY = oldBitmapStartCompareY;
-        int newBitmapStartCompareY = newBottomY - (oldBottomY - oldBitmapStartCompareY);//new bitmap开始比较的高度，确保与old bitmap比较的高度一致
-        Log.i(TAG, "mBottomNotCompareHeight = " + mBottomNotCompareHeight
-                + ", oldBitmapStartCompareY = " + oldBitmapStartCompareY
-                + ", oldBitmapHeight = " + oldBitmapHeight
-                + ", newBitmapStartCompareY = " + newBitmapStartCompareY
-                + ", newBitmapHeight = " + newBitmapHeight
-                + ", (oldBottomY - oldBitmapStartCompareY) = " + (oldBottomY - oldBitmapStartCompareY));
-        if(newBitmapStartCompareY < 0) return false;
-        int sameStartY = 0;
+        int newBitmapCompareEndY = newBitmapHeight - (oldBitmapHeight - oldBitmapCompareEndY);//new bitmap开始比较的高度，确保与old bitmap比较的高度一致
+        if (newBitmapCompareEndY < 0) {
+            Log.i(TAG, "FAILED_COMPARE the new bitmap end compare height < 0");
+            return false;
+        }
+        mIsStop = false;
+        mOldBitmapEndY = oldBitmapCompareEndY;
+        mNewBitmapStartY = 0;
         int sameNum = 0;
-        while (newBitmapStartCompareY > mTopNotCompareHeight){
-            oldBitmap.getPixels(oldPixels, 0, oldBitmapWidth, 0, oldBitmapStartCompareY, oldBitmapWidth, 1);
-            newBitmap.getPixels(newPixels, 0, newBitmapWidth, 0, newBitmapStartCompareY, newBitmapWidth, 1);
+        int count = 0;//just for test
+        while (newBitmapCompareEndY > (TOP_NOT_COMPARE_HEIGHT + BOTTOM_NOT_COMPARE_EXTRA_HEIGHT)) {
+            if(mIsStop){
+                Log.i(TAG, "FAILED_COMPARE user stop to compare...");
+                return false;
+            }
+            count++;
+            oldBitmap.getPixels(oldPixels, 0, oldBitmapWidth, 0, oldBitmapCompareEndY, oldBitmapWidth, 1);
+            newBitmap.getPixels(newPixels, 0, newBitmapWidth, 0, newBitmapCompareEndY, newBitmapWidth, 1);
             boolean equal = isLinePixelsEqual(oldPixels, newPixels);
             if (equal) {
+                if (sameNum == 0) {
+                    mNewBitmapStartY = newBitmapCompareEndY;
+                    Log.i(TAG, "same oldBitmapCompareEndY = " + oldBitmapCompareEndY
+                            + " sameNum = " + sameNum
+                            + " newBitmapCompareEndY = " + newBitmapCompareEndY);
+                }
                 sameNum++;
-                if (sameNum == 1) {
-                    sameStartY = newBitmapStartCompareY;
-                    Log.i(TAG, "same oldBitmapStartCompareY = " + oldBitmapStartCompareY
-                            + " sameNum = " + sameNum
-                            + " newBitmapStartCompareY = " + newBitmapStartCompareY);
-                }
-
-                oldBitmapStartCompareY--;
+                oldBitmapCompareEndY--;
             } else {
-                if (sameNum != 0)
-                    Log.i(TAG, "not same oldBitmapStartCompareY = " + oldBitmapStartCompareY
+                if (sameNum > 5) {
+                    Log.i(TAG, "not same oldBitmapCompareEndY = " + oldBitmapCompareEndY
                             + " sameNum = " + sameNum
-                            + " newBitmapStartCompareY = " + newBitmapStartCompareY
-                            + " sameStartY = " + sameStartY);
-                oldBitmapStartCompareY = oldBitmapStartCompareYDefault;
-                sameNum = 0;
-                if (sameStartY != 0 && sameStartY != newBitmapStartCompareY) {
-                    newBitmapStartCompareY = sameStartY;
+                            + " newBitmapCompareEndY = " + newBitmapCompareEndY
+                            + " mNewBitmapStartY = " + mNewBitmapStartY);
                 }
-
-                sameStartY = 0;
+                oldBitmapCompareEndY = mOldBitmapEndY;
+                sameNum = 0;
+                if (mNewBitmapStartY != 0 && mNewBitmapStartY != newBitmapCompareEndY) {
+                    newBitmapCompareEndY = mNewBitmapStartY;
+                }
+                mNewBitmapStartY = 0;
             }
-            newBitmapStartCompareY--;
-            if(sameNum == mTopNotCompareHeight){
-                mNewBitmapStartY = sameStartY;
-                int oldMoveHeight = oldBottomY - mOldBitmapEndY;
-                int newMoveHeight = newBottomY - mNewBitmapStartY;
-
+            newBitmapCompareEndY--;
+            if (sameNum >= BOTTOM_NOT_COMPARE_EXTRA_HEIGHT) {
+                int oldMoveHeight = oldBitmapHeight - mOldBitmapEndY;
+                int newMoveHeight = newBitmapHeight - mNewBitmapStartY;
+                Log.i(TAG, "SUCCEED_COMPARE mOldBitmapEndY = " + mOldBitmapEndY
+                        + " mNewBitmapStartY = " + mNewBitmapStartY
+                        + " move height = " + Math.abs(newMoveHeight - oldMoveHeight)
+                        + " sameNum = " + sameNum
+                        + " count = " + count
+                );
                 return Math.abs(newMoveHeight - oldMoveHeight) > MOVE_Y_MIN;
             }
-
         }
-
-        /*
-        int moveY = 0;
-        int behindBitmapCompareStartY_5 = 0;
-        int behindBitmapCompareStartY_10 = 0;
-        int behindBitmapCompareStartY_20 = 0;
-        int behindBitmapCompareStartY_30 = 0;
-        int behindBitmapCompareStartY_40 = 0;
-        int behindBitmapCompareStartY_50 = 0;
-        int behindBitmapCompareStartY_60 = 0;
-        int behindBitmapCompareStartY_70 = 0;
-        int behindBitmapCompareStartY_80 = 0;
-        int behindBitmapCompareStartY_90 = 0;
-        int behindBitmapCompareStartY_100 = 0;
-        int behindBitmapCompareStartY_150 = 0;
-        int behindBitmapCompareStartY_200 = 0;
-        int behindBitmapCompareStartY_250 = 0;
-        int behindBitmapCompareStartY_300 = 0;
-        int behindBitmapCompareStartY_350 = 0;
-        int behindBitmapCompareStartY_400 = 0;
-        int behindBitmapCompareStartY_450 = 0;
-
-        int oldBitmapEndCompareY = oldBitmapStartCompareY - USE_TO_COMPARE_PIXEL_HEIGHT_500;//比较500个像素
-        int sameStartY = 0;
-        int sameNum = 0;
-        while (oldBitmapStartCompareY > oldBitmapEndCompareY) {
-
-            oldBitmap.getPixels(oldPixels, 0, oldBitmapWidth, 0, oldBitmapStartCompareY, oldBitmapWidth, 1);
-            newBitmap.getPixels(newPixels, 0, newBitmapWidth, 0, newBitmapStartCompareY, newBitmapWidth, 1);
-
-            boolean equal = isLinePixelsEqual(oldPixels, newPixels);
-            if (equal) {
-                sameNum++;
-                if (sameNum == 1) {
-                    sameStartY = newBitmapStartCompareY;
-                    Log.i(TAG, "same oldBitmapStartCompareY = " + oldBitmapStartCompareY
-                            + " sameNum = " + sameNum
-                            + " newBitmapStartCompareY = " + newBitmapStartCompareY);
-                }
-
-                oldBitmapStartCompareY--;
-            } else {
-                if (sameNum != 0)
-                    Log.i(TAG, "not same oldBitmapStartCompareY = " + oldBitmapStartCompareY
-                            + " sameNum = " + sameNum
-                            + " newBitmapStartCompareY = " + newBitmapStartCompareY
-                            + " sameStartY = " + sameStartY);
-                oldBitmapStartCompareY = oldBitmapStartCompareYDefault;
-                sameNum = 0;
-                if (sameStartY != 0 && sameStartY != newBitmapStartCompareY) {
-                    newBitmapStartCompareY = sameStartY;
-                }
-
-                sameStartY = 0;
-            }
-
-            *//********* record 5 lines equal start ***************//*
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_5
-                    && behindBitmapCompareStartY_5 == 0) {
-                behindBitmapCompareStartY_5 = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - behindBitmapCompareStartY_5;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-            }
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_10
-                    && behindBitmapCompareStartY_10 == 0) {
-                behindBitmapCompareStartY_10 = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - behindBitmapCompareStartY_10;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-            }
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_20
-                    && behindBitmapCompareStartY_20 == 0) {
-                behindBitmapCompareStartY_20 = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - behindBitmapCompareStartY_20;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-            }
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_30
-                    && behindBitmapCompareStartY_30 == 0) {
-                behindBitmapCompareStartY_30 = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - behindBitmapCompareStartY_30;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-            }
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_40
-                    && behindBitmapCompareStartY_40 == 0) {
-                behindBitmapCompareStartY_40 = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - behindBitmapCompareStartY_40;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-            }
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_50
-                    && behindBitmapCompareStartY_50 == 0) {
-                behindBitmapCompareStartY_50 = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - behindBitmapCompareStartY_50;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-            }
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_60
-                    && behindBitmapCompareStartY_60 == 0) {
-                behindBitmapCompareStartY_60 = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - behindBitmapCompareStartY_60;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-            }
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_70
-                    && behindBitmapCompareStartY_70 == 0) {
-                behindBitmapCompareStartY_70 = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - behindBitmapCompareStartY_70;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-            }
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_80
-                    && behindBitmapCompareStartY_80 == 0) {
-                behindBitmapCompareStartY_80 = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - behindBitmapCompareStartY_80;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-            }
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_90
-                    && behindBitmapCompareStartY_90 == 0) {
-                behindBitmapCompareStartY_90 = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - behindBitmapCompareStartY_90;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-            }
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_100
-                    && behindBitmapCompareStartY_100 == 0) {
-                behindBitmapCompareStartY_100 = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - behindBitmapCompareStartY_100;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-            }
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_150
-                    && behindBitmapCompareStartY_150 == 0) {
-                behindBitmapCompareStartY_150 = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - behindBitmapCompareStartY_150;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-            }
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_200
-                    && behindBitmapCompareStartY_200 == 0) {
-                behindBitmapCompareStartY_200 = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - behindBitmapCompareStartY_200;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-            }
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_250
-                    && behindBitmapCompareStartY_250 == 0) {
-                behindBitmapCompareStartY_250 = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - behindBitmapCompareStartY_250;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-            }
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_300
-                    && behindBitmapCompareStartY_300 == 0) {
-                behindBitmapCompareStartY_300 = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - behindBitmapCompareStartY_300;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-            }
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_350
-                    && behindBitmapCompareStartY_350 == 0) {
-                behindBitmapCompareStartY_350 = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - behindBitmapCompareStartY_350;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-            }
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_400
-                    && behindBitmapCompareStartY_400 == 0) {
-                behindBitmapCompareStartY_400 = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - behindBitmapCompareStartY_400;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-            }
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_450
-                    && behindBitmapCompareStartY_450 == 0) {
-                behindBitmapCompareStartY_450 = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - behindBitmapCompareStartY_450;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-            }
-            *//********* record 5 lines equal end ***************//*
-
-            if (sameNum == USE_TO_COMPARE_PIXEL_HEIGHT_500) {
-                mNewBitmapStartY = sameStartY;
-                int front_move_height_to_compare = oldBottomY - mOldBitmapEndY;
-                int behind_move_height_to_compare = newBottomY - mNewBitmapStartY;
-
-                moveY = behind_move_height_to_compare - front_move_height_to_compare;
-
-                if (moveY < MOVE_Y_MIN) {
-                    return ERROR_TWO_BITMAP_IS_SAME;
-                }
-                return SUCCEED_COMPARE;
-            }
-
-            newBitmapStartCompareY--;
-
-            if (newBitmapStartCompareY < mTopNotCompareHeight) {
-                *//********* look if have 100 lines equal start ***************//*
-                if (behindBitmapCompareStartY_450 != 0) {
-                    mNewBitmapStartY = behindBitmapCompareStartY_450;
-
-                    Log.i(TAG, "000 okokok 450 compare succeed moveY = " + moveY
-                            + " behindBitmapCompareStartY_450 = " + behindBitmapCompareStartY_450
-                            + " mOldBitmapEndY = " + mOldBitmapEndY);
-
-                    if (moveY < MOVE_Y_MIN) {
-                        return ERROR_TWO_BITMAP_IS_SAME;
-                    }
-                    return SUCCEED_COMPARE;
-                }
-                if (behindBitmapCompareStartY_400 != 0) {
-                    mNewBitmapStartY = behindBitmapCompareStartY_400;
-
-                    Log.i(TAG, "000 okokok 400 compare succeed moveY = " + moveY
-                            + " behindBitmapCompareStartY_400 = " + behindBitmapCompareStartY_400
-                            + " mOldBitmapEndY = " + mOldBitmapEndY);
-
-                    if (moveY < MOVE_Y_MIN) {
-                        return ERROR_TWO_BITMAP_IS_SAME;
-                    }
-                    return SUCCEED_COMPARE;
-                }
-                if (behindBitmapCompareStartY_350 != 0) {
-                    mNewBitmapStartY = behindBitmapCompareStartY_350;
-
-                    Log.i(TAG, "000 okokok 350 compare succeed moveY = " + moveY
-                            + " behindBitmapCompareStartY_350 = " + behindBitmapCompareStartY_350
-                            + " mOldBitmapEndY = " + mOldBitmapEndY);
-
-                    if (moveY < MOVE_Y_MIN) {
-                        return ERROR_TWO_BITMAP_IS_SAME;
-                    }
-                    return SUCCEED_COMPARE;
-                }
-                if (behindBitmapCompareStartY_300 != 0) {
-                    mNewBitmapStartY = behindBitmapCompareStartY_300;
-
-                    Log.i(TAG, "000 okokok 300 compare succeed moveY = " + moveY
-                            + " behindBitmapCompareStartY_300 = " + behindBitmapCompareStartY_300
-                            + " mOldBitmapEndY = " + mOldBitmapEndY);
-
-                    if (moveY < MOVE_Y_MIN) {
-                        return ERROR_TWO_BITMAP_IS_SAME;
-                    }
-                    return SUCCEED_COMPARE;
-                }
-                if (behindBitmapCompareStartY_250 != 0) {
-                    mNewBitmapStartY = behindBitmapCompareStartY_250;
-
-                    Log.i(TAG, "000 okokok 250 compare succeed moveY = " + moveY
-                            + " behindBitmapCompareStartY_250 = " + behindBitmapCompareStartY_250
-                            + " mOldBitmapEndY = " + mOldBitmapEndY);
-
-                    if (moveY < MOVE_Y_MIN) {
-                        return ERROR_TWO_BITMAP_IS_SAME;
-                    }
-                    return SUCCEED_COMPARE;
-                }
-                if (behindBitmapCompareStartY_200 != 0) {
-                    mNewBitmapStartY = behindBitmapCompareStartY_200;
-
-                    Log.i(TAG, "000 okokok 200 compare succeed moveY = " + moveY
-                            + " behindBitmapCompareStartY_200 = " + behindBitmapCompareStartY_200
-                            + " mOldBitmapEndY = " + mOldBitmapEndY);
-
-                    if (moveY < MOVE_Y_MIN) {
-                        return ERROR_TWO_BITMAP_IS_SAME;
-                    }
-                    return SUCCEED_COMPARE;
-                }
-                if (behindBitmapCompareStartY_150 != 0) {
-                    mNewBitmapStartY = behindBitmapCompareStartY_150;
-
-                    Log.i(TAG, "000 okokok 150 compare succeed moveY = " + moveY
-                            + " behindBitmapCompareStartY_150 = " + behindBitmapCompareStartY_150
-                            + " mOldBitmapEndY = " + mOldBitmapEndY);
-
-                    if (moveY < MOVE_Y_MIN) {
-                        return ERROR_TWO_BITMAP_IS_SAME;
-                    }
-                    return SUCCEED_COMPARE;
-                }
-                if (behindBitmapCompareStartY_100 != 0) {
-                    mNewBitmapStartY = behindBitmapCompareStartY_100;
-
-                    Log.i(TAG, "000 okokok 100 compare succeed moveY = " + moveY
-                            + " behindBitmapCompareStartY_100 = " + behindBitmapCompareStartY_100
-                            + " mOldBitmapEndY = " + mOldBitmapEndY);
-
-                    if (moveY < MOVE_Y_MIN) {
-                        return ERROR_TWO_BITMAP_IS_SAME;
-                    }
-                    return SUCCEED_COMPARE;
-                }
-                *//********* look if have 100 lines equal end ***************//*
-
-                *//****************equal height smaller than 100 start ***************************//*
-                if (oldBitmapStartCompareYDefault - oldBitmapEndCompareY >= REDUCE_PIXEL_BY_ONCE) {
-                    oldBitmapStartCompareYDefault -= REDUCE_PIXEL_BY_ONCE;//compare again
-                    oldBitmapStartCompareY = oldBitmapStartCompareYDefault;
-                    mOldBitmapEndY = oldBitmapStartCompareY;
-                    newBitmapStartCompareY = newBottomY - (oldBottomY - oldBitmapStartCompareY);
-                    sameStartY = 0;
-                    sameNum = 0;
-                    Log.i(TAG, "REDUCE_PIXEL_BY_ONCE oldBitmapStartCompareY = " + oldBitmapStartCompareY
-                            + " newBitmapStartCompareY = " + newBitmapStartCompareY
-                            + " oldBitmapEndCompareY = " + oldBitmapEndCompareY);
-                    continue;
-                }
-                *//****************equal height smaller than 100 end*******************************//*
-
-                Log.i(TAG, "error error error oldBitmapStartCompareY = " + oldBitmapStartCompareY +
-                        " sameNum = " + sameNum + " newBitmapStartCompareY = " + newBitmapStartCompareY
-                        + " sameStartY = " + sameStartY
-                        + " mNewBitmapStartY = " + mNewBitmapStartY);
-
-                return ERROR_COMPARE_FAILED;
-            }
-        }
-
-        *//********* look if have 5 lines equal start ***************//*
-        if (behindBitmapCompareStartY_90 != 0) {
-            mNewBitmapStartY = behindBitmapCompareStartY_90;
-
-            Log.i(TAG, "111 okokok 90 compare succeed moveY = " + moveY
-                    + " behindBitmapCompareStartY_90 = " + behindBitmapCompareStartY_90
-                    + " mOldBitmapEndY = " + mOldBitmapEndY);
-
-            if (moveY < MOVE_Y_MIN) {
-                return ERROR_TWO_BITMAP_IS_SAME;
-            }
-            return SUCCEED_COMPARE;
-        }
-        if (behindBitmapCompareStartY_80 != 0) {
-            mNewBitmapStartY = behindBitmapCompareStartY_80;
-
-            Log.i(TAG, "111 okokok 80 compare succeed moveY = " + moveY
-                    + " behindBitmapCompareStartY_80 = " + behindBitmapCompareStartY_80
-                    + " mOldBitmapEndY = " + mOldBitmapEndY);
-
-            if (moveY < MOVE_Y_MIN) {
-                return ERROR_TWO_BITMAP_IS_SAME;
-            }
-            return SUCCEED_COMPARE;
-        }
-        if (behindBitmapCompareStartY_70 != 0) {
-            mNewBitmapStartY = behindBitmapCompareStartY_70;
-
-            Log.i(TAG, "111 okokok 70 compare succeed moveY = " + moveY
-                    + " behindBitmapCompareStartY_70 = " + behindBitmapCompareStartY_70
-                    + " mOldBitmapEndY = " + mOldBitmapEndY);
-
-            if (moveY < MOVE_Y_MIN) {
-                return ERROR_TWO_BITMAP_IS_SAME;
-            }
-            return SUCCEED_COMPARE;
-        }
-        if (behindBitmapCompareStartY_60 != 0) {
-            mNewBitmapStartY = behindBitmapCompareStartY_60;
-
-            Log.i(TAG, "111 okokok 60 compare succeed moveY = " + moveY
-                    + " behindBitmapCompareStartY_60 = " + behindBitmapCompareStartY_60
-                    + " mOldBitmapEndY = " + mOldBitmapEndY);
-
-            if (moveY < MOVE_Y_MIN) {
-                return ERROR_TWO_BITMAP_IS_SAME;
-            }
-            return SUCCEED_COMPARE;
-        }
-        if (behindBitmapCompareStartY_50 != 0) {
-            mNewBitmapStartY = behindBitmapCompareStartY_50;
-
-            Log.i(TAG, "111 okokok 50 compare succeed moveY = " + moveY
-                    + " behindBitmapCompareStartY_50 = " + behindBitmapCompareStartY_50
-                    + " mOldBitmapEndY = " + mOldBitmapEndY);
-
-            if (moveY < MOVE_Y_MIN) {
-                return ERROR_TWO_BITMAP_IS_SAME;
-            }
-            return SUCCEED_COMPARE;
-        }
-        if (behindBitmapCompareStartY_40 != 0) {
-            mNewBitmapStartY = behindBitmapCompareStartY_40;
-
-            Log.i(TAG, "111 okokok 40 compare succeed moveY = " + moveY
-                    + " behindBitmapCompareStartY_40 = " + behindBitmapCompareStartY_40
-                    + " mOldBitmapEndY = " + mOldBitmapEndY);
-
-            if (moveY < MOVE_Y_MIN) {
-                return ERROR_TWO_BITMAP_IS_SAME;
-            }
-            return SUCCEED_COMPARE;
-        }
-        if (behindBitmapCompareStartY_30 != 0) {
-            mNewBitmapStartY = behindBitmapCompareStartY_30;
-
-            Log.i(TAG, "111 okokok 30 compare succeed moveY = " + moveY
-                    + " behindBitmapCompareStartY_30 = " + behindBitmapCompareStartY_30
-                    + " mOldBitmapEndY = " + mOldBitmapEndY);
-
-            if (moveY < MOVE_Y_MIN) {
-                return ERROR_TWO_BITMAP_IS_SAME;
-            }
-            return SUCCEED_COMPARE;
-        }
-        if (behindBitmapCompareStartY_20 != 0) {
-            mNewBitmapStartY = behindBitmapCompareStartY_20;
-
-            Log.i(TAG, "111 okokok 20 compare succeed moveY = " + moveY
-                    + " behindBitmapCompareStartY_20 = " + behindBitmapCompareStartY_20
-                    + " mOldBitmapEndY = " + mOldBitmapEndY);
-
-            if (moveY < MOVE_Y_MIN) {
-                return ERROR_TWO_BITMAP_IS_SAME;
-            }
-            return SUCCEED_COMPARE;
-        }
-        if (behindBitmapCompareStartY_10 != 0) {
-            mNewBitmapStartY = behindBitmapCompareStartY_10;
-
-            Log.i(TAG, "111 okokok 10 compare succeed moveY = " + moveY
-                    + " behindBitmapCompareStartY_10 = " + behindBitmapCompareStartY_10
-                    + " mOldBitmapEndY = " + mOldBitmapEndY);
-
-            if (moveY < MOVE_Y_MIN) {
-                return ERROR_TWO_BITMAP_IS_SAME;
-            }
-            return SUCCEED_COMPARE;
-        }
-        if (behindBitmapCompareStartY_5 != 0) {
-            mNewBitmapStartY = behindBitmapCompareStartY_5;
-
-            Log.i(TAG, "111 okokok 5 compare succeed moveY = " + moveY
-                    + " behindBitmapCompareStartY_5 = " + behindBitmapCompareStartY_5
-                    + " mOldBitmapEndY = " + mOldBitmapEndY);
-
-            if (moveY < MOVE_Y_MIN) {
-                return ERROR_TWO_BITMAP_IS_SAME;
-            }
-            return SUCCEED_COMPARE;
-        }*/
-        /********* look if have 5 lines equal end ***************/
-
+        Log.i(TAG, "FAILED_COMPARE can not find " + BOTTOM_NOT_COMPARE_EXTRA_HEIGHT + "px equal height...");
         return false;
     }
 
@@ -650,10 +164,10 @@ public class LongScreenshotUtil {
     private boolean isLinePixelsEqual(int[] oldPixels, int[] newPixels) {
         if (oldPixels.length != newPixels.length)
             return false;
-        int compareWidth = oldPixels.length - mBorderNotCompareWidth;
+        int compareWidth = oldPixels.length - BORDER_NOT_COMPARE_WIDTH;
         int differentCount = 0;
 
-        for (int i = mBorderNotCompareWidth; i < compareWidth; i++) {
+        for (int i = BORDER_NOT_COMPARE_WIDTH; i < compareWidth; i++) {
             if (oldPixels[i] != newPixels[i]) {
 
                 int oldRed = (oldPixels[i] & 0x00ff0000) >> 16;
@@ -689,8 +203,8 @@ public class LongScreenshotUtil {
      */
     private boolean isPureColorLine(int[] pixels) {
         int differentCount = 0;
-        int compareWidth = pixels.length - mBorderNotCompareWidth;
-        for (int i = mBorderNotCompareWidth; i < compareWidth; i++) {
+        int compareWidth = pixels.length - BORDER_NOT_COMPARE_WIDTH;
+        for (int i = BORDER_NOT_COMPARE_WIDTH; i < compareWidth; i++) {
             if (pixels[i] != pixels[i - 1]) {
                 differentCount++;
             }
@@ -707,13 +221,15 @@ public class LongScreenshotUtil {
      * @param bitmap
      * @return
      */
-    private int getOldBitmapStartCompareY(Bitmap bitmap, int minHeight) {
+    private int getOldBitmapCompareEndY(Bitmap bitmap, int minHeight) {
         final int width = bitmap.getWidth();
         final int height = bitmap.getHeight();
-        if(height < minHeight) return  -1;
+
+        if (height < minHeight) return -1;
+
         final int end = height - minHeight;
         int[] pixels = new int[width];
-        for (int i = (height - mBottomNotCompareHeight - 1); i >= (end + mTopNotCompareHeight + mBottomNotCompareHeightMargin); i--) {
+        for (int i = (height - BOTTOM_NOT_COMPARE_HEIGHT - 1); i >= (end + TOP_NOT_COMPARE_HEIGHT + BOTTOM_NOT_COMPARE_EXTRA_HEIGHT); i--) {
             //将第i行宽度为width的像素点存入数组pixels中
             bitmap.getPixels(pixels, 0, width, 0, i, width, 1);
             if (!isPureColorLine(pixels)) return i;
@@ -728,7 +244,7 @@ public class LongScreenshotUtil {
         long start = System.currentTimeMillis();
         boolean isSucceed = becompareTwoBitmap(oldBitmap, newBitmap);
         long end = System.currentTimeMillis();
-        Log.i(TAG, "collageLongBitmap result isSucceed = " + isSucceed
+        Log.i(TAG, "SUCCEED_COMPARE collageLongBitmap end isSucceed = " + isSucceed
                 + ", cost = " + (end - start) + "ms");
 
         if (!isSucceed) {//failed, stop

@@ -10,6 +10,7 @@ import com.bugtags.library.Bugtags;
 import com.bumptech.glide.Glide;
 import com.way.capture.fragment.SettingsFragment;
 import com.way.capture.service.ShakeService;
+import com.way.capture.utils.permission.Nammu;
 import com.way.downloadlibrary.WDMSharPre;
 
 
@@ -45,8 +46,9 @@ public class App extends Application {
         WDMSharPre.init(getApplicationContext());
 
         //start shake service
-        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsFragment.SHAKE_KEY, true))
-            startService(new Intent(this, ShakeService.class));
+        //if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsFragment.SHAKE_KEY, true))
+        //    startService(new Intent(this, ShakeService.class));
+        Nammu.init(mContext);
     }
 
     @Override

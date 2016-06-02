@@ -86,7 +86,7 @@ public class GuideActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-                //setIndicator(position);
+                setIndicator(position);
                 if (position == NUM_PAGES - 2) {
                     skip.setVisibility(View.GONE);
                     next.setVisibility(View.GONE);
@@ -105,9 +105,9 @@ public class GuideActivity extends AppCompatActivity {
 
             }
         });
-        SpringIndicator springIndicator = (SpringIndicator) findViewById(R.id.indicator);
-        springIndicator.setViewPager(pager);
-        //buildCircles();
+        //SpringIndicator springIndicator = (SpringIndicator) findViewById(R.id.indicator);
+        //springIndicator.setViewPager(pager);
+        buildCircles();
     }
 
     @Override
@@ -119,7 +119,7 @@ public class GuideActivity extends AppCompatActivity {
     }
 
     private void buildCircles() {
-        //circles = LinearLayout.class.cast(findViewById(R.id.circles));
+        circles = LinearLayout.class.cast(findViewById(R.id.circles));
 
         float scale = getResources().getDisplayMetrics().density;
         int padding = (int) (5 * scale + 0.5f);

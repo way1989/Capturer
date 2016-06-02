@@ -10,13 +10,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.way.capture.widget.springindicator.SpringIndicator
+<!--    <com.way.capture.widget.springindicator.SpringIndicator
         android:id="@+id/indicator"
         android:layout_width="wrap_content"
         android:layout_height="24dp"
         android:layout_marginEnd="48dp"
         android:layout_marginStart="48dp"
-        android:layout_marginTop="36dp" />
+        android:layout_marginTop="36dp" />-->
 
     <View
         android:layout_width="match_parent"
@@ -63,6 +63,15 @@
             android:text="@string/next_with_arrow"
             android:textColor="@color/abc_primary_text_material_dark"
             android:textSize="18sp" />
+
+        <LinearLayout
+            android:id="@+id/circles"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginEnd="80dp"
+            android:layout_marginStart="80dp"
+            android:gravity="center"
+            android:orientation="horizontal" />
     </RelativeLayout>
 
 </RelativeLayout>

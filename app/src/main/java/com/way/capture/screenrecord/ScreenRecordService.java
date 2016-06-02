@@ -103,7 +103,7 @@ public final class ScreenRecordService extends Service {
 
     private boolean hasAvailableSpace() {
         StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
-        long bytesAvailable = stat.getBlockSizeLong() * stat.getBlockCountLong();
+        long bytesAvailable = stat.getBlockSizeLong() * stat.getAvailableBlocksLong();
         long megAvailable = bytesAvailable / 1048576;
         return megAvailable >= 100;
     }

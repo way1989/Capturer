@@ -145,6 +145,7 @@
             android:name=".activity.GuideActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
+            android:launchMode="singleTop"
             android:theme="@style/AppTheme.DayNight.NoActionBar" />
         <activity
             android:name="com.thefinestartist.finestwebview.FinestWebViewActivity"

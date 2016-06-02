@@ -1,12 +1,15 @@
 package com.way.capture.service;
 
+import android.Manifest;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -17,6 +20,7 @@ import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 
 import com.way.capture.R;
@@ -26,6 +30,7 @@ import com.way.capture.screenshot.TakeScreenshotActivity;
 import com.way.capture.screenshot.TakeScreenshotService;
 import com.way.capture.screenshot.crop.TakeCropScreenshotActivity;
 import com.way.capture.screenshot.crop.TakeCropScreenshotService;
+import com.way.capture.utils.permission.Nammu;
 import com.way.capture.widget.FloatMenuDialog;
 
 
@@ -68,6 +73,9 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
             mSensorManager.registerListener(this, mSensor,
                     SensorManager.SENSOR_DELAY_GAME);
         }
+        //注册Home监听广播
+        registerReceiver(mHomeKeyEventReceiver, new IntentFilter(
+                Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
     }
 
     @Override
@@ -94,6 +102,8 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
         super.onDestroy();
         mIsRunning = false;
         mSensorManager.unregisterListener(this);
+        //注销Home键监听广播
+        unregisterReceiver(mHomeKeyEventReceiver);
     }
 
     @Override
@@ -217,10 +227,16 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
     }
 
     private void showDialog() {
+        if (!Nammu.checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE))
+            return;
         if (mFloatMenuDialog == null)
             mFloatMenuDialog = new FloatMenuDialog(this, R.style.Theme_Dialog);
         mFloatMenuDialog.setOnClickListener(this);
         mFloatMenuDialog.show();
+    }
+    private void dismissDialog(){
+        if(isShowDialog())
+            mFloatMenuDialog.dismiss();
     }
 
     public boolean isShowDialog() {
@@ -247,4 +263,32 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
         }
 
     }
+
+    /**
+     * 监听是否点击了home键将客户端推到后台
+     */
+    private BroadcastReceiver mHomeKeyEventReceiver = new BroadcastReceiver() {
+        String SYSTEM_REASON = "reason";
+        String SYSTEM_HOME_KEY = "homekey";
+        String SYSTEM_HOME_KEY_LONG = "recentapps";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {
+                String reason = intent.getStringExtra(SYSTEM_REASON);
+                if (TextUtils.equals(reason, SYSTEM_HOME_KEY)) {
+                    //表示按了home键,程序到了后台
+                    //Toast.makeText(getApplicationContext(), "home click", Toast.LENGTH_SHORT).show();
+                    Log.i(TAG, "home key click....");
+                    dismissDialog();
+                } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
+                    //表示长按home键,显示最近使用的程序列表
+                    //Toast.makeText(getApplicationContext(), "home long click", Toast.LENGTH_SHORT).show();
+                    Log.i(TAG, "home key long click....");
+                    dismissDialog();
+                }
+            }
+        }
+    };
 }

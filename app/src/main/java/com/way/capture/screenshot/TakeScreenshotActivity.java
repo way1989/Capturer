@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.way.capture.R;
 
 public class TakeScreenshotActivity extends Activity {
     private boolean mIsLongScreenshot;
@@ -14,7 +17,12 @@ public class TakeScreenshotActivity extends Activity {
         super.onCreate(savedInstanceState);
         mIsLongScreenshot = TextUtils.equals(TakeScreenshotService.ACTION_LONG_SCREENSHOT, getIntent().getAction());
         Log.i("broncho", "TakeScreenshotActivity onCreate mIsLongScreenshot = " + mIsLongScreenshot);
-        ScreenshotHelper.fireScreenCaptureIntent(this);
+        try {
+            ScreenshotHelper.fireScreenCaptureIntent(this);
+        }catch (Exception e){
+            Toast.makeText(this, R.string.not_support_devices, Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
     @Override

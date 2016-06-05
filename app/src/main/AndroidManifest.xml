@@ -48,7 +48,7 @@
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/permission_title"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.DayNight.Dialog" />
+            android:theme="@android:style/Theme.Material.Light.Panel" />
 
         <service
             android:name=".screenrecord.ScreenRecordService"

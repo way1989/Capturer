@@ -3,13 +3,21 @@ package com.way.capture.screenrecord;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
+
+import com.way.capture.R;
 
 public final class ScreenRecordShortcutLaunchActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        CaptureHelper.fireScreenCaptureIntent(this);
+        try {
+            CaptureHelper.fireScreenCaptureIntent(this);
+        }catch (Exception e){
+            Toast.makeText(this, R.string.not_support_devices, Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
     @Override

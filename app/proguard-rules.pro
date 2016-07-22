@@ -33,3 +33,9 @@
 #-keep class com.way.captain.widget.**{*;}
 #-keep class com.getbase.floatingactionbutton.**{*;}
 #-keep class com.alexvasilkov.**{*;}
+
+
+#spotlight
+-keep class com.wooplr.spotlight.** { *; }
+-keep interface com.wooplr.spotlight.**
+-keep enum com.wooplr.spotlight.**

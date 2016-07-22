@@ -166,8 +166,8 @@
     <string name="help">帮助</string>
     <string name="share_app">分享一个非常实用的截屏、录屏软件: %s</string>
 
-    <string name="float_action_button_guide_title">点这里显示主功能菜单</string>
-    <string name="float_action_button_guide_desc">也可以通过摇一摇的方式启动哦</string>
+    <string name="float_action_button_guide_title">点这里开始</string>
+    <string name="float_action_button_guide_desc">也可以通过摇一摇的方式启动主功能菜单哦</string>
     <string name="video_to_gif_title">点这里将视频转换成GIF图</string>
     <string name="video_to_gif_desc">第一次需要下载一个适合你手机的库文件</string>
     <string name="logo_title">所见即所得</string>

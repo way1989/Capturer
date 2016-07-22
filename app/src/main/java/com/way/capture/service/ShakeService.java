@@ -30,7 +30,6 @@ import com.way.capture.screenshot.TakeScreenshotActivity;
 import com.way.capture.screenshot.TakeScreenshotService;
 import com.way.capture.screenshot.crop.TakeCropScreenshotActivity;
 import com.way.capture.screenshot.crop.TakeCropScreenshotService;
-import com.way.capture.utils.permission.Nammu;
 import com.way.capture.widget.FloatMenuDialog;
 
 
@@ -227,8 +226,6 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
     }
 
     private void showDialog() {
-        if (!Nammu.checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE))
-            return;
         if (mFloatMenuDialog == null)
             mFloatMenuDialog = new FloatMenuDialog(this, R.style.Theme_Dialog);
         mFloatMenuDialog.setOnClickListener(this);

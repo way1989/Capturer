@@ -639,6 +639,7 @@ public class LongScreenshotUtil {
                 + " mOldBitmapEndY = " + mOldBitmapEndY
                 + " mNewBitmapStartY = " + mNewBitmapStartY
                 + " mScreenBitmap.getHeight() = " + newBitmap.getHeight());
+        if(height < oldBitmap.getHeight()) return null;
 
         Bitmap resultBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 

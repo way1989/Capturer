@@ -17,7 +17,6 @@
 package com.way.capture.activity;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,9 +25,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.TextView;
 
 import com.way.capture.R;
 import com.way.capture.utils.OsUtil;
@@ -38,14 +37,11 @@ import com.way.capture.utils.OsUtil;
  * to grant permissions. However, the OS may not actually prompt the user if the user had
  * previously checked the "Never ask again" checkbox while denying the required permissions.
  */
-public class PermissionCheckActivity extends Activity implements OnClickListener {
+public class PermissionCheckActivity extends AppCompatActivity implements OnClickListener {
     private static final int REQUIRED_PERMISSIONS_REQUEST_CODE = 1;
     private static final long AUTOMATED_RESULT_THRESHOLD_MILLLIS = 250;
     private static final String PACKAGE_URI_PREFIX = "package:";
     private long mRequestTimeMillis;
-//    private TextView mNextView;
-//    private TextView mSettingsView;
-//    private TextView mEnablePermissionView;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -54,16 +50,6 @@ public class PermissionCheckActivity extends Activity implements OnClickListener
             return;
         }
         showRequestPermissionDialog();
-//        setContentView(R.layout.permission_check_activity);
-//        View exit = findViewById(R.id.exit);
-//        if (exit != null) exit.setOnClickListener(this);
-//
-//        mNextView = (TextView) findViewById(R.id.next);
-//        if (mNextView != null) mNextView.setOnClickListener(this);
-//
-//        mSettingsView = (TextView) findViewById(R.id.settings);
-//        if (mSettingsView != null) mSettingsView.setOnClickListener(this);
-//        mEnablePermissionView = (TextView) findViewById(R.id.enable_permission_procedure);
     }
 
     private void showRequestPermissionDialog() {
@@ -80,7 +66,7 @@ public class PermissionCheckActivity extends Activity implements OnClickListener
                     public void onClick(DialogInterface dialog, int which) {
                         tryRequestPermission();
                     }
-                }).create().show();
+                }).show();
     }
 
     @Override
@@ -119,12 +105,8 @@ public class PermissionCheckActivity extends Activity implements OnClickListener
                 // automatically denied. This can happen if the user had previously denied it
                 // and checked the "Never ask again" check box.
                 if ((currentTimeMillis - mRequestTimeMillis) < AUTOMATED_RESULT_THRESHOLD_MILLLIS) {
-//                    mNextView.setVisibility(View.GONE);
-//
-//                    mSettingsView.setVisibility(View.VISIBLE);
-//                    mEnablePermissionView.setVisibility(View.VISIBLE);
                     gotoSettings();
-                }else{
+                } else {
                     //tryRequestPermission();
                     finish();
                 }
@@ -148,7 +130,7 @@ public class PermissionCheckActivity extends Activity implements OnClickListener
                                 Uri.parse(PACKAGE_URI_PREFIX + getPackageName()));
                         startActivity(intent);
                     }
-                }).create().show();
+                }).show();
     }
 
     /**

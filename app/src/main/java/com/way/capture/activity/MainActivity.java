@@ -3,7 +3,9 @@ package com.way.capture.activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -19,7 +21,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,10 +35,7 @@ import com.way.capture.fragment.ScreenshotFragment;
 import com.way.capture.service.ShakeService;
 import com.way.capture.utils.AppUtils;
 import com.way.capture.utils.OsUtil;
-import com.way.tourguide.Overlay;
-import com.way.tourguide.Pointer;
-import com.way.tourguide.ToolTip;
-import com.way.tourguide.TourGuide;
+import com.wooplr.spotlight.SpotlightView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,7 +98,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private long mLastPressTime;
     private SharedPreferences mPreference;
     private FloatingActionButton mFab;
-    private TourGuide mTourGuideHandler;
     private Bundle mTmpReenterState;
     private final SharedElementCallback mCallback = new SharedElementCallback() {
         @Override
@@ -151,35 +148,45 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         syncNightMode();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (mFab != null && mTourGuideHandler == null && mPreference.getBoolean(TAG, true)) {
-            mTourGuideHandler = TourGuide.init(this).with(TourGuide.Technique.Click)
-                    .setPointer(new Pointer())
-                    .setToolTip(new ToolTip().setGravity(Gravity.TOP | Gravity.START)
-                            .setTitle(getString(R.string.float_action_button_guide_title))
-                            .setDescription(getString(R.string.float_action_button_guide_desc)))
-                    .setOverlay(new Overlay()).playOn(mFab);
-        }
+    private void showIntro(View view, String usageId) {
+        new SpotlightView.Builder(this)
+                .introAnimationDuration(400)
+                .enableRevalAnimation(true)
+                .performClick(true)
+                .fadeinTextDuration(400)
+                //.setTypeface(FontUtil.get(this, "RemachineScript_Personal_Use"))
+                .headingTvColor(Color.parseColor("#eb273f"))
+                .headingTvSize(32)
+                .headingTvText(getString(R.string.float_action_button_guide_title))
+                .subHeadingTvColor(Color.parseColor("#ffffff"))
+                .subHeadingTvSize(16)
+                .subHeadingTvText(getString(R.string.float_action_button_guide_desc))
+                .maskColor(Color.parseColor("#dc000000"))
+                .target(view)
+                .lineAnimDuration(400)
+                .lineAndArcColor(Color.parseColor("#eb273f"))
+                .dismissOnTouch(true)
+                .enableDismissAfterShown(true)
+                .usageId(usageId) //UNIQUE ID
+                .show();
     }
 
     private void initFab() {
-
         mFab = (FloatingActionButton) findViewById(R.id.fab);
         if (mFab != null) {
             mFab.setOnClickListener(new View.OnClickListener() {
 
                 @Override
                 public void onClick(View view) {
-                    if (mTourGuideHandler != null) {
-                        mTourGuideHandler.cleanUp();
-                        mTourGuideHandler = null;
-                        mPreference.edit().putBoolean(TAG, false).apply();
-                    }
                     startService(new Intent(MainActivity.this, ShakeService.class).setAction("com.way.action.SHOW_MENU"));
                 }
             });
+            mFab.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    showIntro(mFab, TAG);
+                }
+            }, 1000L);
         }
     }
 

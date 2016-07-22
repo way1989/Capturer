@@ -2,15 +2,11 @@ package com.way.capture;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatDelegate;
 
 import com.bugtags.library.Bugtags;
 import com.bumptech.glide.Glide;
-import com.way.capture.fragment.SettingsFragment;
-import com.way.capture.service.ShakeService;
-import com.way.capture.utils.permission.Nammu;
 import com.way.downloadlibrary.WDMSharPre;
 
 
@@ -48,7 +44,6 @@ public class App extends Application {
         //start shake service
         //if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsFragment.SHAKE_KEY, true))
         //    startService(new Intent(this, ShakeService.class));
-        Nammu.init(mContext);
     }
 
     @Override

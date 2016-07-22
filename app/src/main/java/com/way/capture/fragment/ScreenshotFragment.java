@@ -143,7 +143,13 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
         mSwipeRefreshLayout.setOnRefreshListener(this);
         getLoaderManager().initLoader(SCREENSHOT_LOADER_ID, null, this);
     }
-
+    private void loadData() {
+        if(isAdded() && getUserVisibleHint()
+                && getLoaderManager().getLoader(SCREENSHOT_LOADER_ID) == null){
+            mLoadingEmptyContainer.showLoading();
+            getLoaderManager().initLoader(SCREENSHOT_LOADER_ID, null, this);
+        }
+    }
     private void initLoadingEmptyView(View view, int type) {
         mLoadingEmptyContainer = (LoadingEmptyContainer) view.findViewById(R.id.loading_empty_container);
         switch (type) {
@@ -168,7 +174,6 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
 
     @Override
     public Loader<DataLoader.Result> onCreateLoader(int id, Bundle args) {
-        mLoadingEmptyContainer.showLoading();
         return new DataLoader(getContext(), getArguments().getInt(ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT));
     }
 
@@ -177,7 +182,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
         mSwipeRefreshLayout.setRefreshing(false);
         mSwipeRefreshLayout.setEnabled(true);
         if (data.dataInfoes != null && !data.dataInfoes.isEmpty()) {
-            mLoadingEmptyContainer.setVisibility(View.INVISIBLE);
+            mLoadingEmptyContainer.hideAll();
             mDataProvider.setData(data.dataInfoes);
             mScreenshotAdapter.setDatas(mDataProvider);
         } else {

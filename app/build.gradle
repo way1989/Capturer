@@ -58,6 +58,8 @@ android {
             //是否开启BUGTAG
             buildConfigField "boolean", "BUGTAG_ENABLED", "false"
             resValue "string", "bugtag_app_key", BUGTAG_APP_KEY
+            buildConfigField "String", "BUGLY_APPID", BUGLY_APP_ID
+            signingConfig signingConfigs.release
         }
 
         release {
@@ -66,6 +68,7 @@ android {
             //是否开启BUGTAG
             buildConfigField "boolean", "BUGTAG_ENABLED", "true"
             resValue "string", "bugtag_app_key", BUGTAG_APP_KEY
+            buildConfigField "String", "BUGLY_APPID", BUGLY_APP_ID
             signingConfig signingConfigs.release
             shrinkResources true
             minifyEnabled true
@@ -108,4 +111,5 @@ dependencies {
     compile 'com.android.support:support-v4:23.4.0'
     compile 'com.thefinestartist:finestwebview:1.2.5'
     compile 'com.github.wooplr:Spotlight:1.1'
+    //compile 'com.tencent.bugly:crashreport:latest.release' //其中latest.release指代最新版本号，也可以指定明确的版本号，例如2.1.5
 }

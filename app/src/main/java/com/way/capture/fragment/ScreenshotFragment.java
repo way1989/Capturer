@@ -95,14 +95,14 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
 
     @Override
     public void changeSharedElements(List<String> names, Map<String, View> sharedElements, int position) {
-        String newTransitionName = mDataProvider.getItem(position);
+        DataInfo newTransitionName = mDataProvider.getItem(position);
         View newSharedElement = mRecyclerView.findViewHolderForAdapterPosition(position).itemView.findViewById(R.id.ic_screenshot);
         Log.i("way", "changeSharedElements newSharedElement = " + newSharedElement);
         if (newSharedElement != null) {
             names.clear();
-            names.add(newTransitionName);
+            names.add(newTransitionName.path);
             sharedElements.clear();
-            sharedElements.put(newTransitionName, newSharedElement);
+            sharedElements.put(newTransitionName.path, newSharedElement);
         }
     }
 
@@ -216,7 +216,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
             mIsDetailsActivityStarted = true;
             Intent intent = new Intent(getActivity(), DetailsActivity.class);
             intent.putExtra(ARGS_TYPE, getArguments().getInt(ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT));
-            intent.putStringArrayListExtra(EXTRA_DATAS, mDataProvider.getData());
+            intent.putExtra(EXTRA_DATAS, mDataProvider.getData());
             intent.putExtra(EXTRA_STARTING_POSITION, position);
             startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(getActivity(), imageView,
                     imageView.getTransitionName()).toBundle());
@@ -239,7 +239,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     @Override
     public boolean onMenuItemClick(final MenuItem item) {
         int type = getArguments().getInt(ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT);
-        String path = mDataProvider.getItem(mClickPosition);
+        String path = mDataProvider.getItem(mClickPosition).path;
 
         switch (item.getItemId()) {
             case R.id.gif_item_share:

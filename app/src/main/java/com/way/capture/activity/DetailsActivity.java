@@ -61,7 +61,7 @@ public class DetailsActivity extends BaseActivity {
             }
         }
     };
-    private ArrayList<String> mDatas;
+    private ArrayList<DataInfo> mDatas;
     private int mType;
 
     @Override

@@ -69,6 +69,6 @@ public class DataLoader extends AsyncTaskLoader<DataLoader.Result> {
     }
 
     public static class Result {
-        public ArrayList<String> dataInfoes;
+        public ArrayList<DataInfo> dataInfoes;
     }
 }

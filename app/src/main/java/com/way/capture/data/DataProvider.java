@@ -7,9 +7,9 @@ import java.util.ArrayList;
  * Created by android on 16-2-16.
  */
 public class DataProvider {
-    private ArrayList<String> mData;
-    private ArrayList<String> mDeleteData;
-    private String mLastRemovedData;
+    private ArrayList<DataInfo> mData;
+    private ArrayList<DataInfo> mDeleteData;
+    private DataInfo mLastRemovedData;
     private int mLastRemovedPosition = -1;
 
     public DataProvider() {
@@ -17,11 +17,11 @@ public class DataProvider {
         mDeleteData = new ArrayList<>();
     }
 
-    public ArrayList<String> getData() {
+    public ArrayList<DataInfo> getData() {
         return mData;
     }
 
-    public void setData(ArrayList<String> datas) {
+    public void setData(ArrayList<DataInfo> datas) {
         if (datas == null || datas.isEmpty())
             return;
         mData.clear();
@@ -32,7 +32,7 @@ public class DataProvider {
         return mData.size();
     }
 
-    public String getItem(int index) {
+    public DataInfo getItem(int index) {
         if (index < 0 || index >= getCount()) {
             throw new IndexOutOfBoundsException("index = " + index);
         }
@@ -64,8 +64,8 @@ public class DataProvider {
 
     public boolean deleteLastRemoval() {
         if (mLastRemovedData != null && !mDeleteData.isEmpty()) {
-            for (String info : mDeleteData) {
-                File file = new File(info);
+            for (DataInfo info : mDeleteData) {
+                File file = new File(info.path);
                 if (file.exists())
                     file.delete();
             }
@@ -83,7 +83,7 @@ public class DataProvider {
             return;
         }
 
-        final String item = mData.remove(fromPosition);
+        final DataInfo item = mData.remove(fromPosition);
 
         mData.add(toPosition, item);
         mLastRemovedPosition = -1;
@@ -91,7 +91,7 @@ public class DataProvider {
 
     public void removeItem(int position) {
         //noinspection UnnecessaryLocalVariable
-        final String removedItem = mData.remove(position);
+        final DataInfo removedItem = mData.remove(position);
         mDeleteData.add(removedItem);
         mLastRemovedData = removedItem;
         mLastRemovedPosition = position;

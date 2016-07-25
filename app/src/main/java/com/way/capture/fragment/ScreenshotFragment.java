@@ -141,8 +141,16 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
         mSwipeRefreshLayout.setOnRefreshListener(this);
-        getLoaderManager().initLoader(SCREENSHOT_LOADER_ID, null, this);
+        //getLoaderManager().initLoader(SCREENSHOT_LOADER_ID, null, this);
+        loadData();
     }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        loadData();
+    }
+
     private void loadData() {
         if(isAdded() && getUserVisibleHint()
                 && getLoaderManager().getLoader(SCREENSHOT_LOADER_ID) == null){
@@ -169,7 +177,10 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     public void onRefresh() {
         mSwipeRefreshLayout.setRefreshing(true);
         mSwipeRefreshLayout.setEnabled(false);
-        getLoaderManager().restartLoader(SCREENSHOT_LOADER_ID, null, this);
+        if(getLoaderManager().getLoader(SCREENSHOT_LOADER_ID) == null)
+            getLoaderManager().initLoader(SCREENSHOT_LOADER_ID, null, this);
+        else
+            getLoaderManager().restartLoader(SCREENSHOT_LOADER_ID, null, this);
     }
 
     @Override

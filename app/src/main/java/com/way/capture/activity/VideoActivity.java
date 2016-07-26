@@ -8,6 +8,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -24,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.way.capture.App;
 import com.way.capture.utils.ffmpeg.ExecuteBinaryResponseHandler;
 import com.way.capture.utils.ffmpeg.FFmpeg;
 import com.way.capture.utils.ffmpeg.LoadBinaryResponseHandler;
@@ -250,7 +253,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
         String[] command = GifUtils.getVideo2gifCommand(start, gifLength, frame, path,
                 outputFile, width, height);
         if (command.length != 0) {
-            execFFmpegBinary(command);
+            execFFmpegBinary(command, outputFile);
         } else {
             Snackbar.make(mVideoView, R.string.video_to_gif_failed, Snackbar.LENGTH_SHORT).show();
         }
@@ -294,7 +297,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
 
     }
 
-    private void execFFmpegBinary(final String[] command) {
+    private void execFFmpegBinary(final String[] command, final String outputFile) {
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(null);
         progressDialog.setCancelable(false);
@@ -312,6 +315,13 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
                 public void onSuccess(String s) {
                     //Snackbar.make(mVideoView, R.string.video_to_gif_success, Snackbar.LENGTH_SHORT).show();
                     Toast.makeText(VideoActivity.this, R.string.video_to_gif_success, Toast.LENGTH_SHORT).show();
+                    MediaScannerConnection.scanFile(App.getContext(), new String[]{outputFile},
+                            null, new MediaScannerConnection.OnScanCompletedListener() {
+                                @Override
+                                public void onScanCompleted(String path, Uri uri) {
+                                    Log.d("way", "Media scanner completed.");
+                                }
+                            });
                 }
 
                 @Override

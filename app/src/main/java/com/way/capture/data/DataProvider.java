@@ -1,5 +1,11 @@
 package com.way.capture.data;
 
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.util.Log;
+
+import com.way.capture.App;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -7,9 +13,9 @@ import java.util.ArrayList;
  * Created by android on 16-2-16.
  */
 public class DataProvider {
-    private ArrayList<DataInfo> mData;
-    private ArrayList<DataInfo> mDeleteData;
-    private DataInfo mLastRemovedData;
+    private ArrayList<String> mData;
+    private ArrayList<String> mDeleteData;
+    private String mLastRemovedData;
     private int mLastRemovedPosition = -1;
 
     public DataProvider() {
@@ -17,11 +23,11 @@ public class DataProvider {
         mDeleteData = new ArrayList<>();
     }
 
-    public ArrayList<DataInfo> getData() {
+    public ArrayList<String> getData() {
         return mData;
     }
 
-    public void setData(ArrayList<DataInfo> datas) {
+    public void setData(ArrayList<String> datas) {
         if (datas == null || datas.isEmpty())
             return;
         mData.clear();
@@ -32,7 +38,7 @@ public class DataProvider {
         return mData.size();
     }
 
-    public DataInfo getItem(int index) {
+    public String getItem(int index) {
         if (index < 0 || index >= getCount()) {
             throw new IndexOutOfBoundsException("index = " + index);
         }
@@ -64,10 +70,17 @@ public class DataProvider {
 
     public boolean deleteLastRemoval() {
         if (mLastRemovedData != null && !mDeleteData.isEmpty()) {
-            for (DataInfo info : mDeleteData) {
-                File file = new File(info.path);
+            for (String info : mDeleteData) {
+                File file = new File(info);
                 if (file.exists())
                     file.delete();
+                MediaScannerConnection.scanFile(App.getContext(), new String[]{info},
+                        null, new MediaScannerConnection.OnScanCompletedListener() {
+                            @Override
+                            public void onScanCompleted(String path, Uri uri) {
+                                Log.d("way", "Media scanner completed.");
+                            }
+                        });
             }
             mLastRemovedData = null;
             mLastRemovedPosition = -1;
@@ -83,7 +96,7 @@ public class DataProvider {
             return;
         }
 
-        final DataInfo item = mData.remove(fromPosition);
+        final String item = mData.remove(fromPosition);
 
         mData.add(toPosition, item);
         mLastRemovedPosition = -1;
@@ -91,7 +104,7 @@ public class DataProvider {
 
     public void removeItem(int position) {
         //noinspection UnnecessaryLocalVariable
-        final DataInfo removedItem = mData.remove(position);
+        final String removedItem = mData.remove(position);
         mDeleteData.add(removedItem);
         mLastRemovedData = removedItem;
         mLastRemovedPosition = position;

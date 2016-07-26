@@ -54,7 +54,7 @@ public class DataInfo implements Serializable{
     }
 
     @Nullable
-    public static ArrayList<DataInfo> getDataInfos(int type) {
+    public static ArrayList<String> getDataInfos(int type) {
         switch (type) {
             case TYPE_SCREEN_SHOT:
                return getDatas(AppUtils.SCREENSHOT_FOLDER_PATH, PNG);
@@ -104,8 +104,8 @@ public class DataInfo implements Serializable{
         return results;
     }
 
-    private static ArrayList<DataInfo> getDatas(String dir, String fileType) {
-        ArrayList<DataInfo> dataInfos = new ArrayList<>();
+    private static ArrayList<String> getDatas(String dir, String fileType) {
+        ArrayList<String> dataInfos = new ArrayList<>();
         if (TextUtils.isEmpty(dir))
             return dataInfos;
 
@@ -131,8 +131,10 @@ public class DataInfo implements Serializable{
 
         cursor.moveToPosition(-1);
         while (cursor.moveToNext()) {
-            DataInfo musicItem = new DataInfo(cursor);
-            dataInfos.add(musicItem);
+            //DataInfo musicItem = new DataInfo(cursor);
+            //dataInfos.add(musicItem);
+            String path = cursor.getString(COLUMN_PATH);
+            dataInfos.add(path);
         }
         Log.i(TAG, "cursor.size = " + cursor.getCount());
         cursor.close();

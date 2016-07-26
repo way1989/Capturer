@@ -46,7 +46,7 @@ public class ScreenshotAdapter extends RecyclerView.Adapter<ScreenshotAdapter.Vi
         notifyDataSetChanged();
     }
 
-    public DataInfo getItem(int pos) {
+    public String getItem(int pos) {
         return mDataProvider.getItem(pos);
     }
 
@@ -59,8 +59,8 @@ public class ScreenshotAdapter extends RecyclerView.Adapter<ScreenshotAdapter.Vi
 
     @Override
     public void onBindViewHolder(ScreenshotAdapter.ViewHolder holder, int position) {
-        DataInfo info = mDataProvider.getItem(position);
-        GlideHelper.loadResourceBitmap(info.path, holder.image);
+        String info = mDataProvider.getItem(position);
+        GlideHelper.loadResourceBitmap(info, holder.image);
         switch (mType) {
             case DataInfo.TYPE_SCREEN_SHOT:
                 holder.image.setTagEnable(false);
@@ -78,7 +78,7 @@ public class ScreenshotAdapter extends RecyclerView.Adapter<ScreenshotAdapter.Vi
 
         // 把每个图片视图设置不同的Transition名称, 防止在一个视图内有多个相同的名称, 在变换的时候造成混乱
         // Fragment支持多个View进行变换, 使用适配器时, 需要加以区分
-        ViewCompat.setTransitionName(holder.image, info.path);
+        ViewCompat.setTransitionName(holder.image, info);
         holder.itemView.setTag(R.id.tag_item, position);
         holder.popupMenuButton.setTag(R.id.tag_item, position);
         if(holder.itemView.getScaleX() == 0f) {
@@ -104,7 +104,7 @@ public class ScreenshotAdapter extends RecyclerView.Adapter<ScreenshotAdapter.Vi
 
     @Override
     public long getItemId(int position) {
-        return mDataProvider.getItem(position).id;
+        return mDataProvider.getItem(position).hashCode();
     }
 
     public interface OnItemClickListener {

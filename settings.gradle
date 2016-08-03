@@ -1,1 +1,1 @@
-include ':app', ':firupgrade', ':downloadlibrary', ':tourguide'
+include ':app', ':firupgrade', ':downloadlibrary'

@@ -20,7 +20,6 @@ import android.widget.LinearLayout;
 import com.way.capture.R;
 import com.way.capture.fragment.GuideFragment;
 import com.way.capture.utils.AppUtils;
-import com.way.capture.widget.springindicator.SpringIndicator;
 
 public class GuideActivity extends AppCompatActivity {
     static final int NUM_PAGES = 4;

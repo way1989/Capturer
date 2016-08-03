@@ -1,6 +1,5 @@
 package com.way.capture.service;
 
-import android.Manifest;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -54,7 +53,33 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
     private float mLastY;
     private float mLastZ;
     private long mLastUpdateTime;
+    /**
+     * 监听是否点击了home键将客户端推到后台
+     */
+    private BroadcastReceiver mHomeKeyEventReceiver = new BroadcastReceiver() {
+        String SYSTEM_REASON = "reason";
+        String SYSTEM_HOME_KEY = "homekey";
+        String SYSTEM_HOME_KEY_LONG = "recentapps";
 
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {
+                String reason = intent.getStringExtra(SYSTEM_REASON);
+                if (TextUtils.equals(reason, SYSTEM_HOME_KEY)) {
+                    //表示按了home键,程序到了后台
+                    //Toast.makeText(getApplicationContext(), "home click", Toast.LENGTH_SHORT).show();
+                    Log.i(TAG, "home key click....");
+                    dismissDialog();
+                } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
+                    //表示长按home键,显示最近使用的程序列表
+                    //Toast.makeText(getApplicationContext(), "home long click", Toast.LENGTH_SHORT).show();
+                    Log.i(TAG, "home key long click....");
+                    dismissDialog();
+                }
+            }
+        }
+    };
 
     @Override
     public void onCreate() {
@@ -109,7 +134,6 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
     public IBinder onBind(Intent intent) {
         return null;
     }
-
 
     private Notification createNotification() {
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
@@ -231,8 +255,9 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
         mFloatMenuDialog.setOnClickListener(this);
         mFloatMenuDialog.show();
     }
-    private void dismissDialog(){
-        if(isShowDialog())
+
+    private void dismissDialog() {
+        if (isShowDialog())
             mFloatMenuDialog.dismiss();
     }
 
@@ -260,32 +285,4 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
         }
 
     }
-
-    /**
-     * 监听是否点击了home键将客户端推到后台
-     */
-    private BroadcastReceiver mHomeKeyEventReceiver = new BroadcastReceiver() {
-        String SYSTEM_REASON = "reason";
-        String SYSTEM_HOME_KEY = "homekey";
-        String SYSTEM_HOME_KEY_LONG = "recentapps";
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {
-                String reason = intent.getStringExtra(SYSTEM_REASON);
-                if (TextUtils.equals(reason, SYSTEM_HOME_KEY)) {
-                    //表示按了home键,程序到了后台
-                    //Toast.makeText(getApplicationContext(), "home click", Toast.LENGTH_SHORT).show();
-                    Log.i(TAG, "home key click....");
-                    dismissDialog();
-                } else if (TextUtils.equals(reason, SYSTEM_HOME_KEY_LONG)) {
-                    //表示长按home键,显示最近使用的程序列表
-                    //Toast.makeText(getApplicationContext(), "home long click", Toast.LENGTH_SHORT).show();
-                    Log.i(TAG, "home key long click....");
-                    dismissDialog();
-                }
-            }
-        }
-    };
 }

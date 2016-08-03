@@ -20,7 +20,7 @@ import android.view.animation.Interpolator;
 
 /**
  * This class offers a very small subset of {@code ValueAnimator}'s API, but works pre-v11 too.
- * <p>
+ * <p/>
  * You shouldn't not instantiate this directly. Instead use {@code ViewUtils.createAnimator()}.
  */
 public class ValueAnimatorCompat {

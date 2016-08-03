@@ -81,7 +81,7 @@ public class ScreenshotAdapter extends RecyclerView.Adapter<ScreenshotAdapter.Vi
         ViewCompat.setTransitionName(holder.image, info);
         holder.itemView.setTag(R.id.tag_item, position);
         holder.popupMenuButton.setTag(R.id.tag_item, position);
-        if(holder.itemView.getScaleX() == 0f) {
+        if (holder.itemView.getScaleX() == 0f) {
             reset(holder.itemView);
         }
     }

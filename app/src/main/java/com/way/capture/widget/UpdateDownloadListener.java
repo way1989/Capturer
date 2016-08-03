@@ -31,7 +31,7 @@ public class UpdateDownloadListener implements IDownloadListener {
     private Handler handler = new Handler(Looper.getMainLooper());
 
     public UpdateDownloadListener(Activity activity) {
-        if(activity == null || activity.isFinishing())
+        if (activity == null || activity.isFinishing())
             return;
         AlertDialog.Builder downloadBuiler = new AlertDialog.Builder(activity);
         View view = LayoutInflater.from(activity).inflate(R.layout.download_dialog_layout, null);

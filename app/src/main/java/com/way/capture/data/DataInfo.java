@@ -20,7 +20,7 @@ import java.util.Comparator;
 /**
  * Created by way on 16/2/1.
  */
-public class DataInfo implements Serializable{
+public class DataInfo implements Serializable {
     public static final int TYPE_SCREEN_SHOT = 1;
     public static final int TYPE_SCREEN_GIF = 2;
     public static final int TYPE_SCREEN_RECORD = 3;
@@ -57,9 +57,9 @@ public class DataInfo implements Serializable{
     public static ArrayList<String> getDataInfos(int type) {
         switch (type) {
             case TYPE_SCREEN_SHOT:
-               return getDatas(AppUtils.SCREENSHOT_FOLDER_PATH, PNG);
+                return getDatas(AppUtils.SCREENSHOT_FOLDER_PATH, PNG);
             case TYPE_SCREEN_GIF:
-               return getDatas(AppUtils.GIF_PRODUCTS_FOLDER_PATH, GIF);
+                return getDatas(AppUtils.GIF_PRODUCTS_FOLDER_PATH, GIF);
             case TYPE_SCREEN_RECORD:
                 return getDatas(AppUtils.VIDEOS_FOLDER_PATH, MP4);
             default:

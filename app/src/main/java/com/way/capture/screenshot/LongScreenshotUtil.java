@@ -150,7 +150,7 @@ public class LongScreenshotUtil {
         int sameStartY = 0;
         int sameNum = 0;
         while (oldBitmapCompareEndY > oldBitmapEndCompareY) {
-            if(mIsStop){
+            if (mIsStop) {
                 Log.i(TAG, "FAILED_COMPARE user stop compare...");
                 return false;
             }
@@ -639,7 +639,7 @@ public class LongScreenshotUtil {
                 + " mOldBitmapEndY = " + mOldBitmapEndY
                 + " mNewBitmapStartY = " + mNewBitmapStartY
                 + " mScreenBitmap.getHeight() = " + newBitmap.getHeight());
-        if(height < oldBitmap.getHeight()) return null;
+        if (height < oldBitmap.getHeight()) return null;
 
         Bitmap resultBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 

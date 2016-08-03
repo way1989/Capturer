@@ -3,9 +3,9 @@ package com.way.capture.utils.ffmpeg;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.way.capture.R;
 import com.way.capture.utils.ffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 import com.way.capture.utils.ffmpeg.exceptions.FFmpegNotSupportedException;
-import com.way.capture.R;
 
 import java.io.File;
 import java.lang.reflect.Array;

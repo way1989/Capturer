@@ -4,14 +4,14 @@
     tools:context=".activity.DetailsActivity">
     <item
         android:id="@+id/image_info"
-        android:orderInCategory="100"
         android:icon="@drawable/ic_info"
+        android:orderInCategory="100"
         android:title="@string/image_info"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/image_share"
-        android:orderInCategory="100"
         android:icon="@drawable/ic_menu_share"
-        app:showAsAction="ifRoom"
-        android:title="@string/share" />
+        android:orderInCategory="100"
+        android:title="@string/share"
+        app:showAsAction="ifRoom" />
 </menu>

@@ -54,6 +54,14 @@ public class ExplosionField extends View {
         init();
     }
 
+    public static ExplosionField attach2Window(Activity activity) {
+        ViewGroup rootView = (ViewGroup) activity.findViewById(Window.ID_ANDROID_CONTENT);
+        ExplosionField explosionField = new ExplosionField(activity);
+        rootView.addView(explosionField, new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        return explosionField;
+    }
+
     private void init() {
         Arrays.fill(mExpandInset, Utils.dp2Px(32));
     }
@@ -113,14 +121,6 @@ public class ExplosionField extends View {
     public void clear() {
         mExplosions.clear();
         invalidate();
-    }
-
-    public static ExplosionField attach2Window(Activity activity) {
-        ViewGroup rootView = (ViewGroup) activity.findViewById(Window.ID_ANDROID_CONTENT);
-        ExplosionField explosionField = new ExplosionField(activity);
-        rootView.addView(explosionField, new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        return explosionField;
     }
 
 }

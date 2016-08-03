@@ -6,7 +6,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
+import android.content.pm.ActivityInfo;
 import android.media.MediaPlayer;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -22,19 +22,23 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Toast;
 
 import com.way.capture.App;
+import com.way.capture.R;
+import com.way.capture.utils.AppUtils;
+import com.way.capture.utils.GifUtils;
 import com.way.capture.utils.ffmpeg.ExecuteBinaryResponseHandler;
 import com.way.capture.utils.ffmpeg.FFmpeg;
 import com.way.capture.utils.ffmpeg.LoadBinaryResponseHandler;
 import com.way.capture.utils.ffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 import com.way.capture.utils.ffmpeg.exceptions.FFmpegNotSupportedException;
-import com.way.capture.R;
-import com.way.capture.utils.AppUtils;
-import com.way.capture.utils.GifUtils;
 import com.way.capture.widget.FastVideoView;
 import com.way.capture.widget.UpdateDownloadListener;
 import com.way.capture.widget.trim.ControllerOverlay;
@@ -70,6 +74,8 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
     };
     private boolean mDragging;
     private int mChoiceQualityItem;
+    private Toolbar toolbar;
+    private boolean fullscreen;
 
     public static void startVideoActivity(Activity context, String path, View imageView) {
         Intent i = new Intent(context, VideoActivity.class);
@@ -86,10 +92,11 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
         initToolbar();
         setStatusBarColor();
         initPlayControlerView();
+        setupSystemUI();
     }
 
     private void initToolbar() {
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -111,7 +118,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
     private void setStatusBarColor() {
         final android.view.Window window = getWindow();
         ObjectAnimator animator = ObjectAnimator.ofInt(window,
-                "statusBarColor", window.getStatusBarColor(), Color.BLACK);
+                "statusBarColor", window.getStatusBarColor(), getResources().getColor(R.color.colorPrimaryDark));
         animator.setEvaluator(new ArgbEvaluator());
         animator.setDuration(200L);
         animator.start();
@@ -158,6 +165,14 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
             case R.id.video_menu_to_gif:
                 toGif();
                 break;
+            case R.id.video_menu_rotate:
+                int rotation = (((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay()).getRotation();
+                if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270)
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                else
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                showControls();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -391,6 +406,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
         } else {
             playVideo();
         }
+
     }
 
     @Override
@@ -434,12 +450,12 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
 
     @Override
     public void onShown() {
-        getSupportActionBar().show();
+        showControls();
     }
 
     @Override
     public void onHidden() {
-        getSupportActionBar().hide();
+        hideControls();
     }
 
     @Override
@@ -506,5 +522,68 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
         mVideoView.pause();
         mHandler.removeCallbacks(mProgressChecker);
         mController.showPaused();
+    }
+
+
+    private void setupSystemUI() {
+        toolbar.animate().translationY(AppUtils.getStatusBarHeight(getResources())).setInterpolator(new DecelerateInterpolator())
+                .setDuration(0).start();
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+
+        getWindow().getDecorView().setOnSystemUiVisibilityChangeListener
+                (new View.OnSystemUiVisibilityChangeListener() {
+                    @Override
+                    public void onSystemUiVisibilityChange(int visibility) {
+                        if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) showControls();
+                        else hideControls();
+                    }
+                });
+    }
+
+    private void toggleControlsVisibility() {
+        if (fullscreen) showControls();
+        else hideControls();
+    }
+
+    private void hideControls() {
+        if (fullscreen) return;
+        //mController.hide();
+        toolbar.animate().translationY(-toolbar.getHeight())
+                .setInterpolator(new AccelerateInterpolator()).setDuration(200);
+
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE);
+        fullscreen = true;
+    }
+
+    private void showControls() {
+        if (!fullscreen) return;
+        int rotation = (((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay()).getRotation();
+        if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) { //Landscape
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            mController.setPaddingRelative(0, 0, 0, 0);
+        } else {
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+            mController.setPaddingRelative(0, 0, 0, AppUtils.getNavBarHeight(getApplicationContext()));
+        }
+
+        // mController.show();
+        toolbar.animate().translationY(AppUtils.getStatusBarHeight(getResources()))
+                .setInterpolator(new DecelerateInterpolator()).setDuration(240);
+        fullscreen = false;
+
     }
 }

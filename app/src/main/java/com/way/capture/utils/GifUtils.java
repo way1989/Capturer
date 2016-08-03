@@ -27,7 +27,7 @@ public class GifUtils {
     public static final String KEY_GIF_SIZE = "gif_size";
 
     public static String[] getVideo2gifCommand(long start, long length, int frame,
-                                             String sourcePath, String outPath, int width, int height) {
+                                               String sourcePath, String outPath, int width, int height) {
         StringBuilder command = new StringBuilder("-ss ");
         command.append(start);
         command.append(" -t ");

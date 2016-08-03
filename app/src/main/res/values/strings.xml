@@ -11,9 +11,9 @@
 
     <string name="shortcut_name">Launch</string>
     <string name="clear">Clear</string>
-    <string name="countdown_one">1</string>
-    <string name="countdown_two">2</string>
-    <string name="countdown_three">3</string>
+    <string name="countdown_one" translatable="false">1</string>
+    <string name="countdown_two" translatable="false">2</string>
+    <string name="countdown_three" translatable="false">3</string>
     <string name="launch_overlay">Launch Overlay</string>
     <string name="preferences">Preferences</string>
     <string name="countdown">Three second countdown</string>
@@ -135,8 +135,6 @@
     <string name="image_transition" translatable="false">transition_image</string>
     <string name="turn_screen_orientation">Keep your device orientation is portrait</string>
 
-    <string name="title_activity_details">DetailsActivity</string>
-    <string name="title_activity_video">Video</string>
     <string name="screenshot_no_result_summary">No screen shot</string>
     <string name="screenshot_sound">Screen shot sound</string>
     <string name="screenshot_sound_summary">trun on or turn off screen shot sound</string>
@@ -166,7 +164,6 @@
     <string name="video_to_gif_success">Video to gif is succeed!</string>
     <string name="video_to_gif_failed">Video to gif is failed!</string>
     <string name="heigh_quality">Origin</string>
-    <string name="accessibility_review_retake">Review retake</string>
     <!-- The button to play the video. [CHAR LIMIT = NONE] -->
     <string name="accessibility_play_video">Play video</string>
     <!-- The button to pause the video. [CHAR LIMIT = NONE] -->
@@ -181,7 +178,7 @@
     <string name="gif_quality_high">High</string>
     <string name="gif_quality_normal">Normal</string>
     <string name="gif_quality_low">Low</string>
-    <string name="all_rights_reserved">Copyright © 2012-2016 Broncho. All Rights Reserved.</string>
+    <string name="all_rights_reserved" translatable="false">Copyright © 2012-2016 Broncho. All Rights Reserved.</string>
     <string name="skip">skip</string>
     <string name="done">done</string>
     <string name="welcome_head_1">Shake you phone to show main menu</string>
@@ -198,4 +195,5 @@
     <string name="video_to_gif_desc">The first time must download a FFmpeg file</string>
     <string name="logo_title">What you see is what you get</string>
     <string name="video_reach_size_limit">Maximum video length reached</string>
+    <string name="rotate">Rotate</string>
 </resources>

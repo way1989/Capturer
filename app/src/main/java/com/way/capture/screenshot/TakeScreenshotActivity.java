@@ -19,7 +19,7 @@ public class TakeScreenshotActivity extends Activity {
         Log.i("broncho", "TakeScreenshotActivity onCreate mIsLongScreenshot = " + mIsLongScreenshot);
         try {
             ScreenshotHelper.fireScreenCaptureIntent(this);
-        }catch (Exception e){
+        } catch (Exception e) {
             Toast.makeText(this, R.string.not_support_devices, Toast.LENGTH_SHORT).show();
             finish();
         }

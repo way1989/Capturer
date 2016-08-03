@@ -46,6 +46,7 @@ public class TrimControllerOverlay extends CommonControllerOverlay {
             mPlayPauseReplayView.setVisibility(INVISIBLE);
         }
         mPlayPauseReplayView.setAlpha(1f);
+        mListener.onHidden();
     }
 
     @Override

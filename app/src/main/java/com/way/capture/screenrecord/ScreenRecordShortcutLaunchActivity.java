@@ -14,7 +14,7 @@ public final class ScreenRecordShortcutLaunchActivity extends Activity {
         super.onCreate(savedInstanceState);
         try {
             CaptureHelper.fireScreenCaptureIntent(this);
-        }catch (Exception e){
+        } catch (Exception e) {
             Toast.makeText(this, R.string.not_support_devices, Toast.LENGTH_SHORT).show();
             finish();
         }

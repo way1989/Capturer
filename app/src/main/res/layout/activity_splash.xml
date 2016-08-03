@@ -51,6 +51,6 @@
         android:gravity="center"
         android:maxLines="1"
         android:text="@string/all_rights_reserved"
-        android:textSize="10sp"
-        android:textColor="#b3ffffff" />
+        android:textColor="#b3ffffff"
+        android:textSize="10sp" />
 </RelativeLayout>

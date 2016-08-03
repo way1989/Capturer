@@ -206,6 +206,8 @@ public abstract class CommonControllerOverlay extends FrameLayout implements
         mLoadingView.setVisibility(mMainView == mLoadingView ? View.VISIBLE : View.INVISIBLE);
         mPlayPauseReplayView.setVisibility(
                 mMainView == mPlayPauseReplayView ? View.VISIBLE : View.INVISIBLE);
+        if (mMainView == mPlayPauseReplayView)
+            mListener.onShown();
         show();
     }
 

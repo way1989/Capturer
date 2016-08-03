@@ -36,12 +36,12 @@
     </declare-styleable>
 
     <declare-styleable name="SubsamplingScaleImageView">
-        <attr name="src" format="reference"/>
-        <attr name="assetName" format="string"/>
-        <attr name="panEnabled" format="boolean"/>
-        <attr name="zoomEnabled" format="boolean"/>
-        <attr name="quickScaleEnabled" format="boolean"/>
-        <attr name="tileBackgroundColor" format="color"/>
+        <attr name="src" format="reference" />
+        <attr name="assetName" format="string" />
+        <attr name="panEnabled" format="boolean" />
+        <attr name="zoomEnabled" format="boolean" />
+        <attr name="quickScaleEnabled" format="boolean" />
+        <attr name="tileBackgroundColor" format="color" />
     </declare-styleable>
 
     <!-- FloatingActionMenu -->
@@ -65,28 +65,28 @@
     <declare-styleable name="SpringIndicator">
 
         <!--tab text color -->
-        <attr name="siTextColor" format="reference"/>
+        <attr name="siTextColor" format="reference" />
 
         <!--tab text color which is selected-->
-        <attr name="siSelectedTextColor" format="reference"/>
+        <attr name="siSelectedTextColor" format="reference" />
 
         <!--tab item bg -->
-        <attr name="siTextBg" format="reference"/>
+        <attr name="siTextBg" format="reference" />
 
         <!--tab text size-->
-        <attr name="siTextSize" format="dimension"/>
+        <attr name="siTextSize" format="dimension" />
 
         <!--indicator bg color-->
-        <attr name="siIndicatorColor" format="reference"/>
+        <attr name="siIndicatorColor" format="reference" />
 
         <!--indicator bg colors. should equals your titles count-->
-        <attr name="siIndicatorColors" format="reference"/>
+        <attr name="siIndicatorColors" format="reference" />
 
         <!--max indicator radius-->
-        <attr name="siRadiusMax" format="dimension"/>
+        <attr name="siRadiusMax" format="dimension" />
 
         <!--min indicator radius when moving-->
-        <attr name="siRadiusMin" format="dimension"/>
+        <attr name="siRadiusMin" format="dimension" />
 
     </declare-styleable>
 </resources>

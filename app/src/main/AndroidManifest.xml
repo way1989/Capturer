@@ -114,13 +114,11 @@
             android:name=".activity.DetailsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="sensor"
-            android:label="@string/title_activity_details"
             android:theme="@style/AppTheme.DayNight.NoActionBar" />
         <activity
             android:name=".activity.VideoActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
-            android:label="@string/title_activity_video"
             android:theme="@style/SplashTheme.NoActionBar" />
         <activity
             android:name=".activity.SplashActivity"

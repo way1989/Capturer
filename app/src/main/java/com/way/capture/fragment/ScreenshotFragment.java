@@ -152,12 +152,13 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     }
 
     private void loadData() {
-        if(isAdded() && getUserVisibleHint()
-                && getLoaderManager().getLoader(SCREENSHOT_LOADER_ID) == null){
+        if (isAdded() && getUserVisibleHint()
+                && getLoaderManager().getLoader(SCREENSHOT_LOADER_ID) == null) {
             mLoadingEmptyContainer.showLoading();
             getLoaderManager().initLoader(SCREENSHOT_LOADER_ID, null, this);
         }
     }
+
     private void initLoadingEmptyView(View view, int type) {
         mLoadingEmptyContainer = (LoadingEmptyContainer) view.findViewById(R.id.loading_empty_container);
         switch (type) {
@@ -177,7 +178,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     public void onRefresh() {
         mSwipeRefreshLayout.setRefreshing(true);
         mSwipeRefreshLayout.setEnabled(false);
-        if(getLoaderManager().getLoader(SCREENSHOT_LOADER_ID) == null)
+        if (getLoaderManager().getLoader(SCREENSHOT_LOADER_ID) == null)
             getLoaderManager().initLoader(SCREENSHOT_LOADER_ID, null, this);
         else
             getLoaderManager().restartLoader(SCREENSHOT_LOADER_ID, null, this);

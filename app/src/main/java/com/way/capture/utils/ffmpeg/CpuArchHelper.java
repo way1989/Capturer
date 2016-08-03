@@ -9,7 +9,7 @@ class CpuArchHelper {
         String[] abis = Build.SUPPORTED_ABIS;
         if (abis == null || abis.length < 1)
             return CpuArch.NONE;
-        for(String cpuArch :abis) {
+        for (String cpuArch : abis) {
             if (TextUtils.equals(cpuArch, getx86CpuAbi()))
                 return CpuArch.x86;
             else if (TextUtils.equals(cpuArch, getArmeabiv7CpuAbi()))

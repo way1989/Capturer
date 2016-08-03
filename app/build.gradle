@@ -47,7 +47,7 @@ android {
             buildConfigField "boolean", "LOG_DEBUG", "true"
             //是否开启BUGTAG
             buildConfigField "boolean", "BUGTAG_ENABLED", "false"
-            resValue "string", "bugtag_app_key", BUGTAG_APP_KEY
+            //resValue "string", "bugtag_app_key", BUGTAG_APP_KEY
             buildConfigField "String", "BUGLY_APPID", BUGLY_APP_ID
             signingConfig signingConfigs.release
         }
@@ -57,7 +57,7 @@ android {
             buildConfigField "boolean", "LOG_DEBUG", "false"
             //是否开启BUGTAG
             buildConfigField "boolean", "BUGTAG_ENABLED", "true"
-            resValue "string", "bugtag_app_key", BUGTAG_APP_KEY
+            //resValue "string", "bugtag_app_key", BUGTAG_APP_KEY
             buildConfigField "String", "BUGLY_APPID", BUGLY_APP_ID
             signingConfig signingConfigs.release
             shrinkResources true

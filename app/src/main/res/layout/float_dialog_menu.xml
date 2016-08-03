@@ -52,8 +52,8 @@
         android:id="@+id/menu_screnshot_center"
         style="@style/Item_Tumblr"
         android:layout_gravity="center"
-        android:contentDescription="@string/home"
         android:background="@drawable/tumblr_red_oval"
+        android:contentDescription="@string/home"
         android:src="@drawable/ic_screenshot_home" />
 
 </FrameLayout>

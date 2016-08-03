@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package com.way.capture.utils.explosion;
+package com.way.capture.utils.explosion;
 
 import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
@@ -29,13 +29,13 @@ import java.util.Random;
 
 public class ExplosionAnimator extends ValueAnimator {
 
-    static long DEFAULT_DURATION = 0x400;
     private static final Interpolator DEFAULT_INTERPOLATOR = new AccelerateInterpolator(0.6f);
     private static final float END_VALUE = 1.4f;
     private static final float X = Utils.dp2Px(5);
     private static final float Y = Utils.dp2Px(20);
     private static final float V = Utils.dp2Px(2);
     private static final float W = Utils.dp2Px(1);
+    static long DEFAULT_DURATION = 0x400;
     private Paint mPaint;
     private Particle[] mParticles;
     private Rect mBound;

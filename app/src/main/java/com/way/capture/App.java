@@ -31,7 +31,7 @@ public class App extends Application {
             CrashReport.initCrashReport(mContext, BuildConfig.BUGLY_APPID, false);
         }
         //LeakCanary
-        if(BuildConfig.DEBUG) LeakCanary.install(this);
+        if (BuildConfig.DEBUG) LeakCanary.install(this);
 
         //night mode
         boolean isNightMode = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(KEY_NIGHT_MODE, false);

@@ -224,7 +224,7 @@ final class RecordingSession implements MediaRecorder.OnErrorListener, MediaReco
         mMediaRecorder = new MediaRecorder();
         mMediaRecorder.setVideoSource(SURFACE);
         mMediaRecorder.setOutputFormat(MPEG_4);
-        //mMediaRecorder.setVideoFrameRate(25);
+        mMediaRecorder.setVideoFrameRate(25);
         mMediaRecorder.setVideoEncoder(H264);
         mMediaRecorder.setVideoSize(recordingInfo.width, recordingInfo.height);
         mMediaRecorder.setVideoEncodingBitRate(8 * 1000 * 1000);

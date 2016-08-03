@@ -3,7 +3,6 @@ package com.way.capture.activity;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -18,7 +17,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 
+import com.bumptech.glide.Glide;
 import com.way.capture.R;
 import com.way.capture.data.DataInfo;
 import com.way.capture.fragment.DetailsFragment;
@@ -63,6 +65,8 @@ public class DetailsActivity extends BaseActivity {
     };
     private ArrayList<String> mDatas;
     private int mType;
+    private Toolbar toolbar;
+    private boolean fullscreenmode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +77,7 @@ public class DetailsActivity extends BaseActivity {
         setStatusBarColor();
         initDatas(savedInstanceState);//初始化必要数据
         initToolbar();
+        setupSystemUI();
         initViewPager();
     }
 
@@ -91,14 +96,14 @@ public class DetailsActivity extends BaseActivity {
     private void setStatusBarColor() {
         final android.view.Window window = getWindow();
         ObjectAnimator animator = ObjectAnimator.ofInt(window,
-                "statusBarColor", window.getStatusBarColor(), Color.BLACK);
+                "statusBarColor", window.getStatusBarColor(), getResources().getColor(R.color.colorPrimaryDark));
         animator.setEvaluator(new ArgbEvaluator());
         animator.setDuration(200L);
         animator.start();
     }
 
     private void initToolbar() {
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -135,6 +140,65 @@ public class DetailsActivity extends BaseActivity {
         }
     }
 
+    private void setupSystemUI() {
+        toolbar.animate().translationY(AppUtils.getStatusBarHeight(getResources())).setInterpolator(new DecelerateInterpolator())
+                .setDuration(0).start();
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+
+        getWindow().getDecorView().setOnSystemUiVisibilityChangeListener
+                (new View.OnSystemUiVisibilityChangeListener() {
+                    @Override
+                    public void onSystemUiVisibilityChange(int visibility) {
+                        if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) showSystemUI();
+                        else hideSystemUI();
+                    }
+                });
+    }
+
+    public void toggleSystemUI() {
+        if (fullscreenmode)
+            showSystemUI();
+        else
+            hideSystemUI();
+    }
+
+    private void showSystemUI() {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                toolbar.animate().translationY(AppUtils.getStatusBarHeight(getResources())).setInterpolator(new DecelerateInterpolator())
+                        .setDuration(240);
+                getWindow().getDecorView().setSystemUiVisibility(
+                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+                fullscreenmode = false;
+                //changeBackGroundColor();
+            }
+        });
+    }
+
+    private void hideSystemUI() {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                toolbar.animate().translationY(-toolbar.getHeight()).setInterpolator(new AccelerateInterpolator())
+                        .setDuration(200);
+                getWindow().getDecorView().setSystemUiVisibility(
+                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                                | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                                | View.SYSTEM_UI_FLAG_IMMERSIVE);
+
+                fullscreenmode = true;
+                //changeBackGroundColor();
+            }
+        });
+    }
+
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -145,6 +209,14 @@ public class DetailsActivity extends BaseActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_info, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        Glide.get(getApplicationContext()).clearMemory();
+        Glide.get(getApplicationContext()).trimMemory(TRIM_MEMORY_COMPLETE);
+        System.gc();
     }
 
     @Override

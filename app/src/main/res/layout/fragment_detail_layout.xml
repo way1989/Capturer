@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.alexvasilkov.gestures.views.GestureFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/image_root_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <FrameLayout
+    <ProgressBar
+        android:id="@+id/circleLoading"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center" />
+
+    <uk.co.senab.photoview.PhotoView
+        android:id="@+id/detail_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center">
+        android:layout_gravity="center" />
 
-        <ImageView
-            android:id="@+id/detail_image"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center" />
-
-        <ImageView
-            android:id="@+id/video_indicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_gallery_play"
-            android:visibility="gone" />
-    </FrameLayout>
-</com.alexvasilkov.gestures.views.GestureFrameLayout>
+    <ImageView
+        android:id="@+id/video_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_gallery_play"
+        android:visibility="gone" />
+</FrameLayout>

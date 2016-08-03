@@ -115,7 +115,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="sensor"
             android:label="@string/title_activity_details"
-            android:theme="@style/SplashTheme.NoActionBar" />
+            android:theme="@style/AppTheme.DayNight.NoActionBar" />
         <activity
             android:name=".activity.VideoActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"

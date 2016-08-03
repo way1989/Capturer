@@ -19,6 +19,7 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.way.capture.R;
+import com.way.capture.activity.DetailsActivity;
 import com.way.capture.activity.VideoActivity;
 import com.way.capture.data.DataInfo;
 import com.way.capture.utils.DensityUtil;
@@ -28,6 +29,9 @@ import com.way.capture.widget.subscaleview.SubsamplingScaleImageView;
 
 import java.io.File;
 
+import uk.co.senab.photoview.PhotoView;
+import uk.co.senab.photoview.PhotoViewAttacher;
+
 /**
  * Created by way on 16/4/10.
  */
@@ -35,7 +39,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "DetailsFragment";
     private static final String ARG_IMAGE_PATH = "arg_image_path";
     private static final String ARG_IMAGE_TYPE = "arg_image_type";
-    private ImageView mImageView;
+    private PhotoView mImageView;
     private ImageView mPlayButton;
     private Button mShowHeighQualityButton;
     private SubsamplingScaleImageView mSubsamplingScaleImageView;
@@ -105,9 +109,19 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
     }
 
     private void loadImage(View view, int type, String path) {
-        mImageView = (ImageView) view.findViewById(R.id.detail_image);
+        mImageView = (PhotoView) view.findViewById(R.id.detail_image);
         mImageView.setTransitionName(path);
+        mImageView.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
+            @Override
+            public void onPhotoTap(View view, float x, float y) {
+                ((DetailsActivity) getActivity()).toggleSystemUI();
+            }
 
+            @Override
+            public void onOutsidePhotoTap() {
+                ((DetailsActivity) getActivity()).toggleSystemUI();
+            }
+        });
         switch (type) {
             case DataInfo.TYPE_SCREEN_SHOT:
                 mSubsamplingScaleImageView = (SubsamplingScaleImageView) view.findViewById(R.id.detail_image_height_quality);
@@ -209,6 +223,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
                     }
                 }, 300L);
                 break;
+
         }
     }
 

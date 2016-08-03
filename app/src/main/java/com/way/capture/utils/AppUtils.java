@@ -3,6 +3,7 @@ package com.way.capture.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
@@ -54,7 +55,13 @@ public class AppUtils {
     public static boolean isLollipop() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
     }
+    public static int getStatusBarHeight(Resources r) {
+        int resourceId = r.getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0)
+            return r.getDimensionPixelSize(resourceId);
 
+        return 0;
+    }
     public static Pair<Integer, Integer> getVideoWidthHeight(String path) {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {

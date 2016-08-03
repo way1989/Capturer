@@ -27,6 +27,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Surface;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.way.capture.R;
 import com.way.capture.fragment.SettingsFragment;
@@ -49,9 +50,9 @@ import static android.media.MediaRecorder.VideoEncoder.H264;
 import static android.media.MediaRecorder.VideoSource.SURFACE;
 import static android.os.Environment.DIRECTORY_MOVIES;
 
-final class RecordingSession {
+final class RecordingSession implements MediaRecorder.OnErrorListener, MediaRecorder.OnInfoListener {
     static final int NOTIFICATION_ID = 789;
-
+    private static final String TAG = "RecordingSession";
     private static final String DISPLAY_NAME = "ScreenRecord";
     private static final String MIME_TYPE = "video/mp4";
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -223,7 +224,7 @@ final class RecordingSession {
         mMediaRecorder = new MediaRecorder();
         mMediaRecorder.setVideoSource(SURFACE);
         mMediaRecorder.setOutputFormat(MPEG_4);
-        mMediaRecorder.setVideoFrameRate(25);
+        //mMediaRecorder.setVideoFrameRate(25);
         mMediaRecorder.setVideoEncoder(H264);
         mMediaRecorder.setVideoSize(recordingInfo.width, recordingInfo.height);
         mMediaRecorder.setVideoEncodingBitRate(8 * 1000 * 1000);
@@ -238,7 +239,8 @@ final class RecordingSession {
         } catch (IOException e) {
             throw new RuntimeException("Unable to prepare MediaRecorder.", e);
         }
-
+        mMediaRecorder.setOnErrorListener(this);
+        mMediaRecorder.setOnInfoListener(this);
         mMediaProjection = mProjectionManager.getMediaProjection(mResultCode, mIntentData);
 
         Surface surface = mMediaRecorder.getSurface();
@@ -255,10 +257,10 @@ final class RecordingSession {
 
     private void stopRecording() {
         Log.d("way", "Stopping screen recording...");
-
         if (!mIsRunning) {
             throw new IllegalStateException("Not mIsRunning.");
         }
+        boolean fail = false;
         mIsRunning = false;
         if (!PreferenceManager.getDefaultSharedPreferences(mContext)
                 .getBoolean(SettingsFragment.VIDEO_STOP_METHOD_KEY, true)) {
@@ -270,8 +272,18 @@ final class RecordingSession {
         // Stop the mMediaProjection in order to flush everything to the mMediaRecorder.
         mMediaProjection.stop();
 
+        //设置后不会崩
+        mMediaRecorder.setOnErrorListener(null);
+        mMediaRecorder.setOnInfoListener(null);
         // Stop the mMediaRecorder which writes the contents to the file.
-        mMediaRecorder.stop();
+        try {
+            mMediaRecorder.stop();
+        } catch (Exception e) {
+            fail = true;
+        }
+        if (fail && mOutputFile != null) {
+            deleteVideoFile(mOutputFile);
+        }
 
         mMediaRecorder.release();
         mVirtualDisplay.release();
@@ -279,20 +291,29 @@ final class RecordingSession {
         mListener.onStop();
 
         Log.d("way", "Screen recording stopped. Notifying media scanner of new video.");
+        if (!fail)
+            MediaScannerConnection.scanFile(mContext, new String[]{mOutputFile}, null,
+                    new MediaScannerConnection.OnScanCompletedListener() {
+                        @Override
+                        public void onScanCompleted(String path, final Uri uri) {
+                            Log.d("way", "Media scanner completed.");
+                            if (uri != null)
+                                mHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        showNotification(uri, null);
+                                    }
+                                });
+                        }
+                    });
+    }
 
-        MediaScannerConnection.scanFile(mContext, new String[]{mOutputFile}, null,
-                new MediaScannerConnection.OnScanCompletedListener() {
-                    @Override
-                    public void onScanCompleted(String path, final Uri uri) {
-                        Log.d("way", "Media scanner completed.");
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                showNotification(uri, null);
-                            }
-                        });
-                    }
-                });
+    private void deleteVideoFile(String fileName) {
+        Log.v(TAG, "Deleting video " + fileName);
+        File f = new File(fileName);
+        if (!f.delete()) {
+            Log.v(TAG, "Could not delete " + fileName);
+        }
     }
 
     private void showNotification(final Uri uri, Bitmap bitmap) {
@@ -357,10 +378,33 @@ final class RecordingSession {
     public void destroy() {
         if (mIsRunning) {
             Log.w("way", "Destroyed while mIsRunning!");
-            try {
+            stopRecording();
+        }
+    }
+
+    @Override
+    public void onError(MediaRecorder mr, int what, int extra) {
+        Log.e(TAG, "MediaRecorder error. what=" + what + ". extra=" + extra);
+        if (what == MediaRecorder.MEDIA_RECORDER_ERROR_UNKNOWN) {
+            // We may have run out of space on the sdcard.
+            if (mIsRunning)
                 stopRecording();
-            } catch (Exception e) {
-            }
+        }
+    }
+
+    @Override
+    public void onInfo(MediaRecorder mr, int what, int extra) {
+        if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED) {
+            Log.v(TAG, "media recoder reached max duration");
+            if (mIsRunning)
+                stopRecording();
+        } else if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED) {
+            Log.v(TAG, "media recoder reached max size");
+            if (mIsRunning)
+                stopRecording();
+            // Show the toast.
+            Toast.makeText(mContext.getApplicationContext(), R.string.video_reach_size_limit,
+                    Toast.LENGTH_LONG).show();
         }
     }
 

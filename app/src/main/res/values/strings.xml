@@ -197,4 +197,5 @@
     <string name="video_to_gif_title">Tap me to translate to gif</string>
     <string name="video_to_gif_desc">The first time must download a FFmpeg file</string>
     <string name="logo_title">What you see is what you get</string>
+    <string name="video_reach_size_limit">Maximum video length reached</string>
 </resources>

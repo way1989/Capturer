@@ -7,7 +7,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
-import com.bugtags.library.Bugtags;
 import com.way.capture.R;
 
 public class FeedbackActivity extends BaseActivity {
@@ -27,7 +26,6 @@ public class FeedbackActivity extends BaseActivity {
             Snackbar.make(view, R.string.feedback_text_empty, Snackbar.LENGTH_SHORT).show();
             return;
         }
-        Bugtags.sendFeedback(message);
         Snackbar.make(view, R.string.feedback_send_succeed, Snackbar.LENGTH_SHORT).show();
         finish();
     }

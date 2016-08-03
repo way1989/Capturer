@@ -10,16 +10,6 @@ fir {
     changeLog CHANGE_LOG
 }
 
-//BUGTAG应用插件
-apply plugin: 'com.bugtags.library.plugin'
-//自动上传插件
-bugtags {
-    appKey BUGTAG_APP_KEY  //这里是你的 appKey
-    appSecret BUGTAG_APP_SECRET    //这里是你的 appSecret，管理员在设置页可以查看
-
-    //trackingNetworkEnabled true //开启网络请求跟踪功能(企业版)
-}
-
 def buildTime() {
     return new Date().format("yyyyMMdd", TimeZone.getTimeZone("GMT+8:00"))
 }
@@ -97,9 +87,7 @@ android {
 dependencies {
     //compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':firupgrade')
-    //compile project(':tourguide')
     compile project(':downloadlibrary')
-    //compile 'ly.img.android:photo-editor-sdk:1.0.8'
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.android.support:design:23.4.0'
     compile 'com.android.support:recyclerview-v7:23.4.0'
@@ -107,9 +95,12 @@ dependencies {
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.alexvasilkov:gesture-views:2.1.1'
     compile 'com.ogaclejapan.arclayout:library:1.0.1@aar'
-    compile 'com.bugtags.library:bugtags-lib:latest.integration'
-    compile 'com.android.support:support-v4:23.4.0'
     compile 'com.thefinestartist:finestwebview:1.2.5'
     compile 'com.github.wooplr:Spotlight:1.1'
-    //compile 'com.tencent.bugly:crashreport:latest.release' //其中latest.release指代最新版本号，也可以指定明确的版本号，例如2.1.5
+    compile 'com.tencent.bugly:crashreport:latest.release' //其中latest.release指代最新版本号，也可以指定明确的版本号，例如2.1.5
+
+    //leakcanary
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
+    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
 }

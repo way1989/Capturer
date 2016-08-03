@@ -171,4 +171,5 @@
     <string name="video_to_gif_title">点这里将视频转换成GIF图</string>
     <string name="video_to_gif_desc">第一次需要下载一个适合你手机的库文件</string>
     <string name="logo_title">所见即所得</string>
+    <string name="video_reach_size_limit">达到最大视频长度</string>
 </resources>

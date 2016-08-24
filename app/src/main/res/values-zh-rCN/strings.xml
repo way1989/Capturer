@@ -174,4 +174,7 @@
     <string name="video_reach_size_limit">达到最大视频长度</string>
     <string name="rotate">旋转屏幕</string>
     <string name="loading_video">加载视频\\u2026</string>
+    <string name="delete">删除</string>
+    <string name="edit">编辑</string>
+    <string name="save">保存</string>
 </resources>

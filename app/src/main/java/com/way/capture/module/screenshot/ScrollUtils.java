@@ -1,5 +1,7 @@
 package com.way.capture.module.screenshot;
 
+import android.util.Log;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -8,6 +10,7 @@ import java.io.OutputStream;
  * Created by android on 16-3-8.
  */
 public class ScrollUtils {
+    private static final String TAG = "ScrollUtils";
     private static final int CMD_START_MOVE_X = 10;
 
     public static void scrollToNextScreen(int screenHeight, long duration) throws IOException {
@@ -42,5 +45,17 @@ public class ScrollUtils {
             sb.append(duration);
         }
         return sb.toString();
+    }
+
+    public static boolean isDeviceRoot() {
+        try {
+            Process process = Runtime.getRuntime().exec("su");
+            Log.i(TAG, "isDeviceRoot: process = " + process + ", process.getOutputStream() = " + process.getOutputStream());
+            if (process != null && process.getOutputStream() != null)
+                return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

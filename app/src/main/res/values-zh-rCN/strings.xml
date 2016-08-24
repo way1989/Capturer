@@ -116,7 +116,7 @@
     <string name="screenshot_sound">截屏声音</string>
     <string name="screenshot_sound_summary">开关截屏时的声音</string>
     <string name="long_screenshot_indicator">滚动后单击这里继续截屏，双击则结束</string>
-    <string name="long_screenshot_indicator_title">请按箭头方向滚动与之相同的高度:%s次</string>
+    <string name="long_screenshot_indicator_title">请按箭头方向滚动与之相同的高度</string>
     <string name="long_screenshot_progressing">处理中,请稍后…</string>
     <string name="long_screenshot_auto">自动滚动截屏</string>
     <string name="long_screenshot_auto_summary">是否允许root设备自动滚动截屏</string>

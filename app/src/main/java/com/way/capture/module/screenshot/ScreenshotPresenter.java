@@ -184,7 +184,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     }
 
     @Override
-    public void takeLongScreenshot() {
+    public void takeLongScreenshot(boolean isAutoScroll) {
         if (mScreenBitmap == null || mScreenBitmap.isRecycled()) {
             //notifyScreenshotError(mContext, mNotificationManager);
             mScreenshotView.showScreenshotError(new NullPointerException("screenshot bitmap is null"));
@@ -197,21 +197,27 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
             mScreenshotView.showScreenshotAnim(mScreenBitmap, true);
             return;
         }
+        Observable<Boolean> observable;
+        if(isAutoScroll) {
+           observable = scrollNextScreen().flatMap(new Func1<Boolean, Observable<Boolean>>() {
+                @Override
+                public Observable<Boolean> call(Boolean aBoolean) {
+                    return sleepForWhile();
+                }
+            });
+        }else {
+            observable = captureNow();
+        }
 
-        scrollNextScreen().flatMap(new Func1<Boolean, Observable<Boolean>>() {
-            @Override
-            public Observable<Boolean> call(Boolean aBoolean) {
-                return sleepForWhile();
-            }
-        }).flatMap(new Func1<Boolean, Observable<Bitmap>>() {
+        observable.flatMap(new Func1<Boolean, Observable<Bitmap>>() {
             @Override
             public Observable<Bitmap> call(Boolean succeed) {
-                return collageLongBitmap();
+                return getNewBitmap();
             }
         }).map(new Func1<Bitmap, Bitmap>() {
             @Override
             public Bitmap call(Bitmap bitmap) {
-                return takeScreenshotByScroll(bitmap);
+                return collageLongBitmap(bitmap);
             }
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Bitmap>() {
@@ -483,7 +489,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                 Log.i(TAG, "scrollNextScreen... screenHeight = " + mDisplayMetrics.heightPixels
                         + ", " + Thread.currentThread());
                 try {
-                    ScrollUtils.scrollToNextScreen(mDisplayMetrics.heightPixels, 800L);//scroll
+                    ScrollUtils.scrollToNextScreen(mDisplayMetrics.heightPixels, 1000L);//scroll
                     subscriber.onNext(true);
                     subscriber.onCompleted();
                 } catch (IOException e) {
@@ -503,7 +509,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                 Log.i(TAG, "sleepForWhile... " + Thread.currentThread());
                 try {
                     // Do some long running operation
-                    Thread.sleep(TimeUnit.MILLISECONDS.toMillis(1000));
+                    Thread.sleep(TimeUnit.MILLISECONDS.toMillis(2000));
                     subscriber.onNext(true);
                     subscriber.onCompleted();
                 } catch (InterruptedException e) {
@@ -515,7 +521,19 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
         });
     }
 
-    private Observable<Bitmap> collageLongBitmap() {
+    private Observable<Boolean> captureNow() {
+        return Observable.create(new Observable.OnSubscribe<Boolean>() {
+
+            @Override
+            public void call(Subscriber<? super Boolean> subscriber) {
+                Log.i(TAG, "captureNow... " + Thread.currentThread());
+                subscriber.onNext(true);
+                subscriber.onCompleted();
+            }
+        });
+    }
+
+    private Observable<Bitmap> getNewBitmap() {
         return Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(Subscriber<? super Bitmap> subscriber) {
@@ -524,7 +542,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
         });
     }
 
-    private Bitmap takeScreenshotByScroll(Bitmap newBitmap) {
+    private Bitmap collageLongBitmap(Bitmap newBitmap) {
         if (mScreenBitmap == null || mScreenBitmap.isRecycled()) {
             throw new NullPointerException("mScreenBitmap is null");
         }

@@ -19,6 +19,7 @@ import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,9 +30,11 @@ import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.way.capture.R;
+import com.way.capture.fragment.SettingsFragment;
 import com.way.capture.module.BaseModule;
 import com.way.capture.module.ModuleService;
 import com.way.capture.utils.DensityUtil;
@@ -67,14 +70,13 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     private static final float BACKGROUND_ALPHA = 0.8f;
     private static final float SCREENSHOT_SCALE = 1f;
     public static final float SCREENSHOT_DROP_IN_MIN_SCALE = SCREENSHOT_SCALE * 0.689f;
-
+    private static final boolean IS_DEVICE_ROOT = ScrollUtils.isDeviceRoot();
     //system manager
     private NotificationManager mNotificationManager;
     private KeyguardManager mKeyguardManager;
     private WindowManager mWindowManager;
     private WindowManager.LayoutParams mWindowLayoutParams;
     private LayoutInflater mLayoutInflater;
-
     //view
     private FrameLayout mRootView;
     private SwipeVerticalLayout mSwipeVerticalLayout;
@@ -87,14 +89,13 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     private View mBtnControlView;
     private View mSwipeUpToDeleteView;
     private View mSwipeDownToSaveView;
-
     private View mLongScreenshotToast;
     private View mLongScreenshotCover;
     private ValueAnimator mScreenshotAnimation;
     private ValueAnimator mExitScreenshotAnimation;
     private Context mContext;
     private ScreenshotContract.Presenter mPresenter;
-
+    private boolean mIsAutoLongScreenshot;
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -106,7 +107,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
                     mPresenter.takeScreenshot();
                     break;
                 case TAKE_LONG_SCREENSHOT_MESSAGE:
-                    mPresenter.takeLongScreenshot();
+                    mPresenter.takeLongScreenshot(mIsAutoLongScreenshot);
                     break;
                 case AUTO_SAVE_MESSAGE:
                     mSwipeVerticalLayout.setEnabled(false);
@@ -134,7 +135,8 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
 
         //init views
         initViews();
-
+        mIsAutoLongScreenshot = IS_DEVICE_ROOT && PreferenceManager.getDefaultSharedPreferences(mContext)
+                .getBoolean(SettingsFragment.LONG_SCREENSHOT_AUTO, true);
         //init presenter
         mPresenter = new ScreenshotPresenter(context, this, resultCode, data);
         mHandler.removeMessages(TAKE_SCREENSHOT_MESSAGE);
@@ -310,8 +312,12 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
 
     @Override
     public void onCollageFinish() {
-        mHandler.removeMessages(TAKE_LONG_SCREENSHOT_MESSAGE);
-        mHandler.sendEmptyMessage(TAKE_LONG_SCREENSHOT_MESSAGE);
+        if(mIsAutoLongScreenshot) {
+            mHandler.removeMessages(TAKE_LONG_SCREENSHOT_MESSAGE);
+            mHandler.sendEmptyMessage(TAKE_LONG_SCREENSHOT_MESSAGE);
+        }else{
+            enableDialogTouchFlag(true);
+        }
     }
 
     @Override
@@ -432,15 +438,24 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
             case R.id.scroll_screenshot_btn:
                 showLongScreenshotToast();
                 removeScreenshotView();
-                mHandler.removeMessages(TAKE_LONG_SCREENSHOT_MESSAGE);
-                mHandler.sendEmptyMessage(TAKE_LONG_SCREENSHOT_MESSAGE);
+                if(mIsAutoLongScreenshot) {
+                    mHandler.removeMessages(TAKE_LONG_SCREENSHOT_MESSAGE);
+                    mHandler.sendEmptyMessage(TAKE_LONG_SCREENSHOT_MESSAGE);
+                }else{
+                    enableDialogTouchFlag(true);
+                }
                 break;
             case R.id.share_btn:
                 mRootView.findViewById(R.id.loading).animate().alpha(1);
                 mPresenter.saveScreenshot(STYLE_SAVE_TO_SHARE);
                 break;
+            case R.id.toast_dialog_bg_container:
+                Log.i(TAG, "onClick... toast_dialog_bg_container");
+                enableDialogTouchFlag(false);
+                mHandler.removeMessages(TAKE_LONG_SCREENSHOT_MESSAGE);
+                mHandler.sendEmptyMessage(TAKE_LONG_SCREENSHOT_MESSAGE);
+                break;
             case R.id.long_screenshot_indicator_root:
-                Log.i(TAG, "onClick... long_screenshot_indicator_root");
                 stopLongScreenshot();
                 break;
             default:
@@ -458,6 +473,20 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         return true;
     }
 
+    private void enableDialogTouchFlag(boolean enable) {
+        TextView textView = (TextView) mLongScreenshotToast.findViewById(R.id.long_screenshot_text);
+        TextView title = (TextView) mLongScreenshotToast.findViewById(R.id.long_screenshot_title);
+        title.setText(R.string.long_screenshot_indicator_title);
+        if (enable) {
+            textView.setText(R.string.long_screenshot_indicator);
+            mLongScreenshotCover.findViewById(R.id.long_screenshot_indicator_arrow).setVisibility(View.VISIBLE);
+            mLongScreenshotCover.findViewById(R.id.long_screenshot_indicator).setVisibility(View.VISIBLE);
+        } else {
+            textView.setText(R.string.long_screenshot_progressing);
+            mLongScreenshotCover.findViewById(R.id.long_screenshot_indicator).setVisibility(View.GONE);
+            mLongScreenshotCover.findViewById(R.id.long_screenshot_indicator_arrow).setVisibility(View.GONE);
+        }
+    }
     private void showLongScreenshotToast() {
         addCover();
         addToast();
@@ -476,8 +505,8 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
 
     private void addCover() {
         mLongScreenshotCover = mLayoutInflater.inflate(R.layout.long_screenshot_indicator, null);
-        //mLongScreenshotCover.setBackgroundColor(Color.parseColor("#80ff0000"));
         mLongScreenshotCover.setOnClickListener(this);
+        //mLongScreenshotCover.setBackgroundColor(Color.parseColor("#80ff0000"));
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 0,
                 WindowManager.LayoutParams.TYPE_TOAST,
@@ -487,6 +516,15 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                         | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
                 PixelFormat.TRANSLUCENT);
+        if (!mIsAutoLongScreenshot) {
+            layoutParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN
+                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                    | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+            mLongScreenshotCover.setOnClickListener(null);
+        }
         int screenShowWidth = DensityUtil.getDisplayWidth(mContext);
         layoutParams.width = screenShowWidth - 24;//leave some space for swipe
         layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED;
@@ -503,6 +541,14 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                         | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
                 PixelFormat.TRANSLUCENT);
+        if (!mIsAutoLongScreenshot) {
+            layoutParams.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN
+                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+            mLongScreenshotToast.findViewById(R.id.toast_dialog_bg_container).setOnClickListener(this);
+        }
         layoutParams.y = 0;
         layoutParams.windowAnimations = R.style.VolumePanelAnimation;
         layoutParams.gravity = mContext.getResources().getInteger(

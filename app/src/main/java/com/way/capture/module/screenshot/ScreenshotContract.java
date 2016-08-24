@@ -22,7 +22,7 @@ public interface ScreenshotContract {
     interface Presenter{
         void takeScreenshot();
         void playCaptureSound();
-        void takeLongScreenshot();
+        void takeLongScreenshot(boolean isAutoScroll);
         void saveScreenshot(int style);
         void release();
 

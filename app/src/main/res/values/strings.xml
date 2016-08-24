@@ -196,4 +196,7 @@
     <string name="logo_title">What you see is what you get</string>
     <string name="video_reach_size_limit">Maximum video length reached</string>
     <string name="rotate">Rotate</string>
+    <string name="save">save</string>
+    <string name="delete">delete</string>
+    <string name="edit">Edit</string>
 </resources>

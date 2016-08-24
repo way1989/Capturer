@@ -24,6 +24,7 @@ import android.view.View;
 
 import com.way.capture.R;
 import com.way.capture.activity.MainActivity;
+import com.way.capture.module.ModuleService;
 import com.way.capture.screenrecord.ScreenRecordShortcutLaunchActivity;
 import com.way.capture.screenshot.TakeScreenshotActivity;
 import com.way.capture.screenshot.TakeScreenshotService;
@@ -167,6 +168,7 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
             case R.id.menu_normal_screenshot:
                 try {
                     Intent screenRecordIntent = new Intent(ShakeService.this, TakeScreenshotActivity.class);
+                    screenRecordIntent.setAction(ModuleService.Action.ACTION_SCREENSHOT);
                     screenRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                     startActivity(screenRecordIntent);
                 } catch (ActivityNotFoundException e) {

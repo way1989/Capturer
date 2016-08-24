@@ -16,16 +16,17 @@
 
 package com.way.capture.activity;
 
-import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 
@@ -41,7 +42,8 @@ public class PermissionCheckActivity extends AppCompatActivity implements OnClic
     private static final int REQUIRED_PERMISSIONS_REQUEST_CODE = 1;
     private static final long AUTOMATED_RESULT_THRESHOLD_MILLLIS = 250;
     private static final String PACKAGE_URI_PREFIX = "package:";
-    private long mRequestTimeMillis;
+    private static final String TAG = "PermissionCheckActivity";
+    private static final int REQUEST_CODE = 2;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -49,7 +51,8 @@ public class PermissionCheckActivity extends AppCompatActivity implements OnClic
         if (redirectIfNeeded()) {
             return;
         }
-        showRequestPermissionDialog();
+        //showRequestPermissionDialog();
+        tryRequestPermission();
     }
 
     private void showRequestPermissionDialog() {
@@ -78,38 +81,65 @@ public class PermissionCheckActivity extends AppCompatActivity implements OnClic
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
     private void tryRequestPermission() {
         final String[] missingPermissions = OsUtil.getMissingRequiredPermissions();
         if (missingPermissions.length == 0) {
-            redirect();
+            checkcanDrawOverlays();
             return;
         }
 
-        mRequestTimeMillis = SystemClock.elapsedRealtime();
-        requestPermissions(missingPermissions, REQUIRED_PERMISSIONS_REQUEST_CODE);
+        ActivityCompat.requestPermissions(this, missingPermissions, REQUIRED_PERMISSIONS_REQUEST_CODE);
     }
 
     @Override
     public void onRequestPermissionsResult(
             final int requestCode, final String permissions[], final int[] grantResults) {
         if (requestCode == REQUIRED_PERMISSIONS_REQUEST_CODE) {
-            // We do not use grantResults as some of the granted permissions might have been
-            // revoked while the permissions dialog box was being shown for the missing permissions.
-            if (OsUtil.hasRequiredPermissions()) {
-                //Factory.get().onRequiredPermissionsAcquired();
+            final int length = grantResults.length;
+            for (int i = 0; i < length; i++) {
+                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                    // Should we show an explanation?
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[i])) {
+                        //Show permission explanation dialog...
+                        finish();
+                        return;
+                    } else {
+                        //Never ask again selected, or device policy prohibits the app from having that permission.
+                        //So, disable that feature, or fall back to another situation...
+                        gotoSettings();
+                        return;
+                    }
+                }
+            }
+            Log.v(TAG, "request permission success");
+            checkcanDrawOverlays();
+        }
+    }
+
+    private void checkcanDrawOverlays() {
+        if(OsUtil.canDrawOverlays(this)){
+            redirect();
+        }else {
+            requestAlertWindowPermission();
+        }
+    }
+
+
+    private void requestAlertWindowPermission() {
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+        intent.setData(Uri.parse("package:" + getPackageName()));
+        startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE) {
+            if (OsUtil.canDrawOverlays(this)) {
+                Log.i(TAG, "onActivityResult granted");
                 redirect();
             } else {
-                final long currentTimeMillis = SystemClock.elapsedRealtime();
-                // If the permission request completes very quickly, it must be because the system
-                // automatically denied. This can happen if the user had previously denied it
-                // and checked the "Never ask again" check box.
-                if ((currentTimeMillis - mRequestTimeMillis) < AUTOMATED_RESULT_THRESHOLD_MILLLIS) {
-                    gotoSettings();
-                } else {
-                    //tryRequestPermission();
-                    finish();
-                }
+                finish();
             }
         }
     }
@@ -137,6 +167,8 @@ public class PermissionCheckActivity extends AppCompatActivity implements OnClic
      * Returns true if the redirecting was performed
      */
     private boolean redirectIfNeeded() {
+        if(!OsUtil.canDrawOverlays(this))
+            return false;
         if (!OsUtil.hasRequiredPermissions()) {
             return false;
         }

@@ -8,15 +8,17 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.way.capture.R;
+import com.way.capture.module.ModuleService;
 
 public class TakeScreenshotActivity extends Activity {
-    private boolean mIsLongScreenshot;
-
+    private String mAction;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mIsLongScreenshot = TextUtils.equals(TakeScreenshotService.ACTION_LONG_SCREENSHOT, getIntent().getAction());
-        Log.i("broncho", "TakeScreenshotActivity onCreate mIsLongScreenshot = " + mIsLongScreenshot);
+        if(getIntent() == null || getIntent().getAction() == null)
+            mAction = ModuleService.Action.ACTION_SCREENSHOT;
+        else
+            mAction = getIntent().getAction();
         try {
             ScreenshotHelper.fireScreenCaptureIntent(this);
         } catch (Exception e) {
@@ -27,7 +29,7 @@ public class TakeScreenshotActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (!ScreenshotHelper.handleActivityResult(this, requestCode, resultCode, data, mIsLongScreenshot)) {
+        if (!ScreenshotHelper.handleActivityResult(this, requestCode, resultCode, data, mAction)) {
             super.onActivityResult(requestCode, resultCode, data);
         }
         finish();

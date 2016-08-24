@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tool="http://schemas.android.com/tools"
     package="com.way.capture">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -8,16 +7,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <!-- 开机启动权限 -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <!-- remove bugtags permission -->
-    <uses-permission
-        android:name="android.permission.SYSTEM_ALERT_WINDOW"
-        tool:node="remove" />
-    <uses-permission
-        android:name="android.permission.ACCESS_FINE_LOCATION"
-        tool:node="remove" />
-    <uses-permission
-        android:name="android.permission.ACCESS_COARSE_LOCATION"
-        tool:node="remove" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:name=".App"
@@ -33,7 +23,7 @@
             android:label="@string/app_name"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.DayNight.NoActionBar"></activity>
+            android:theme="@style/AppTheme.DayNight.NoActionBar" />
         <activity
             android:name=".activity.PermissionCheckActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
@@ -141,6 +131,11 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.DayNight.NoActionBar" />
+
+        <service
+            android:name=".module.ModuleService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

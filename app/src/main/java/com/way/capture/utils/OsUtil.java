@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.provider.Settings;
 
 import com.way.capture.App;
 import com.way.capture.activity.PermissionCheckActivity;
@@ -95,9 +96,12 @@ public class OsUtil {
     public static String[] getMissingRequiredPermissions() {
         return getMissingPermissions(sRequiredPermissions);
     }
-
+    public static  boolean canDrawOverlays(final Activity activity) {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(activity));
+    }
     public static boolean redirectToPermissionCheckIfNeeded(final Activity activity) {
-        if (!OsUtil.hasRequiredPermissions()) {
+        if (!OsUtil.hasRequiredPermissions() || !canDrawOverlays(activity)) {
             final Intent intent = new Intent(activity, PermissionCheckActivity.class);
             activity.startActivity(intent);
         } else {

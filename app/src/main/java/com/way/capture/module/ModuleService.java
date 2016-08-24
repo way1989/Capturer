@@ -81,7 +81,7 @@ public class ModuleService extends Service {
         }
 
         mCurrentModulel = getModuleByAction(action);
-        mCurrentModulel.onStart(getApplicationContext(), resultCode, data);
+        mCurrentModulel.onStart(this, resultCode, data);
         return START_NOT_STICKY;
     }
 
@@ -106,11 +106,11 @@ public class ModuleService extends Service {
         super.onDestroy();
         if(mCurrentModulel != null)
             mCurrentModulel.onDestroy();
+        mCurrentModulel = null;
     }
 
     public static final class Action {
         public static final String ACTION_SCREENSHOT = BuildConfig.APPLICATION_ID + ".SCREENSHOT";
-        public static final String ACTION_FULL_PAGE = BuildConfig.APPLICATION_ID + ".FULL_PAGE";
         public static final String ACTION_RECORD = BuildConfig.APPLICATION_ID + ".RECORD";
         public static final String ACTION_CROP = BuildConfig.APPLICATION_ID + ".CROP";
     }

@@ -176,8 +176,8 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
                 break;
             case R.id.menu_screenrecord:
                 try {
-                    Intent screenRecordIntent = new Intent(ShakeService.this, ScreenRecordShortcutLaunchActivity.class);
-
+                    Intent screenRecordIntent = new Intent(ShakeService.this, TakeScreenshotActivity.class);
+                    screenRecordIntent.setAction(ModuleService.Action.ACTION_RECORD);
                     screenRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                     startActivity(screenRecordIntent);
                 } catch (ActivityNotFoundException e) {

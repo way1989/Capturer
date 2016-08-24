@@ -50,7 +50,7 @@ import static android.media.MediaRecorder.VideoEncoder.H264;
 import static android.media.MediaRecorder.VideoSource.SURFACE;
 import static android.os.Environment.DIRECTORY_MOVIES;
 
-final class RecordingSession implements MediaRecorder.OnErrorListener, MediaRecorder.OnInfoListener {
+public final class RecordingSession implements MediaRecorder.OnErrorListener, MediaRecorder.OnInfoListener {
     static final int NOTIFICATION_ID = 789;
     private static final String TAG = "RecordingSession";
     private static final String DISPLAY_NAME = "ScreenRecord";
@@ -79,7 +79,7 @@ final class RecordingSession implements MediaRecorder.OnErrorListener, MediaReco
     };
 
 
-    RecordingSession(Context context, Listener listener, int resultCode, Intent data) {
+    public RecordingSession(Context context, Listener listener, int resultCode, Intent data) {
         this.mContext = context;
         this.mListener = listener;
         this.mResultCode = resultCode;
@@ -408,7 +408,7 @@ final class RecordingSession implements MediaRecorder.OnErrorListener, MediaReco
         }
     }
 
-    interface Listener {
+    public interface Listener {
         /**
          * Invoked immediately prior to the start of recording.
          */

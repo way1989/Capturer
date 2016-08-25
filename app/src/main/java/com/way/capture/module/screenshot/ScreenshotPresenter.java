@@ -65,6 +65,8 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     private static final String SCREENSHOT_FILE_NAME_TEMPLATE = "Screenshot_%s.png";
     private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
     private static final String DISPLAY_NAME = "Screenshot";
+    private static final long WAIT_FOR_SCROLL_TIME = 1500L;
+    private static final long SCROLL_DURATION = 500L;
     private final Context mContext;
     private final ScreenshotContract.View mScreenshotView;
     private Display mDisplay;
@@ -196,17 +198,17 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
             return;
         }
         Observable<Boolean> observable;
-        if(isAutoScroll) {
-           observable = scrollNextScreen().subscribeOn(Schedulers.io())
-                   .observeOn(Schedulers.newThread())
-                   .flatMap(new Func1<Boolean, Observable<Boolean>>() {
-                @Override
-                public Observable<Boolean> call(Boolean aBoolean) {
-                    return sleepForWhile();
-                }
-            });
-        }else {
-            observable = captureNow().subscribeOn(Schedulers.io());
+        if (isAutoScroll) {
+            observable = scrollNextScreen(SCROLL_DURATION)
+                    .flatMap(new Func1<Boolean, Observable<Boolean>>() {
+                        @Override
+                        public Observable<Boolean> call(Boolean aBoolean) {
+                            //return sleepForWhile();
+                            return Observable.just(true).delay(WAIT_FOR_SCROLL_TIME, TimeUnit.MILLISECONDS);
+                        }
+                    });
+        } else {
+            observable = Observable.just(true);
         }
 
         observable.flatMap(new Func1<Boolean, Observable<Bitmap>>() {
@@ -219,7 +221,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
             public Bitmap call(Bitmap bitmap) {
                 return collageLongBitmap(bitmap);
             }
-        }).observeOn(AndroidSchedulers.mainThread())
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Bitmap>() {
                     @Override
                     public void onCompleted() {
@@ -481,15 +483,15 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
         }
     }
 
-    private Observable<Boolean> scrollNextScreen() {
+    private Observable<Boolean> scrollNextScreen(final long duration) {
         return Observable.create(new Observable.OnSubscribe<Boolean>() {
 
             @Override
             public void call(Subscriber<? super Boolean> subscriber) {
                 Log.i(TAG, "scrollNextScreen... screenHeight = " + mDisplayMetrics.heightPixels
-                        + ", " + Thread.currentThread());
+                        + ", current thread name = " + Thread.currentThread().getName());
                 try {
-                    ScrollUtils.scrollToNextScreen(mDisplayMetrics.heightPixels, 500L);//scroll
+                    ScrollUtils.scrollToNextScreen(mDisplayMetrics.heightPixels, duration);//scroll
                     subscriber.onNext(true);
                     subscriber.onCompleted();
                 } catch (IOException e) {
@@ -497,38 +499,6 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                     subscriber.onError(e);
                 }
 
-            }
-        });
-    }
-
-    private Observable<Boolean> sleepForWhile() {
-        return Observable.create(new Observable.OnSubscribe<Boolean>() {
-
-            @Override
-            public void call(Subscriber<? super Boolean> subscriber) {
-                Log.i(TAG, "sleepForWhile... " + Thread.currentThread());
-                try {
-                    // Do some long running operation
-                    Thread.sleep(TimeUnit.MILLISECONDS.toMillis(1500));
-                    subscriber.onNext(true);
-                    subscriber.onCompleted();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    subscriber.onError(e);
-                }
-
-            }
-        });
-    }
-
-    private Observable<Boolean> captureNow() {
-        return Observable.create(new Observable.OnSubscribe<Boolean>() {
-
-            @Override
-            public void call(Subscriber<? super Boolean> subscriber) {
-                Log.i(TAG, "captureNow... " + Thread.currentThread());
-                subscriber.onNext(true);
-                subscriber.onCompleted();
             }
         });
     }

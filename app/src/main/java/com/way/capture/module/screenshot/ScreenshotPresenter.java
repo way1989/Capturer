@@ -69,7 +69,6 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     private final ScreenshotContract.View mScreenshotView;
     private Display mDisplay;
     private DisplayMetrics mDisplayMetrics;
-    private Matrix mDisplayMatrix;
     private int mLastRotation;
     private MediaActionSound mCameraSound;
     private Bitmap mScreenBitmap;
@@ -83,7 +82,6 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
         mContext = context;
         mScreenshotView = screenshotView;
 
-        mDisplayMatrix = new Matrix();
         mDisplay = ((WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         mDisplayMetrics = new DisplayMetrics();
         mDisplay.getRealMetrics(mDisplayMetrics);
@@ -199,14 +197,16 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
         }
         Observable<Boolean> observable;
         if(isAutoScroll) {
-           observable = scrollNextScreen().flatMap(new Func1<Boolean, Observable<Boolean>>() {
+           observable = scrollNextScreen().subscribeOn(Schedulers.io())
+                   .observeOn(Schedulers.newThread())
+                   .flatMap(new Func1<Boolean, Observable<Boolean>>() {
                 @Override
                 public Observable<Boolean> call(Boolean aBoolean) {
                     return sleepForWhile();
                 }
             });
         }else {
-            observable = captureNow();
+            observable = captureNow().subscribeOn(Schedulers.io());
         }
 
         observable.flatMap(new Func1<Boolean, Observable<Bitmap>>() {
@@ -219,7 +219,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
             public Bitmap call(Bitmap bitmap) {
                 return collageLongBitmap(bitmap);
             }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+        }).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Bitmap>() {
                     @Override
                     public void onCompleted() {
@@ -489,7 +489,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                 Log.i(TAG, "scrollNextScreen... screenHeight = " + mDisplayMetrics.heightPixels
                         + ", " + Thread.currentThread());
                 try {
-                    ScrollUtils.scrollToNextScreen(mDisplayMetrics.heightPixels, 1000L);//scroll
+                    ScrollUtils.scrollToNextScreen(mDisplayMetrics.heightPixels, 500L);//scroll
                     subscriber.onNext(true);
                     subscriber.onCompleted();
                 } catch (IOException e) {
@@ -509,7 +509,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                 Log.i(TAG, "sleepForWhile... " + Thread.currentThread());
                 try {
                     // Do some long running operation
-                    Thread.sleep(TimeUnit.MILLISECONDS.toMillis(2000));
+                    Thread.sleep(TimeUnit.MILLISECONDS.toMillis(1500));
                     subscriber.onNext(true);
                     subscriber.onCompleted();
                 } catch (InterruptedException e) {

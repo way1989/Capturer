@@ -29,6 +29,7 @@ import android.os.Looper;
 import android.os.Process;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
@@ -53,6 +54,7 @@ import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -67,6 +69,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     private static final String DISPLAY_NAME = "Screenshot";
     private static final long WAIT_FOR_SCROLL_TIME = 1500L;
     private static final long SCROLL_DURATION = 500L;
+    private static final long SCREENSHOT_OUT_TIME = 5L;
     private final Context mContext;
     private final ScreenshotContract.View mScreenshotView;
     private Display mDisplay;
@@ -108,6 +111,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                 capture(subscriber);
             }
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .timeout(SCREENSHOT_OUT_TIME, TimeUnit.SECONDS)
                 .subscribe(new Observer<Bitmap>() {
                     @Override
                     public void onCompleted() {
@@ -115,9 +119,13 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                     }
 
                     @Override
-                    public void onError(Throwable e) {
-
-                        mScreenshotView.showScreenshotError(e);
+                    public void onError(final Throwable e) {
+                        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                            @Override
+                            public void call() {
+                                mScreenshotView.showScreenshotError(e);
+                            }
+                        });
                     }
 
                     @Override
@@ -186,8 +194,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     @Override
     public void takeLongScreenshot(boolean isAutoScroll) {
         if (mScreenBitmap == null || mScreenBitmap.isRecycled()) {
-            //notifyScreenshotError(mContext, mNotificationManager);
-            mScreenshotView.showScreenshotError(new NullPointerException("screenshot bitmap is null"));
+            mScreenshotView.showScreenshotError(new NullPointerException("bitmap is null"));
             return;
         }
 
@@ -221,7 +228,9 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
             public Bitmap call(Bitmap bitmap) {
                 return collageLongBitmap(bitmap);
             }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .timeout(SCREENSHOT_OUT_TIME, TimeUnit.SECONDS)
                 .subscribe(new Subscriber<Bitmap>() {
                     @Override
                     public void onCompleted() {
@@ -229,11 +238,16 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                     }
 
                     @Override
-                    public void onError(Throwable e) {
-                        if (mScreenBitmap != null && !mScreenBitmap.isRecycled())
-                            mScreenshotView.showScreenshotAnim(mScreenBitmap, true);
-                        else
-                            mScreenshotView.showScreenshotError(e);
+                    public void onError(final Throwable e) {
+                        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                            @Override
+                            public void call() {
+                                if (mScreenBitmap != null && !mScreenBitmap.isRecycled())
+                                    mScreenshotView.showScreenshotAnim(mScreenBitmap, true);
+                                else
+                                    mScreenshotView.showScreenshotError(e);
+                            }
+                        });
                     }
 
                     @Override
@@ -275,13 +289,32 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
 
     @Override
     public void saveScreenshot(final int style) {
+        final Notification.Builder notificationBuilder = initNotificationBuilder(style);
+
+        getUriObservable(notificationBuilder).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Uri>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        mScreenshotView.showScreenshotError(e);
+                    }
+
+                    @Override
+                    public void onNext(Uri uri) {
+                        onSaveFinish(uri, notificationBuilder, style);
+
+                    }
+                });
+    }
+
+    @NonNull
+    private Notification.Builder initNotificationBuilder(int style) {
         final Resources r = mContext.getResources();
-        final long imageTime = System.currentTimeMillis();
-        final String imageDate = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(imageTime));
-        final String imageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, imageDate);
-        final File screenshotDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                SCREENSHOTS_DIR_NAME);
-        final String imageFilePath = new File(screenshotDir, imageFileName).getAbsolutePath();
 
         final int imageWidth = mScreenBitmap.getWidth();
         final int imageHeight = mScreenBitmap.getHeight();
@@ -320,13 +353,13 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
 
         // For "public" situations we want to show all the same info but
         // omit the actual screenshot image.
-        final Notification.Builder publicNotificationBuilder = new Notification.Builder(mContext)
-                .setContentTitle(r.getString(R.string.screenshot_saving_title))
-                .setContentText(r.getString(R.string.screenshot_saving_text)).setSmallIcon(R.drawable.stat_notify_image)
-                .setCategory(Notification.CATEGORY_PROGRESS).setWhen(now)
-                .setColor(r.getColor(R.color.system_notification_accent_color));
+//        final Notification.Builder publicNotificationBuilder = new Notification.Builder(mContext)
+//                .setContentTitle(r.getString(R.string.screenshot_saving_title))
+//                .setContentText(r.getString(R.string.screenshot_saving_text)).setSmallIcon(R.drawable.stat_notify_image)
+//                .setCategory(Notification.CATEGORY_PROGRESS).setWhen(now)
+//                .setColor(r.getColor(R.color.system_notification_accent_color));
 
-        notificationBuilder.setPublicVersion(publicNotificationBuilder.build());
+//        notificationBuilder.setPublicVersion(publicNotificationBuilder.build());
 
         Notification n = notificationBuilder.build();
         n.flags |= Notification.FLAG_NO_CLEAR;
@@ -342,43 +375,37 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
         // But we still don't set it for the expanded view, allowing the
         // smallIcon to show here.
         notificationStyle.bigLargeIcon((Bitmap) null);
-
-        Observable.create(new Observable.OnSubscribe<Uri>() {
-            @Override
-            public void call(Subscriber<? super Uri> subscriber) {
-                saveInWorkThread(subscriber, screenshotDir, imageTime, imageFilePath,
-                        imageFileName, imageWidth, imageHeight, r, notificationBuilder);
-
-            }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Uri>() {
-                    @Override
-                    public void onCompleted() {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onNext(Uri uri) {
-                        onSaveFinish(uri, notificationBuilder, r, publicNotificationBuilder, style);
-
-                    }
-                });
+        return notificationBuilder;
     }
 
-    private void saveInWorkThread(Subscriber<? super Uri> subscriber, File screenshotDir,
-                                  long imageTime, String imageFilePath, String imageFileName,
-                                  int imageWidth, int imageHeight, Resources r,
-                                  Notification.Builder notificationBuilder) {
+    @NonNull
+    private Observable<Uri> getUriObservable(final Notification.Builder notificationBuilder) {
+        return Observable.create(new Observable.OnSubscribe<Uri>() {
+            @Override
+            public void call(Subscriber<? super Uri> subscriber) {
+                saveInWorkThread(subscriber, notificationBuilder);
+            }
+        });
+    }
+
+    private void saveInWorkThread(Subscriber<? super Uri> subscriber, Notification.Builder notificationBuilder) {
         // By default, AsyncTask sets the worker thread to have background
         // thread priority, so bump
         // it back up so that we save a little quicker.
         Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
         try {
+            Resources r = mContext.getResources();
+            final long imageTime = System.currentTimeMillis();
+            final String imageDate = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(imageTime));
+
+            final String imageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, imageDate);
+            final File screenshotDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                    SCREENSHOTS_DIR_NAME);
+            final String imageFilePath = new File(screenshotDir, imageFileName).getAbsolutePath();
+
+            final int imageWidth = mScreenBitmap.getWidth();
+            final int imageHeight = mScreenBitmap.getHeight();
+
             // Create screenshot directory if it doesn't exist
             screenshotDir.mkdirs();
 
@@ -408,26 +435,27 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
             values.put(MediaStore.Images.ImageColumns.SIZE, new File(imageFilePath).length());
             Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
-            // Create a share intent
-            String subjectDate = DateFormat.getDateTimeInstance().format(new Date(imageTime));
-            String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
-            Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-            sharingIntent.setType("image/png");
-            sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
-            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+            if (uri != null) {
+                // Create a share intent
+                String subjectDate = DateFormat.getDateTimeInstance().format(new Date(imageTime));
+                String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
+                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                sharingIntent.setType("image/png");
+                sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
 
-            Intent chooserIntent = Intent.createChooser(sharingIntent, null);
-            chooserIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                Intent chooserIntent = Intent.createChooser(sharingIntent, null);
+                chooserIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
 
-            notificationBuilder.addAction(R.drawable.ic_menu_share, r.getString(R.string.share),
-                    PendingIntent.getActivity(mContext, 0, chooserIntent, PendingIntent.FLAG_CANCEL_CURRENT));
+                notificationBuilder.addAction(R.drawable.ic_menu_share, r.getString(R.string.share),
+                        PendingIntent.getActivity(mContext, 0, chooserIntent, PendingIntent.FLAG_CANCEL_CURRENT));
 
-            Intent deleteIntent = new Intent();
-            deleteIntent.setClass(mContext, DeleteScreenshot.class);
-            deleteIntent.putExtra(DeleteScreenshot.SCREENSHOT_URI, uri.toString());
-
-            notificationBuilder.addAction(R.drawable.ic_menu_delete, r.getString(R.string.screenshot_delete_action),
-                    PendingIntent.getBroadcast(mContext, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT));
+                Intent deleteIntent = new Intent();
+                deleteIntent.setClass(mContext, DeleteScreenshot.class);
+                deleteIntent.putExtra(DeleteScreenshot.SCREENSHOT_URI, uri.toString());
+                notificationBuilder.addAction(R.drawable.ic_menu_delete, r.getString(R.string.screenshot_delete_action),
+                        PendingIntent.getBroadcast(mContext, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT));
+            }
             subscriber.onNext(uri);
             subscriber.onCompleted();
         } catch (Exception e) {
@@ -435,18 +463,12 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
             subscriber.onError(e);
         }
 
-        // Recycle the bitmap data
-        if (mScreenBitmap != null && !mScreenBitmap.isRecycled()) {
-            mScreenBitmap.recycle();
-        }
     }
 
-    private void onSaveFinish(Uri uri, Notification.Builder builder, Resources r,
-                              Notification.Builder publicNotificationBuilder, int style) {
+    private void onSaveFinish(Uri uri, Notification.Builder builder, int style) {
+        Resources r = mContext.getResources();
         // Create the intent to show the screenshot in gallery
-        Intent launchIntent
-                //= new Intent(mContext, ImageEditorActivity.class);
-                = new Intent(Intent.ACTION_VIEW);
+        Intent launchIntent = new Intent(Intent.ACTION_VIEW);
         launchIntent.setDataAndType(uri, "image/png");
         launchIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
 
@@ -458,12 +480,12 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                 .setAutoCancel(true).setColor(r.getColor(R.color.system_notification_accent_color));
 
         // Update the text in the public version as well
-        publicNotificationBuilder.setContentTitle(r.getString(R.string.screenshot_saved_title))
-                .setContentText(r.getString(R.string.screenshot_saved_text))
-                .setContentIntent(PendingIntent.getActivity(mContext, 0, launchIntent, 0)).setWhen(now)
-                .setAutoCancel(true).setColor(r.getColor(R.color.system_notification_accent_color));
-
-        builder.setPublicVersion(publicNotificationBuilder.build());
+//        publicNotificationBuilder.setContentTitle(r.getString(R.string.screenshot_saved_title))
+//                .setContentText(r.getString(R.string.screenshot_saved_text))
+//                .setContentIntent(PendingIntent.getActivity(mContext, 0, launchIntent, 0)).setWhen(now)
+//                .setAutoCancel(true).setColor(r.getColor(R.color.system_notification_accent_color));
+//
+//        builder.setPublicVersion(publicNotificationBuilder.build());
 
         Notification n = builder.build();
         n.flags &= ~Notification.FLAG_NO_CLEAR;
@@ -480,6 +502,11 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                 break;
             default:
                 break;
+        }
+
+        // Recycle the bitmap data
+        if (mScreenBitmap != null && !mScreenBitmap.isRecycled()) {
+            mScreenBitmap.recycle();
         }
     }
 
@@ -514,22 +541,20 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
 
     private Bitmap collageLongBitmap(Bitmap newBitmap) {
         if (mScreenBitmap == null || mScreenBitmap.isRecycled()) {
-            throw new NullPointerException("mScreenBitmap is null");
+            throw new NullPointerException("bitmap is null");
         }
 
         if (newBitmap == null || newBitmap.isRecycled()) {
-            return mScreenBitmap;
+            throw new NullPointerException("bitmap is null");
         }
 
-        //tmp save the last bitmap
-        final Bitmap oldBitmap = mScreenBitmap;
 
         //collage a new bitmap
         Bitmap collageBitmap = LongScreenshotUtil.getInstance()
-                .collageLongBitmap(oldBitmap, newBitmap);
+                .collageLongBitmap(mScreenBitmap, newBitmap);
 
         if (collageBitmap == null || collageBitmap.isRecycled()) {
-            return oldBitmap;
+            throw new NullPointerException("bitmap is null");
         }
         return collageBitmap;
     }

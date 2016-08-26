@@ -312,12 +312,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
 
     @Override
     public void onCollageFinish() {
-        if(mIsAutoLongScreenshot) {
-            mHandler.removeMessages(TAKE_LONG_SCREENSHOT_MESSAGE);
-            mHandler.sendEmptyMessage(TAKE_LONG_SCREENSHOT_MESSAGE);
-        }else{
-            enableDialogTouchFlag(true);
-        }
+        takeLongScreenshot();
     }
 
     @Override
@@ -438,12 +433,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
             case R.id.scroll_screenshot_btn:
                 showLongScreenshotToast();
                 removeScreenshotView();
-                if(mIsAutoLongScreenshot) {
-                    mHandler.removeMessages(TAKE_LONG_SCREENSHOT_MESSAGE);
-                    mHandler.sendEmptyMessage(TAKE_LONG_SCREENSHOT_MESSAGE);
-                }else{
-                    enableDialogTouchFlag(true);
-                }
+                takeLongScreenshot();
                 break;
             case R.id.share_btn:
                 mRootView.findViewById(R.id.loading).animate().alpha(1);
@@ -460,6 +450,15 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
                 break;
             default:
                 break;
+        }
+    }
+
+    private void takeLongScreenshot() {
+        if(mIsAutoLongScreenshot) {
+            mHandler.removeMessages(TAKE_LONG_SCREENSHOT_MESSAGE);
+            mHandler.sendEmptyMessage(TAKE_LONG_SCREENSHOT_MESSAGE);
+        }else{
+            enableDialogTouchFlag(true);
         }
     }
 

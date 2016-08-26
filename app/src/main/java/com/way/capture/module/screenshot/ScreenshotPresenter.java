@@ -67,9 +67,9 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     private static final String SCREENSHOT_FILE_NAME_TEMPLATE = "Screenshot_%s.png";
     private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
     private static final String DISPLAY_NAME = "Screenshot";
-    private static final long WAIT_FOR_SCROLL_TIME = 1500L;
-    private static final long SCROLL_DURATION = 500L;
-    private static final long SCREENSHOT_OUT_TIME = 5L;
+    private static final long WAIT_FOR_SCROLL_TIME = 2000L;
+    private static final long SCROLL_DURATION = 1000L;
+    private static final long SCREENSHOT_OUT_TIME = 8000L;
     private final Context mContext;
     private final ScreenshotContract.View mScreenshotView;
     private Display mDisplay;
@@ -105,13 +105,9 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     public void takeScreenshot() {
         mDisplay.getRealMetrics(mDisplayMetrics);
         mLastRotation = mDisplay.getRotation();//keep the first rotation
-        Observable.create(new Observable.OnSubscribe<Bitmap>() {
-            @Override
-            public void call(final Subscriber<? super Bitmap> subscriber) {
-                capture(subscriber);
-            }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                .timeout(SCREENSHOT_OUT_TIME, TimeUnit.SECONDS)
+        getNewBitmap().subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .timeout(SCREENSHOT_OUT_TIME, TimeUnit.MILLISECONDS)
                 .subscribe(new Observer<Bitmap>() {
                     @Override
                     public void onCompleted() {
@@ -210,7 +206,6 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                     .flatMap(new Func1<Boolean, Observable<Boolean>>() {
                         @Override
                         public Observable<Boolean> call(Boolean aBoolean) {
-                            //return sleepForWhile();
                             return Observable.just(true).delay(WAIT_FOR_SCROLL_TIME, TimeUnit.MILLISECONDS);
                         }
                     });
@@ -230,7 +225,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
             }
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .timeout(SCREENSHOT_OUT_TIME, TimeUnit.SECONDS)
+                .timeout(SCREENSHOT_OUT_TIME, TimeUnit.MILLISECONDS)
                 .subscribe(new Subscriber<Bitmap>() {
                     @Override
                     public void onCompleted() {

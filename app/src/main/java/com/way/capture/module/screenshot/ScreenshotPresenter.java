@@ -2,100 +2,53 @@ package com.way.capture.module.screenshot;
 
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PixelFormat;
-import android.hardware.display.DisplayManager;
-import android.hardware.display.VirtualDisplay;
-import android.media.Image;
-import android.media.ImageReader;
 import android.media.MediaActionSound;
-import android.media.projection.MediaProjection;
-import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Process;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
-import android.view.WindowManager;
 
+import com.way.capture.App;
 import com.way.capture.R;
 import com.way.capture.fragment.SettingsFragment;
-import com.way.capture.screenshot.DeleteScreenshot;
 import com.way.capture.screenshot.LongScreenshotUtil;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-
-import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by android on 16-8-19.
  */
 public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     private static final String TAG = "ScreenshotPresenter";
-    private static final String SCREENSHOTS_DIR_NAME = "Screenshots";
-    private static final String SCREENSHOT_FILE_NAME_TEMPLATE = "Screenshot_%s.png";
-    private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
-    private static final String DISPLAY_NAME = "Screenshot";
-    private static final long WAIT_FOR_SCROLL_TIME = 2000L;
-    private static final long SCROLL_DURATION = 1000L;
-    private static final long SCREENSHOT_OUT_TIME = 8000L;
+
     private final Context mContext;
     private final ScreenshotContract.View mScreenshotView;
-    private Display mDisplay;
-    private DisplayMetrics mDisplayMetrics;
-    private int mLastRotation;
     private MediaActionSound mCameraSound;
     private Bitmap mScreenBitmap;
-    private boolean isStopLongScreenshot;
-    private MediaProjection mProjection;
-    private VirtualDisplay mVirtualDisplay;
-    private ImageReader mImageReader;
+    private CompositeSubscription mSubscriptions;
+    private ScreenshotModel mScreenshotModel;
 
-    public ScreenshotPresenter(Context context, ScreenshotContract.View screenshotView,
-                               int resultCode, Intent data) {
-        mContext = context;
+    public ScreenshotPresenter(ScreenshotContract.View screenshotView, int resultCode, Intent data) {
         mScreenshotView = screenshotView;
 
-        mDisplay = ((WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-        mDisplayMetrics = new DisplayMetrics();
-        mDisplay.getRealMetrics(mDisplayMetrics);
-
-        MediaProjectionManager projectionManager = (MediaProjectionManager) context.getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-        mProjection = projectionManager.getMediaProjection(resultCode, data);
+        mScreenshotModel = new ScreenshotModel(resultCode, data);
+        mSubscriptions = new CompositeSubscription();
+        mContext = App.getContext();
 
         // Setup the Camera shutter sound
-        if (PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean(SettingsFragment.SCREENSHOT_SOUND, true)) {
+        if (PreferenceManager.getDefaultSharedPreferences(mContext)
+                .getBoolean(SettingsFragment.SCREENSHOT_SOUND, true)) {
             mCameraSound = new MediaActionSound();
             mCameraSound.load(MediaActionSound.SHUTTER_CLICK);
         }
@@ -103,82 +56,27 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
 
     @Override
     public void takeScreenshot() {
-        mDisplay.getRealMetrics(mDisplayMetrics);
-        mLastRotation = mDisplay.getRotation();//keep the first rotation
-        getNewBitmap().subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .timeout(SCREENSHOT_OUT_TIME, TimeUnit.MILLISECONDS)
-                .subscribe(new Observer<Bitmap>() {
-                    @Override
-                    public void onCompleted() {
-
-                    }
-
-                    @Override
-                    public void onError(final Throwable e) {
-                        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-                            @Override
-                            public void call() {
-                                mScreenshotView.showScreenshotError(e);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onNext(Bitmap bitmap) {
-                        mScreenBitmap = bitmap;
-                        mScreenshotView.showScreenshotAnim(mScreenBitmap, false);
-                    }
-                });
-    }
-
-    private void capture(final Subscriber<? super Bitmap> subscriber) {
-        mImageReader = ImageReader.newInstance(mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels,
-                PixelFormat.RGBA_8888, 1);// 只获取一张图片
-        mVirtualDisplay = mProjection.createVirtualDisplay(DISPLAY_NAME,
-                mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels, mDisplayMetrics.densityDpi,
-                DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION, mImageReader.getSurface(), null, null);
-        mImageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
+        mSubscriptions.clear();
+        mSubscriptions.add(mScreenshotModel.getNewBitmap().subscribe(new Observer<Bitmap>() {
             @Override
-            public void onImageAvailable(ImageReader reader) {
-                mImageReader.setOnImageAvailableListener(null, null);// 移除监听
+            public void onCompleted() {
 
-                Image image = mImageReader.acquireLatestImage();
-                if (image == null) {
-                    subscriber.onError(new NullPointerException("image is null..."));
-                    return;
-                }
-                int imageWidth = mDisplayMetrics.widthPixels;
-                int imageHeight = image.getHeight();
-                Image.Plane[] planes = image.getPlanes();
-                ByteBuffer byteBuffer = planes[0].getBuffer();
-                int pixelStride = planes[0].getPixelStride();
-                int rowStride = planes[0].getRowStride() - pixelStride * imageWidth;
-                Bitmap bitmap = Bitmap.createBitmap(imageWidth + rowStride / pixelStride, imageHeight,
-                        Bitmap.Config.ARGB_8888);
-                bitmap.copyPixelsFromBuffer(byteBuffer);
-                if (rowStride != 0) {
-                    bitmap = addBorder(bitmap, -(rowStride / pixelStride));
-                }
-                image.close();
-
-
-                if (bitmap == null || bitmap.isRecycled()) {
-                    subscriber.onError(new NullPointerException("bitmap is null"));
-                } else {
-                    subscriber.onNext(bitmap);
-                    subscriber.onCompleted();
-                }
             }
-        }, new Handler(Looper.getMainLooper()));
-    }
 
-    private Bitmap addBorder(Bitmap bitmap, int width) {
-        Bitmap newBitmap = Bitmap.createBitmap(width + bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
-        Canvas canvas = new Canvas(newBitmap);
-        canvas.drawColor(Color.TRANSPARENT);
-        canvas.drawBitmap(bitmap, 0.0F, 0.0F, null);
-        return newBitmap;
+            @Override
+            public void onError(Throwable e) {
+                Log.d(TAG, "takeScreenshot... onError e = " + e.getMessage());
+                mScreenshotView.showScreenshotError(e);
+            }
+
+            @Override
+            public void onNext(Bitmap bitmap) {
+                Log.d(TAG, "takeScreenshot... onNext bitmap = " + bitmap);
+                mScreenBitmap = bitmap;
+                mScreenshotView.showScreenshotAnim(mScreenBitmap, false);
+            }
+        }));
+
     }
 
     @Override
@@ -193,39 +91,8 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
             mScreenshotView.showScreenshotError(new NullPointerException("bitmap is null"));
             return;
         }
-
-        mDisplay.getRealMetrics(mDisplayMetrics);
-        int rotation = mDisplay.getRotation();
-        if (isStopLongScreenshot || rotation != mLastRotation) {
-            mScreenshotView.showScreenshotAnim(mScreenBitmap, true);
-            return;
-        }
-        Observable<Boolean> observable;
-        if (isAutoScroll) {
-            observable = scrollNextScreen(SCROLL_DURATION)
-                    .flatMap(new Func1<Boolean, Observable<Boolean>>() {
-                        @Override
-                        public Observable<Boolean> call(Boolean aBoolean) {
-                            return Observable.just(true).delay(WAIT_FOR_SCROLL_TIME, TimeUnit.MILLISECONDS);
-                        }
-                    });
-        } else {
-            observable = Observable.just(true);
-        }
-
-        observable.flatMap(new Func1<Boolean, Observable<Bitmap>>() {
-            @Override
-            public Observable<Bitmap> call(Boolean succeed) {
-                return getNewBitmap();
-            }
-        }).map(new Func1<Bitmap, Bitmap>() {
-            @Override
-            public Bitmap call(Bitmap bitmap) {
-                return collageLongBitmap(bitmap);
-            }
-        }).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .timeout(SCREENSHOT_OUT_TIME, TimeUnit.MILLISECONDS)
+        mSubscriptions.clear();
+        mSubscriptions.add(mScreenshotModel.takeLongScreenshot(mScreenBitmap, isAutoScroll)
                 .subscribe(new Subscriber<Bitmap>() {
                     @Override
                     public void onCompleted() {
@@ -233,23 +100,18 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                     }
 
                     @Override
-                    public void onError(final Throwable e) {
-                        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-                            @Override
-                            public void call() {
-                                if (mScreenBitmap != null && !mScreenBitmap.isRecycled())
-                                    mScreenshotView.showScreenshotAnim(mScreenBitmap, true);
-                                else
-                                    mScreenshotView.showScreenshotError(e);
-                            }
-                        });
+                    public void onError(Throwable e) {
+                        if (mScreenBitmap != null && !mScreenBitmap.isRecycled())
+                            mScreenshotView.showScreenshotAnim(mScreenBitmap, true);
+                        else
+                            mScreenshotView.showScreenshotError(e);
                     }
 
                     @Override
                     public void onNext(Bitmap bitmap) {
                         Log.i("LongScreenshotUtil", "onNext...");
                         if (bitmap.getHeight() == mScreenBitmap.getHeight()
-                                || mScreenBitmap.getHeight() / mDisplayMetrics.heightPixels > 9) {
+                                || mScreenBitmap.getHeight() / mScreenshotModel.getHeight() > 9) {
                             mScreenshotView.showScreenshotAnim(bitmap, true);
                         } else {
                             mScreenshotView.onCollageFinish();
@@ -257,58 +119,53 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                             mScreenBitmap = bitmap;
                         }
                     }
-                });
+                }));
+
     }
 
     @Override
     public void stopLongScreenshot() {
-        isStopLongScreenshot = true;
+        mSubscriptions.clear();
         LongScreenshotUtil.getInstance().stop();
     }
 
     @Override
     public void release() {
-        isStopLongScreenshot = false;
         if (mScreenBitmap != null && !mScreenBitmap.isRecycled())
             mScreenBitmap.recycle();
         if (mCameraSound != null)
             mCameraSound.release();
-        if (mImageReader != null)
-            mImageReader.close();
-        if (mVirtualDisplay != null)
-            mVirtualDisplay.release();
-        if (mProjection != null) {
-            mProjection.stop();
-        }
+        mScreenshotModel.release();
     }
 
     @Override
     public void saveScreenshot(final int style) {
-        final Notification.Builder notificationBuilder = initNotificationBuilder(style);
+        final Notification.Builder notificationBuilder = initNotificationBuilder();
+        if (style == ScreenshotModule.STYLE_SAVE_ONLY) {
+            mScreenshotView.notify(notificationBuilder.build());
+        }
+        mSubscriptions.clear();
+        mSubscriptions.add(mScreenshotModel.saveScreenshot(mScreenBitmap, notificationBuilder).subscribe(new Observer<Uri>() {
+            @Override
+            public void onCompleted() {
 
-        getUriObservable(notificationBuilder).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Uri>() {
-                    @Override
-                    public void onCompleted() {
+            }
 
-                    }
+            @Override
+            public void onError(Throwable e) {
+                mScreenshotView.showScreenshotError(e);
+            }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        mScreenshotView.showScreenshotError(e);
-                    }
+            @Override
+            public void onNext(Uri uri) {
+                onSaveFinish(uri, notificationBuilder, style);
+            }
+        }));
 
-                    @Override
-                    public void onNext(Uri uri) {
-                        onSaveFinish(uri, notificationBuilder, style);
-
-                    }
-                });
     }
 
     @NonNull
-    private Notification.Builder initNotificationBuilder(int style) {
+    private Notification.Builder initNotificationBuilder() {
         final Resources r = mContext.getResources();
 
         final int imageWidth = mScreenBitmap.getWidth();
@@ -316,8 +173,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
         final int iconSize = r.getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
         int previewWidth = r.getDimensionPixelSize(R.dimen.notification_panel_width);
         if (previewWidth <= 0) {
-            // includes notification_panel_width==match_parent (-1)
-            previewWidth = mDisplayMetrics.widthPixels;
+            previewWidth = mScreenshotModel.getWidth();
         }
         final int previewHeight = r.getDimensionPixelSize(R.dimen.notification_max_height);
 
@@ -346,20 +202,9 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
         Notification.BigPictureStyle notificationStyle = new Notification.BigPictureStyle().bigPicture(preview);
         notificationBuilder.setStyle(notificationStyle);
 
-        // For "public" situations we want to show all the same info but
-        // omit the actual screenshot image.
-//        final Notification.Builder publicNotificationBuilder = new Notification.Builder(mContext)
-//                .setContentTitle(r.getString(R.string.screenshot_saving_title))
-//                .setContentText(r.getString(R.string.screenshot_saving_text)).setSmallIcon(R.drawable.stat_notify_image)
-//                .setCategory(Notification.CATEGORY_PROGRESS).setWhen(now)
-//                .setColor(r.getColor(R.color.system_notification_accent_color));
-
-//        notificationBuilder.setPublicVersion(publicNotificationBuilder.build());
-
         Notification n = notificationBuilder.build();
         n.flags |= Notification.FLAG_NO_CLEAR;
-        if (style == ScreenshotModule.STYLE_SAVE_ONLY)
-            mScreenshotView.notify(n);
+
 
         // On the tablet, the large icon makes the notification appear as if it
         // is clickable (and
@@ -371,93 +216,6 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
         // smallIcon to show here.
         notificationStyle.bigLargeIcon((Bitmap) null);
         return notificationBuilder;
-    }
-
-    @NonNull
-    private Observable<Uri> getUriObservable(final Notification.Builder notificationBuilder) {
-        return Observable.create(new Observable.OnSubscribe<Uri>() {
-            @Override
-            public void call(Subscriber<? super Uri> subscriber) {
-                saveInWorkThread(subscriber, notificationBuilder);
-            }
-        });
-    }
-
-    private void saveInWorkThread(Subscriber<? super Uri> subscriber, Notification.Builder notificationBuilder) {
-        // By default, AsyncTask sets the worker thread to have background
-        // thread priority, so bump
-        // it back up so that we save a little quicker.
-        Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
-        try {
-            Resources r = mContext.getResources();
-            final long imageTime = System.currentTimeMillis();
-            final String imageDate = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(imageTime));
-
-            final String imageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, imageDate);
-            final File screenshotDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                    SCREENSHOTS_DIR_NAME);
-            final String imageFilePath = new File(screenshotDir, imageFileName).getAbsolutePath();
-
-            final int imageWidth = mScreenBitmap.getWidth();
-            final int imageHeight = mScreenBitmap.getHeight();
-
-            // Create screenshot directory if it doesn't exist
-            screenshotDir.mkdirs();
-
-            // media provider uses seconds for DATE_MODIFIED and DATE_ADDED, but
-            // milliseconds
-            // for DATE_TAKEN
-            long dateSeconds = imageTime / 1000;
-
-            // Save
-            OutputStream out = new FileOutputStream(imageFilePath);
-            mScreenBitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-            out.flush();
-            out.close();
-
-            // Save the screenshot to the MediaStore
-            ContentValues values = new ContentValues();
-            ContentResolver resolver = mContext.getContentResolver();
-            values.put(MediaStore.Images.ImageColumns.DATA, imageFilePath);
-            values.put(MediaStore.Images.ImageColumns.TITLE, imageFileName);
-            values.put(MediaStore.Images.ImageColumns.DISPLAY_NAME, imageFileName);
-            values.put(MediaStore.Images.ImageColumns.DATE_TAKEN, imageTime);
-            values.put(MediaStore.Images.ImageColumns.DATE_ADDED, dateSeconds);
-            values.put(MediaStore.Images.ImageColumns.DATE_MODIFIED, dateSeconds);
-            values.put(MediaStore.Images.ImageColumns.MIME_TYPE, "image/png");
-            values.put(MediaStore.Images.ImageColumns.WIDTH, imageWidth);
-            values.put(MediaStore.Images.ImageColumns.HEIGHT, imageHeight);
-            values.put(MediaStore.Images.ImageColumns.SIZE, new File(imageFilePath).length());
-            Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-
-            if (uri != null) {
-                // Create a share intent
-                String subjectDate = DateFormat.getDateTimeInstance().format(new Date(imageTime));
-                String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
-                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-                sharingIntent.setType("image/png");
-                sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
-                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-
-                Intent chooserIntent = Intent.createChooser(sharingIntent, null);
-                chooserIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-
-                notificationBuilder.addAction(R.drawable.ic_menu_share, r.getString(R.string.share),
-                        PendingIntent.getActivity(mContext, 0, chooserIntent, PendingIntent.FLAG_CANCEL_CURRENT));
-
-                Intent deleteIntent = new Intent();
-                deleteIntent.setClass(mContext, DeleteScreenshot.class);
-                deleteIntent.putExtra(DeleteScreenshot.SCREENSHOT_URI, uri.toString());
-                notificationBuilder.addAction(R.drawable.ic_menu_delete, r.getString(R.string.screenshot_delete_action),
-                        PendingIntent.getBroadcast(mContext, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT));
-            }
-            subscriber.onNext(uri);
-            subscriber.onCompleted();
-        } catch (Exception e) {
-            // IOException/UnsupportedOperationException may be thrown if external storage is not mounted
-            subscriber.onError(e);
-        }
-
     }
 
     private void onSaveFinish(Uri uri, Notification.Builder builder, int style) {
@@ -473,14 +231,6 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                 .setContentText(r.getString(R.string.screenshot_saved_text))
                 .setContentIntent(PendingIntent.getActivity(mContext, 0, launchIntent, 0)).setWhen(now)
                 .setAutoCancel(true).setColor(r.getColor(R.color.system_notification_accent_color));
-
-        // Update the text in the public version as well
-//        publicNotificationBuilder.setContentTitle(r.getString(R.string.screenshot_saved_title))
-//                .setContentText(r.getString(R.string.screenshot_saved_text))
-//                .setContentIntent(PendingIntent.getActivity(mContext, 0, launchIntent, 0)).setWhen(now)
-//                .setAutoCancel(true).setColor(r.getColor(R.color.system_notification_accent_color));
-//
-//        builder.setPublicVersion(publicNotificationBuilder.build());
 
         Notification n = builder.build();
         n.flags &= ~Notification.FLAG_NO_CLEAR;
@@ -505,52 +255,4 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
         }
     }
 
-    private Observable<Boolean> scrollNextScreen(final long duration) {
-        return Observable.create(new Observable.OnSubscribe<Boolean>() {
-
-            @Override
-            public void call(Subscriber<? super Boolean> subscriber) {
-                Log.i(TAG, "scrollNextScreen... screenHeight = " + mDisplayMetrics.heightPixels
-                        + ", current thread name = " + Thread.currentThread().getName());
-                try {
-                    ScrollUtils.scrollToNextScreen(mDisplayMetrics.heightPixels, duration);//scroll
-                    subscriber.onNext(true);
-                    subscriber.onCompleted();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    subscriber.onError(e);
-                }
-
-            }
-        });
-    }
-
-    private Observable<Bitmap> getNewBitmap() {
-        return Observable.create(new Observable.OnSubscribe<Bitmap>() {
-            @Override
-            public void call(Subscriber<? super Bitmap> subscriber) {
-                capture(subscriber);
-            }
-        });
-    }
-
-    private Bitmap collageLongBitmap(Bitmap newBitmap) {
-        if (mScreenBitmap == null || mScreenBitmap.isRecycled()) {
-            throw new NullPointerException("bitmap is null");
-        }
-
-        if (newBitmap == null || newBitmap.isRecycled()) {
-            throw new NullPointerException("bitmap is null");
-        }
-
-
-        //collage a new bitmap
-        Bitmap collageBitmap = LongScreenshotUtil.getInstance()
-                .collageLongBitmap(mScreenBitmap, newBitmap);
-
-        if (collageBitmap == null || collageBitmap.isRecycled()) {
-            throw new NullPointerException("bitmap is null");
-        }
-        return collageBitmap;
-    }
 }

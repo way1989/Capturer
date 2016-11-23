@@ -138,9 +138,9 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         mIsAutoLongScreenshot = IS_DEVICE_ROOT && PreferenceManager.getDefaultSharedPreferences(mContext)
                 .getBoolean(SettingsFragment.LONG_SCREENSHOT_AUTO, true);
         //init presenter
-        mPresenter = new ScreenshotPresenter(context, this, resultCode, data);
+        mPresenter = new ScreenshotPresenter(this, resultCode, data);
         mHandler.removeMessages(TAKE_SCREENSHOT_MESSAGE);
-        mHandler.sendEmptyMessage(TAKE_SCREENSHOT_MESSAGE);
+        mHandler.sendEmptyMessageDelayed(TAKE_SCREENSHOT_MESSAGE, 500L);
     }
 
     private void initSystemManager(Context context) {

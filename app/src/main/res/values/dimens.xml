@@ -72,4 +72,5 @@
     <!-- Default rounded corner for controls -->
     <dimen name="control_corner_material">2dp</dimen>
     <dimen name="swipe_helper_falsing_threshold">70dp</dimen>
+    <dimen name="size_20">20dp</dimen>
 </resources>

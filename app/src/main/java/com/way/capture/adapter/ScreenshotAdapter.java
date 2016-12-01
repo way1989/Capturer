@@ -6,19 +6,18 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import com.afollestad.dragselectrecyclerview.DragSelectRecyclerViewAdapter;
 import com.way.capture.R;
 import com.way.capture.data.DataInfo;
 import com.way.capture.data.DataProvider;
 import com.way.capture.utils.glide.GlideHelper;
-import com.way.capture.widget.SimpleTagImageView;
 
 /**
  * Created by android on 16-2-1.
  */
-public class ScreenshotAdapter extends RecyclerView.Adapter<ScreenshotAdapter.ViewHolder> {
+public class ScreenshotAdapter extends DragSelectRecyclerViewAdapter<ScreenshotAdapter.ViewHolder> {
     private LayoutInflater mInflater;
     private DataProvider mDataProvider = new DataProvider();
     private int mType;
@@ -53,26 +52,30 @@ public class ScreenshotAdapter extends RecyclerView.Adapter<ScreenshotAdapter.Vi
     @Override
     public ScreenshotAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         final View v = mInflater.inflate(R.layout.item_screenshot, parent, false);
-        ViewHolder holder = new ViewHolder(v);
-        return holder;
+        return new ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(ScreenshotAdapter.ViewHolder holder, int position) {
+        super.onBindViewHolder(holder, position);
         String info = mDataProvider.getItem(position);
-        GlideHelper.loadResourceBitmap(info, holder.image);
+        GlideHelper.loadResourceBitmapCenterCrop(info, holder.image);
+        boolean isSelected = isIndexSelected(position);
+        holder.image.animate().scaleX(isSelected ? 0.8f : 1.0f).scaleY(isSelected ? 0.8f : 1.0f);
+        holder.selectImageView.setVisibility(isSelected ? View.VISIBLE : View.GONE);
+        holder.coverView.setVisibility(isSelected ? View.VISIBLE : View.GONE);
+
         switch (mType) {
             case DataInfo.TYPE_SCREEN_SHOT:
-                holder.image.setTagEnable(false);
+                holder.videoIndicator.setVisibility(View.GONE);
                 break;
             case DataInfo.TYPE_SCREEN_GIF:
-                holder.image.setTagEnable(true);
-                holder.image.setTagText("GIF");
+                holder.videoIndicator.setVisibility(View.VISIBLE);
+                holder.videoIndicator.setImageResource(R.drawable.gif);
                 break;
             case DataInfo.TYPE_SCREEN_RECORD:
-                holder.image.setTagEnable(true);
-                holder.image.setTagText("MP4");
                 holder.videoIndicator.setVisibility(View.VISIBLE);
+                holder.videoIndicator.setImageResource(R.drawable.ic_gallery_play);
                 break;
         }
 
@@ -80,16 +83,6 @@ public class ScreenshotAdapter extends RecyclerView.Adapter<ScreenshotAdapter.Vi
         // Fragment支持多个View进行变换, 使用适配器时, 需要加以区分
         ViewCompat.setTransitionName(holder.image, info);
         holder.itemView.setTag(R.id.tag_item, position);
-        holder.popupMenuButton.setTag(R.id.tag_item, position);
-        if (holder.itemView.getScaleX() == 0f) {
-            reset(holder.itemView);
-        }
-    }
-
-    private void reset(View root) {
-        root.setScaleX(1);
-        root.setScaleY(1);
-        root.setAlpha(1);
     }
 
     @Override
@@ -110,38 +103,36 @@ public class ScreenshotAdapter extends RecyclerView.Adapter<ScreenshotAdapter.Vi
     public interface OnItemClickListener {
         void onItemClick(View v);
 
-        void onPopupMenuClick(View v);
+        void onLongClick(int position);
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public final SimpleTagImageView image;
-        public final ImageButton popupMenuButton;
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+        ImageView image;
         ImageView videoIndicator;
+        ImageView selectImageView;
+        View coverView;
 
         public ViewHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
-
-            image = (SimpleTagImageView) itemView.findViewById(R.id.ic_screenshot);
-            videoIndicator = (ImageView) itemView.findViewById(R.id.video_indicator);
-            popupMenuButton = (ImageButton) itemView.findViewById(R.id.popup_menu_button);
-            popupMenuButton.setOnClickListener(this);
-
+            itemView.setOnLongClickListener(this);
+            image = (ImageView) itemView.findViewById(R.id.iv_image);
+            videoIndicator = (ImageView) itemView.findViewById(R.id.iv_is_gif);
+            selectImageView = (ImageView) itemView.findViewById(R.id.cb_selected);
+            coverView = itemView.findViewById(R.id.lay_mask);
         }
 
         @Override
         public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.popup_menu_button:
-                    mListener.onPopupMenuClick(v);
-                    break;
-                default:
-                    mListener.onItemClick(v);
-                    break;
-            }
+            mListener.onItemClick(v);
         }
 
 
+        @Override
+        public boolean onLongClick(View view) {
+            mListener.onLongClick(getAdapterPosition());
+            return true;
+        }
     }
 
 }

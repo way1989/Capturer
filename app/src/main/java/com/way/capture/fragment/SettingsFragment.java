@@ -19,7 +19,7 @@ import com.way.capture.R;
 import com.way.capture.screenshot.ShellCmdUtils;
 import com.way.capture.service.ShakeService;
 import com.way.capture.utils.AppUtils;
-import com.way.firupgrade.FIRUtils;
+//import com.way.firupgrade.FIRUtils;
 
 /**
  * Created by android on 16-2-4.
@@ -76,7 +76,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                 break;
             case "key_version":
                 //if(true) throw new NullPointerException("test");
-                FIRUtils.checkForUpdate(getActivity(), true);
+//                FIRUtils.checkForUpdate(getActivity(), true);
                 break;
             case "about_author":
                 new FinestWebView.Builder(getActivity())

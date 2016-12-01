@@ -9,7 +9,7 @@ import android.view.MotionEvent;
 
 import com.way.capture.App;
 import com.way.capture.BuildConfig;
-import com.way.firupgrade.FIRUtils;
+//import com.way.firupgrade.FIRUtils;
 
 /**
  * Created by android on 16-3-5.
@@ -20,8 +20,8 @@ public class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         boolean isNightMode = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(App.KEY_NIGHT_MODE, false);
         AppCompatDelegate.setDefaultNightMode(isNightMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
-        if (!BuildConfig.DEBUG)
-            FIRUtils.checkForUpdate(this, false);
+//        if (!BuildConfig.DEBUG)
+//            FIRUtils.checkForUpdate(this, false);
     }
 
     @Override

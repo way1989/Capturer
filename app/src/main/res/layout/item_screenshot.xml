@@ -1,50 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/card_view"
-    android:layout_width="match_parent"
-    android:layout_height="176dp"
-    android:layout_gravity="center"
-    android:layout_margin="4dp"
-    android:foreground="?selectableItemBackground"
-    card_view:cardBackgroundColor="?android:colorBackground"
-    card_view:cardCornerRadius="2dp"
-    card_view:cardElevation="4dp">
-
-    <com.way.capture.widget.SimpleTagImageView xmlns:simple="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/ic_screenshot"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        simple:simple_tag_background_color="@color/colorAccent"
-        simple:simple_tag_enable="true"
-        simple:simple_tag_orientation="right_top"
-        simple:simple_tag_textColor="@android:color/white"
-        simple:simple_tag_textSize="12sp"
-        simple:simple_tag_width="12dp" />
+<com.way.capture.widget.SquareLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                     xmlns:app="http://schemas.android.com/apk/res-auto"
+                                     android:layout_width="match_parent"
+                                     android:layout_height="match_parent"
+                                     android:foreground="?selectableItemBackground"
+                                     app:cardElevation="0.5dp">
 
     <ImageView
-        android:id="@+id/video_indicator"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_gravity="center"
-        android:src="@drawable/ic_gallery_play"
-        android:visibility="gone" />
+        android:id="@+id/iv_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#dadada"
+        android:clickable="false"
+        android:contentDescription="@string/app_name"
+        android:focusable="false"
+        android:scaleType="centerInside"/>
 
     <View
+        android:id="@+id/lay_mask"
         android:layout_width="match_parent"
-        android:layout_height="32dip"
-        android:layout_gravity="bottom"
-        android:alpha="0.7"
-        android:background="?android:colorBackground" />
+        android:layout_height="match_parent"
+        android:background="@color/black_alpha_80"
+        android:clickable="false"
+        android:focusable="false"
+        android:visibility="gone"/>
 
+    <ImageView
+        android:id="@+id/cb_selected"
+        android:layout_width="@dimen/size_20"
+        android:layout_height="@dimen/size_20"
+        android:layout_gravity="top|right"
+        android:layout_margin="4dp"
+        android:clickable="false"
+        android:contentDescription="@string/app_name"
+        android:focusable="false"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_tweet_select_picture_selected"/>
 
-    <ImageButton
-        android:id="@+id/popup_menu_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:background="?selectableItemBackground"
-        android:padding="4dp"
-        android:src="@drawable/ic_menu_more"
-        android:tint="@color/colorAccent" />
-</android.support.v7.widget.CardView>
+    <ImageView
+        android:id="@+id/iv_is_gif"
+        android:layout_width="30dp"
+        android:layout_height="18dp"
+        android:layout_gravity="right|bottom"
+        android:contentDescription="@string/app_name"
+        android:padding="2dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_gallery_play"
+        android:visibility="gone"/>
+
+</com.way.capture.widget.SquareLayout>

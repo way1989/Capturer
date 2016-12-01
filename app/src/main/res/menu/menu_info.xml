@@ -1,17 +1,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".activity.DetailsActivity">
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context=".activity.DetailsActivity">
     <item
-        android:id="@+id/image_info"
-        android:icon="@drawable/ic_info"
+        android:id="@+id/gif_item_delete"
+        android:icon="@drawable/ic_menu_delete"
         android:orderInCategory="100"
-        android:title="@string/image_info"
-        app:showAsAction="ifRoom" />
+        android:title="@string/screenshot_delete_action"
+        app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/image_share"
         android:icon="@drawable/ic_menu_share"
         android:orderInCategory="100"
         android:title="@string/share"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/image_info"
+        android:icon="@drawable/ic_info"
+        android:orderInCategory="100"
+        android:title="@string/image_info"
+        app:showAsAction="ifRoom"/>
+
 </menu>

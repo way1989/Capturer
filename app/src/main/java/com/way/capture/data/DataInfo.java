@@ -21,9 +21,9 @@ import java.util.Comparator;
  * Created by way on 16/2/1.
  */
 public class DataInfo implements Serializable {
-    public static final int TYPE_SCREEN_SHOT = 1;
-    public static final int TYPE_SCREEN_GIF = 2;
-    public static final int TYPE_SCREEN_RECORD = 3;
+    public static final int TYPE_SCREEN_SHOT = 0;
+    public static final int TYPE_SCREEN_GIF = 1;
+    public static final int TYPE_SCREEN_RECORD = 2;
     private static final String TAG = "DataInfo";
     private static final int COLUMN_ID = 0;
     private static final int COLUMN_PATH = 1;

@@ -1,22 +1,17 @@
 package com.way.capture.activity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.IdRes;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.SharedElementCallback;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -40,12 +35,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener,
-        ViewPager.OnPageChangeListener {
+import it.sephiroth.android.library.bottomnavigation.BottomNavigation;
+
+import static android.R.attr.fragment;
+
+public class MainActivity extends BaseActivity implements
+        ViewPager.OnPageChangeListener, BottomNavigation.OnMenuItemSelectionListener {
     private static final String TAG = "MainActivity";
-    private static final int PAGE_SCREENSHOTS = 0;
-    private static final int PAGE_GIFS = 1;
-    private static final int PAGE_SCREENRECORDS = 2;
     Runnable navigateShare = new Runnable() {
         public void run() {
             String url = "http://fir.im/capturer";
@@ -91,11 +87,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
     };
     private ViewPager mViewPager;
-    private NavigationView mNavigationView;
-    private DrawerLayout mDrawerLayout;
     private BaseFragment mCurrentFragment;
     private long mLastPressTime;
-    private SharedPreferences mPreference;
     private FloatingActionButton mFab;
     private Bundle mTmpReenterState;
     private final SharedElementCallback mCallback = new SharedElementCallback() {
@@ -128,6 +121,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }
         }
     };
+    private BottomNavigation mBottomNavigation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,15 +131,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(AppUtils.APP_FIRST_RUN, true))
             startActivity(new Intent(MainActivity.this, GuideActivity.class));
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.app_bar_main);
         setExitSharedElementCallback(mCallback);
-
-        mPreference = PreferenceManager.getDefaultSharedPreferences(this);
+        mBottomNavigation = (BottomNavigation) findViewById(R.id.BottomNavigation);
+        mBottomNavigation.setOnMenuItemClickListener(this);
         initToolbar();
         initFab();
         initViewPager();
-        syncNightMode();
     }
+
 
     private void showIntro(View view, String usageId) {
         new SpotlightView.Builder(this)
@@ -192,20 +186,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        initNavigationView(toolbar);
     }
 
-    private void initNavigationView(Toolbar toolbar) {
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        mDrawerLayout.setDrawerListener(toggle);
-        toggle.syncState();
-
-        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
-        if (mNavigationView != null)
-            mNavigationView.setNavigationItemSelectedListener(this);
-    }
 
     private void initViewPager() {
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
@@ -215,18 +197,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             mViewPager.addOnPageChangeListener(this);
         }
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        if (tabLayout != null)
-            tabLayout.setupWithViewPager(mViewPager);
     }
 
-    private void syncNightMode() {
-        MenuItem item = mNavigationView.getMenu().findItem(R.id.nav_night_mode);
-        int uiMode = getResources().getConfiguration().uiMode;
-        boolean isCurrentNightMode = (uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
-        item.setTitle(isCurrentNightMode ? R.string.nav_day_mode : R.string.nav_night_mode);
-        item.setIcon(isCurrentNightMode ? R.drawable.ic_mode_day : R.drawable.ic_mode_night);
-    }
 
     @Override
     public void onActivityReenter(int resultCode, Intent data) {
@@ -239,24 +211,30 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     @Override
     public void onBackPressed() {
-        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-            mDrawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            if (mCurrentFragment != null && mCurrentFragment.onBackPressed())
-                return;
-            long time = System.currentTimeMillis();
-            if (time - mLastPressTime > 3000) {
-                Snackbar.make(mViewPager, R.string.twice_press_exit, Snackbar.LENGTH_LONG).show();
-                mLastPressTime = time;
-            } else
-                super.onBackPressed();
-        }
+        if (mCurrentFragment != null && mCurrentFragment.onBackPressed())
+            return;
+        long time = System.currentTimeMillis();
+        if (time - mLastPressTime > 3000) {
+            Snackbar.make(mViewPager, R.string.twice_press_exit, Snackbar.LENGTH_LONG).show();
+            mLastPressTime = time;
+        } else
+            super.onBackPressed();
+
+    }
+
+    private void syncNightMode(MenuItem item) {
+        int uiMode = getResources().getConfiguration().uiMode;
+        boolean isCurrentNightMode = (uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        item.setTitle(isCurrentNightMode ? R.string.nav_day_mode : R.string.nav_night_mode);
+        item.setIcon(isCurrentNightMode ? R.drawable.ic_mode_day : R.drawable.ic_mode_night);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        MenuItem item = menu.findItem(R.id.action_night_mode);
+        syncNightMode(item);
         return true;
     }
 
@@ -264,57 +242,21 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
-            case R.id.action_settings:
-                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+            case R.id.action_night_mode:
+                navigateChangeMode.run();
                 return true;
             case R.id.action_help:
                 navigateHelp.run();
                 return true;
+            case R.id.action_settings:
+                navigateSettings.run();
+                return true;
             default:
-
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-        switch (id) {
-            case R.id.nav_screenshot:
-                item.setChecked(true);
-                mViewPager.setCurrentItem(PAGE_SCREENSHOTS, true);
-                break;
-            case R.id.nav_gifs:
-                item.setChecked(true);
-                mViewPager.setCurrentItem(PAGE_GIFS, true);
-                break;
-            case R.id.nav_videos:
-                item.setChecked(true);
-                mViewPager.setCurrentItem(PAGE_SCREENRECORDS, true);
-                break;
-            case R.id.nav_night_mode:
-                mNavigationView.post(navigateChangeMode);
-                break;
-            case R.id.nav_share:
-                mNavigationView.post(navigateShare);
-                break;
-            case R.id.nav_feedback:
-                mNavigationView.postDelayed(navigateFeedback, 200L);
-                break;
-            case R.id.nav_help:
-                mNavigationView.postDelayed(navigateHelp, 200L);
-                break;
-            case R.id.nav_settings:
-                mNavigationView.postDelayed(navigateSettings, 200L);
-                break;
-            default:
-                break;
-        }
-        mDrawerLayout.closeDrawer(GravityCompat.START);
-        return true;
-    }
 
     private void setupViewPager(ViewPager viewPager) {
         Adapter adapter = new Adapter(getSupportFragmentManager());
@@ -322,7 +264,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         adapter.addFragment(ScreenshotFragment.newInstance(DataInfo.TYPE_SCREEN_GIF), this.getString(R.string.gif_title));
         adapter.addFragment(ScreenshotFragment.newInstance(DataInfo.TYPE_SCREEN_RECORD), this.getString(R.string.video_title));
         viewPager.setAdapter(adapter);
-        mNavigationView.getMenu().findItem(R.id.nav_screenshot).setChecked(true);
     }
 
     @Override
@@ -332,17 +273,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     @Override
     public void onPageSelected(int position) {
-        switch (position) {
-            case PAGE_SCREENSHOTS:
-                mNavigationView.getMenu().findItem(R.id.nav_screenshot).setChecked(true);
-                break;
-            case PAGE_GIFS:
-                mNavigationView.getMenu().findItem(R.id.nav_gifs).setChecked(true);
-                break;
-            case PAGE_SCREENRECORDS:
-                mNavigationView.getMenu().findItem(R.id.nav_videos).setChecked(true);
-                break;
-        }
+        mBottomNavigation.setSelectedIndex(position, false);
     }
 
     @Override
@@ -350,15 +281,34 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     }
 
+    @Override
+    public void onMenuItemSelect(@IdRes int itemId, int position, boolean fromUser) {
+        Log.d(TAG, "onMenuItemSelect(" + itemId + ", " + position + ", " + fromUser + ")");
+        if (fromUser) {
+            mBottomNavigation.getBadgeProvider().remove(itemId);
+            mViewPager.setCurrentItem(position);
+        }
+    }
+
+    @Override
+    public void onMenuItemReselect(@IdRes int itemId, int position, boolean fromUser) {
+        Log.d(TAG, "onMenuItemReselect(" + itemId + ", " + position + ", " + fromUser + ")");
+        if (fromUser) {
+            if(mCurrentFragment != null)
+                mCurrentFragment.scrollToTop();
+        }
+
+    }
+
     class Adapter extends FragmentPagerAdapter {
         private final List<BaseFragment> mFragments = new ArrayList<>();
         private final List<String> mFragmentTitles = new ArrayList<>();
 
-        public Adapter(FragmentManager fm) {
+        Adapter(FragmentManager fm) {
             super(fm);
         }
 
-        public void addFragment(BaseFragment fragment, String title) {
+        void addFragment(BaseFragment fragment, String title) {
             mFragments.add(fragment);
             mFragmentTitles.add(title);
         }
@@ -384,4 +334,5 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             return mFragmentTitles.get(position);
         }
     }
+
 }

@@ -104,6 +104,7 @@
             android:name=".activity.DetailsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="sensor"
+            android:label=""
             android:theme="@style/AppTheme.DayNight.NoActionBar" />
         <activity
             android:name=".activity.VideoActivity"

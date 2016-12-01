@@ -199,4 +199,6 @@
     <string name="save">save</string>
     <string name="delete">delete</string>
     <string name="edit">Edit</string>
+    <string name="cab_title_x">Selection (%1$d)</string>
+    <item name="app_gravity" format="integer" type="integer">80</item>
 </resources>

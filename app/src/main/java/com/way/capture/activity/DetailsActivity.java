@@ -108,7 +108,7 @@ public class DetailsActivity extends BaseActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            setActionBarTitle();
+            //setActionBarTitle();
         }
     }
 

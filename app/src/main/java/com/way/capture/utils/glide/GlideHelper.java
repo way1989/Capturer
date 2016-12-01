@@ -1,5 +1,6 @@
 package com.way.capture.utils.glide;
 
+import android.graphics.Bitmap;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
@@ -8,6 +9,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
@@ -71,6 +73,18 @@ public class GlideHelper {
         Glide.with(image.getContext())
                 .load(path)
                 .asBitmap()
+                //.animate(ANIMATOR)
+                .dontAnimate()
+                .fitCenter()
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .into(image);
+    }
+    public static void loadResourceBitmap(String path, @NonNull ImageView image,
+                                          RequestListener<String, Bitmap> requestListener) {
+        Glide.with(image.getContext())
+                .load(path)
+                .asBitmap()
+                .listener(requestListener)
                 //.animate(ANIMATOR)
                 .dontAnimate()
                 .fitCenter()

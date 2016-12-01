@@ -106,9 +106,9 @@ dependencies {
     //intro
     compile 'com.github.wooplr:Spotlight:1.1'
     //bugly
-    compile 'com.tencent.bugly:crashreport:latest.release' //其中latest.release指代最新版本号，也可以指定明确的版本号，例如2.1.5
+    //compile 'com.tencent.bugly:crashreport:latest.release' //其中latest.release指代最新版本号，也可以指定明确的版本号，例如2.1.5
     //photo view
-    compile 'com.commit451:PhotoView:1.2.5'
+    //compile 'com.commit451:PhotoView:1.2.5'
     //leakcanary
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'

@@ -30,7 +30,6 @@ import java.io.File;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import uk.co.senab.photoview.PhotoViewAttacher;
 
 /**
  * Created by way on 16/4/10.
@@ -51,7 +50,7 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
     Button mHeightQualityBtn;
     private int mType;
     private String mPath;
-    private PhotoViewAttacher mPhotoViewAttacher;
+//    private PhotoViewAttacher mPhotoViewAttacher;
 
     public static DetailsFragment newInstance(int type, String path) {
         Bundle args = new Bundle();
@@ -114,7 +113,14 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
         loadImage();
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+//        mPhotoViewAttacher.cleanup();
+    }
+
     private void loadImage() {
+//        mPhotoViewAttacher = new PhotoViewAttacher(mDetailImage);
         mDetailImage.setTransitionName(mPath);
         mDetailImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,27 +128,38 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
                 ((DetailsActivity) getActivity()).toggleSystemUI();
             }
         });
+//        mPhotoViewAttacher.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
+//            @Override
+//            public void onPhotoTap(View view, float x, float y) {
+//                ((DetailsActivity) getActivity()).toggleSystemUI();
+//            }
+//
+//            @Override
+//            public void onOutsidePhotoTap() {
+//                ((DetailsActivity) getActivity()).toggleSystemUI();
+//            }
+//        });
 
         boolean isLongImage = isLongImage(mPath);
         mHeightQualityBtn.setVisibility(isLongImage ? View.VISIBLE : View.GONE);
         mVideoIndicator.setVisibility(mType == DataInfo.TYPE_SCREEN_SHOT ? View.GONE : View.VISIBLE);
 
-        Glide.with(mDetailImage.getContext()).load(mPath).asBitmap()
-                .listener(new RequestListener<String, Bitmap>() {
-                    @Override
-                    public boolean onException(Exception e, String model, Target<Bitmap> target, boolean isFirstResource) {
-                        mCircleLoading.setVisibility(View.GONE);
-                        startPostponedEnterTransition();
-                        return false;
-                    }
+        GlideHelper.loadResourceBitmap(mPath, mDetailImage, new RequestListener<String, Bitmap>() {
+            @Override
+            public boolean onException(Exception e, String model, Target<Bitmap> target, boolean isFirstResource) {
+                mCircleLoading.setVisibility(View.GONE);
+                startPostponedEnterTransition();
+                return false;
+            }
 
-                    @Override
-                    public boolean onResourceReady(Bitmap resource, String model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        mCircleLoading.setVisibility(View.GONE);
-                        startPostponedEnterTransition();
-                        return false;
-                    }
-                }).into(mDetailImage);
+            @Override
+            public boolean onResourceReady(Bitmap resource, String model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                mCircleLoading.setVisibility(View.GONE);
+                startPostponedEnterTransition();
+                //mPhotoViewAttacher.update();
+                return false;
+            }
+        });
     }
 
     private boolean isLongImage(String path) {
@@ -165,8 +182,8 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
     }
 
     /**
-     * Returns the shared element that should be transitioned back to the previous Activity,
-     * or null if the view is not visible on the screen.
+     * Returns the shared element that should be transitioned back to the previous Activity, or null
+     * if the view is not visible on the screen.
      */
     @Nullable
     public View getAlbumImage() {

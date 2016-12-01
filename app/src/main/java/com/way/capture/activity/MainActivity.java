@@ -68,7 +68,7 @@ public class MainActivity extends BaseActivity implements
                     .titleColorRes(R.color.finestWhite)
                     .urlColorRes(R.color.finestWhite)
                     .iconDefaultColorRes(R.color.finestWhite)
-                    .show("http://way1989.github.io/Capturer-help");
+                    .show("https://way1989.github.io/2016/05/15/help/CapturerHelp/");
         }
     };
     Runnable navigateSettings = new Runnable() {

@@ -1,4 +1,4 @@
-package com.way.capture.fragment;
+package com.way.capture.base;
 
 
 import android.content.Context;

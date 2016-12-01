@@ -1,4 +1,4 @@
-package com.way.capture.fragment;
+package com.way.capture.widget;
 
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;

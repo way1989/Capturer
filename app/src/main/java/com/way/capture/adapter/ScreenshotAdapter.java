@@ -15,6 +15,7 @@ import com.way.capture.data.DataProvider;
 import com.way.capture.utils.glide.GlideHelper;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by android on 16-2-1.
@@ -101,7 +102,7 @@ public class ScreenshotAdapter extends DragSelectRecyclerViewAdapter<ScreenshotA
         return mDataProvider.getData();
     }
 
-    public void setData(ArrayList<String> data) {
+    public void setData(List<String> data) {
         mDataProvider.setData(data);
         notifyDataSetChanged();
     }

@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.way.capture.R;
+import com.way.capture.base.BaseActivity;
 
 public class FeedbackActivity extends BaseActivity {
     private EditText mEditText;

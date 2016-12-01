@@ -1,4 +1,4 @@
-package com.way.capture.activity;
+package com.way.capture.base;
 
 import android.os.Bundle;
 import android.preference.PreferenceManager;

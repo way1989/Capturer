@@ -14,12 +14,12 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.way.capture.R;
 import com.way.capture.activity.DetailsActivity;
 import com.way.capture.activity.VideoActivity;
+import com.way.capture.base.BaseFragment;
 import com.way.capture.data.DataInfo;
 import com.way.capture.utils.DensityUtil;
 import com.way.capture.utils.glide.GlideHelper;
@@ -185,6 +185,7 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.video_indicator:
+                mCircleLoading.setVisibility(View.VISIBLE);
                 if (mType == DataInfo.TYPE_SCREEN_RECORD) {
                     VideoActivity.startVideoActivity(getActivity(), mPath, mDetailImage);
                 }else if(mType == DataInfo.TYPE_SCREEN_GIF){
@@ -194,6 +195,7 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
                 }
                 break;
             case R.id.height_quality_btn:
+                mCircleLoading.setVisibility(View.VISIBLE);
                 view.setVisibility(View.GONE);
                 mDetailImageHeightQuality.setVisibility(View.VISIBLE);
                 mDetailImage.setTransitionName("");

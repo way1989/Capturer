@@ -5,7 +5,6 @@ import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -24,6 +23,7 @@ import android.view.animation.DecelerateInterpolator;
 
 import com.bumptech.glide.Glide;
 import com.way.capture.R;
+import com.way.capture.base.BaseActivity;
 import com.way.capture.data.DataInfo;
 import com.way.capture.fragment.DetailsFragment;
 import com.way.capture.fragment.ScreenshotFragment;
@@ -141,7 +141,7 @@ public class DetailsActivity extends BaseActivity {
                 @Override
                 public void onPageSelected(int position) {
                     mCurrentPosition = position;
-                    setActionBarTitle();
+                    //setActionBarTitle();
                 }
             });
         }

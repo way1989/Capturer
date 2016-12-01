@@ -28,7 +28,7 @@ public class DataProvider {
         return mData;
     }
 
-    public void setData(ArrayList<String> datas) {
+    public void setData(List<String> datas) {
         if (datas == null || datas.isEmpty())
             return;
         mData.clear();

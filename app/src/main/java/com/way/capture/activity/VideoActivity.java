@@ -33,6 +33,7 @@ import android.widget.Toast;
 
 import com.way.capture.App;
 import com.way.capture.R;
+import com.way.capture.base.BaseActivity;
 import com.way.capture.data.DataInfo;
 import com.way.capture.utils.AppUtils;
 import com.way.capture.utils.FilesOptHelper;
@@ -117,8 +118,8 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            final String path = getIntent().getStringExtra(ARG_IMAGE_PATH);
-            setActionBarTitle(path);
+//            final String path = getIntent().getStringExtra(ARG_IMAGE_PATH);
+//            setActionBarTitle(path);
         }
     }
 

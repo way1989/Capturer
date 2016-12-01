@@ -24,11 +24,14 @@ import com.trello.rxlifecycle.android.FragmentEvent;
 import com.way.capture.R;
 import com.way.capture.activity.DetailsActivity;
 import com.way.capture.adapter.ScreenshotAdapter;
+import com.way.capture.base.BaseFragment;
+import com.way.capture.base.BaseScreenshotFragment;
 import com.way.capture.data.DataInfo;
 import com.way.capture.data.DataLoader;
 import com.way.capture.utils.DensityUtil;
 import com.way.capture.utils.RxBus;
 import com.way.capture.utils.RxEvent;
+import com.way.capture.widget.SpaceGridItemDecoration;
 import com.weavey.loading.lib.LoadingLayout;
 
 import java.util.List;
@@ -43,8 +46,8 @@ import rx.schedulers.Schedulers;
  * Created by way on 16/4/10.
  */
 public class ScreenshotFragment extends BaseScreenshotFragment implements SwipeRefreshLayout.OnRefreshListener,
-        LoaderManager.LoaderCallbacks<DataLoader.Result>, ScreenshotAdapter.OnItemClickListener,
-        DragSelectRecyclerViewAdapter.SelectionListener, MaterialCab.Callback {
+       ScreenshotAdapter.OnItemClickListener,
+        DragSelectRecyclerViewAdapter.SelectionListener, MaterialCab.Callback, ScreenshotContract.View {
     public static final String ARGS_TYPE = "type";
     public static final String EXTRA_DATAS = "extra_datas";
     public static final String EXTRA_STARTING_POSITION = "extra_starting_item_position";
@@ -185,43 +188,14 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements SwipeR
                         }
                     }
                 });
-        mLoadingLayout.setStatus(LoadingLayout.Loading);
-        getLoaderManager().initLoader(SCREENSHOT_LOADER_ID, null, ScreenshotFragment.this);
+        mPresenter = new ScreenshotPresenter(this);
+        mPresenter.getData(mType);
     }
-
+    private ScreenshotPresenter mPresenter;
     @Override
     public void onRefresh() {
-        mSwipeRefresh.setRefreshing(true);
         mSwipeRefresh.setEnabled(false);
-        if (getLoaderManager().getLoader(SCREENSHOT_LOADER_ID) == null)
-            getLoaderManager().initLoader(SCREENSHOT_LOADER_ID, null, this);
-        else
-            getLoaderManager().restartLoader(SCREENSHOT_LOADER_ID, null, this);
-    }
-
-    @Override
-    public Loader<DataLoader.Result> onCreateLoader(int id, Bundle args) {
-        return new DataLoader(getContext(), getArguments().getInt(ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT));
-    }
-
-    @Override
-    public void onLoadFinished(Loader<DataLoader.Result> loader, DataLoader.Result data) {
-        mSwipeRefresh.setRefreshing(false);
-        mSwipeRefresh.setEnabled(true);
-        if (data.dataInfoes != null && !data.dataInfoes.isEmpty()) {
-            mLoadingLayout.setStatus(LoadingLayout.Success);
-            mAdapter.setData(data.dataInfoes);
-        } else {
-            mAdapter.clearData();
-            mLoadingLayout.setStatus(LoadingLayout.Empty);
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<DataLoader.Result> loader) {
-        mSwipeRefresh.setRefreshing(false);
-        if (mAdapter != null)
-            mAdapter.clearData();
+        mPresenter.getData(mType);
     }
 
     @Override
@@ -294,5 +268,30 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements SwipeR
     public boolean onCabFinished(MaterialCab cab) {
         mAdapter.clearSelected();
         return true;
+    }
+
+    @Override
+    public void onLoadFinished(List<String> data) {
+        mSwipeRefresh.setRefreshing(false);
+        mSwipeRefresh.setEnabled(true);
+        if (!data.isEmpty()) {
+            mLoadingLayout.setStatus(LoadingLayout.Success);
+            mAdapter.setData(data);
+        } else {
+            mAdapter.clearData();
+            mLoadingLayout.setStatus(LoadingLayout.Empty);
+        }
+    }
+
+    @Override
+    public void onError(Throwable e) {
+        mLoadingLayout.setStatus(LoadingLayout.Error);
+        if (mAdapter != null)
+            mAdapter.clearData();
+    }
+
+    @Override
+    public void showLoading() {
+        mLoadingLayout.setStatus(LoadingLayout.Loading);
     }
 }

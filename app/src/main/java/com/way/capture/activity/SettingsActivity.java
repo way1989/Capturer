@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 
 import com.way.capture.R;
+import com.way.capture.base.BaseActivity;
 import com.way.capture.fragment.SettingsFragment;
 
 /**

@@ -37,8 +37,6 @@ import java.util.Map;
 
 import it.sephiroth.android.library.bottomnavigation.BottomNavigation;
 
-import static android.R.attr.fragment;
-
 public class MainActivity extends BaseActivity implements
         ViewPager.OnPageChangeListener, BottomNavigation.OnMenuItemSelectionListener {
     private static final String TAG = "MainActivity";
@@ -131,15 +129,28 @@ public class MainActivity extends BaseActivity implements
         }
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(AppUtils.APP_FIRST_RUN, true))
             startActivity(new Intent(MainActivity.this, GuideActivity.class));
-        setContentView(R.layout.app_bar_main);
         setExitSharedElementCallback(mCallback);
-        mBottomNavigation = (BottomNavigation) findViewById(R.id.BottomNavigation);
-        mBottomNavigation.setOnMenuItemClickListener(this);
+
+    }
+
+    @Override
+    protected void initWidget() {
+        super.initWidget();
+        initBootNavigation();
         initToolbar();
         initFab();
         initViewPager();
     }
 
+    private void initBootNavigation() {
+        mBottomNavigation = (BottomNavigation) findViewById(R.id.BottomNavigation);
+        mBottomNavigation.setOnMenuItemClickListener(this);
+    }
+
+    @Override
+    protected int getContentView() {
+        return R.layout.app_bar_main;
+    }
 
     private void showIntro(View view, String usageId) {
         new SpotlightView.Builder(this)
@@ -179,7 +190,7 @@ public class MainActivity extends BaseActivity implements
                 public void run() {
                     showIntro(mFab, TAG);
                 }
-            }, 1000L);
+            }, 100L);
         }
     }
 
@@ -294,7 +305,7 @@ public class MainActivity extends BaseActivity implements
     public void onMenuItemReselect(@IdRes int itemId, int position, boolean fromUser) {
         Log.d(TAG, "onMenuItemReselect(" + itemId + ", " + position + ", " + fromUser + ")");
         if (fromUser) {
-            if(mCurrentFragment != null)
+            if (mCurrentFragment != null)
                 mCurrentFragment.scrollToTop();
         }
 

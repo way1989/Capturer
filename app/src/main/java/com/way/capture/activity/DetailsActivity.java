@@ -3,7 +3,9 @@ package com.way.capture.activity;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -69,34 +71,39 @@ public class DetailsActivity extends BaseActivity {
     private boolean fullscreenmode;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_details);
-        postponeEnterTransition();
-        setEnterSharedElementCallback(mCallback);
-        setStatusBarColor();
-        initDatas(savedInstanceState);//初始化必要数据
-        initToolbar();
-        setupSystemUI();
-        initViewPager();
-    }
-
-    private void initDatas(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         Intent intent = getIntent();
         mType = intent.getIntExtra(ScreenshotFragment.ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT);
         mDatas = getIntent().getStringArrayListExtra(ScreenshotFragment.EXTRA_DATAS);
         mStartingPosition = getIntent().getIntExtra(ScreenshotFragment.EXTRA_STARTING_POSITION, 0);
-        if (savedInstanceState == null) {
+        if(savedInstanceState != null){
+            mCurrentPosition = savedInstanceState.getInt(STATE_CURRENT_PAGE_POSITION, 0);
+        }else {
             mCurrentPosition = mStartingPosition;
-        } else {
-            mCurrentPosition = savedInstanceState.getInt(STATE_CURRENT_PAGE_POSITION);
         }
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void initWidget() {
+        super.initWidget();
+        initToolbar();
+        setupSystemUI();
+        initViewPager();
+        postponeEnterTransition();
+        setEnterSharedElementCallback(mCallback);
+        setStatusBarColor();
+    }
+
+    @Override
+    protected int getContentView() {
+        return R.layout.activity_details;
     }
 
     private void setStatusBarColor() {
         final android.view.Window window = getWindow();
         ObjectAnimator animator = ObjectAnimator.ofInt(window,
-                "statusBarColor", window.getStatusBarColor(), getResources().getColor(R.color.colorPrimaryDark));
+                "statusBarColor", window.getStatusBarColor(), Color.BLACK);
         animator.setEvaluator(new ArgbEvaluator());
         animator.setDuration(200L);
         animator.start();

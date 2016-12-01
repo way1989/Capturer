@@ -94,9 +94,6 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        final int type = getArguments().getInt(ARG_IMAGE_TYPE, DataInfo.TYPE_SCREEN_SHOT);
-        if (type == DataInfo.TYPE_SCREEN_SHOT)
-            return inflater.inflate(R.layout.fragment_detail_layout_image, container, false);
         return inflater.inflate(R.layout.fragment_detail_layout, container, false);
     }
 

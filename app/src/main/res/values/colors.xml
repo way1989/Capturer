@@ -48,4 +48,5 @@
     <color name="tool_bar_bg">#C1000000</color>
     <color name="darker_transparent">#C1000000</color>
     <color name="black_alpha_80">#50000000</color>
+    <color name="black_alpha_128">#80000000</color>
 </resources>

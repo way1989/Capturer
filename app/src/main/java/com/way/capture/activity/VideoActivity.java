@@ -88,11 +88,20 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_video);
+    }
+
+    @Override
+    protected void initWidget() {
+        super.initWidget();
         initToolbar();
         setStatusBarColor();
         initPlayControlerView();
         setupSystemUI();
+    }
+
+    @Override
+    protected int getContentView() {
+        return R.layout.activity_video;
     }
 
     private void initToolbar() {

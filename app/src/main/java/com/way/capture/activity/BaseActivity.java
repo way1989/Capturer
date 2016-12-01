@@ -7,14 +7,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.view.MotionEvent;
 
+import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 import com.way.capture.App;
 import com.way.capture.BuildConfig;
+
+import butterknife.ButterKnife;
 //import com.way.firupgrade.FIRUtils;
 
 /**
  * Created by android on 16-3-5.
  */
-public class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends RxAppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,23 +25,22 @@ public class BaseActivity extends AppCompatActivity {
         AppCompatDelegate.setDefaultNightMode(isNightMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
 //        if (!BuildConfig.DEBUG)
 //            FIRUtils.checkForUpdate(this, false);
+        setContentView(getContentView());
+
+        initWindow();
+        ButterKnife.bind(this);
+        initWidget();
+        initData();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+    protected abstract int getContentView();
 
+    protected void initWindow() {
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-
+    protected void initWidget() {
     }
 
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent event) {
-
-        return super.dispatchTouchEvent(event);
+    protected void initData() {
     }
 }

@@ -4,12 +4,13 @@ package com.way.capture.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.trello.rxlifecycle.components.support.RxFragment;
 
 import java.io.Serializable;
 import java.util.List;
@@ -20,7 +21,7 @@ import butterknife.ButterKnife;
 /**
  * Created by android on 16-2-2.
  */
-public abstract class BaseFragment extends Fragment {
+public abstract class BaseFragment extends RxFragment {
     protected Context mContext;
     protected View mRoot;
     protected Bundle mBundle;

@@ -15,9 +15,13 @@ public class FeedbackActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_feedback);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mEditText = (EditText) findViewById(R.id.inputText);
+    }
+
+    @Override
+    protected int getContentView() {
+        return R.layout.activity_feedback;
     }
 
     public void onPost(View view) {

@@ -30,7 +30,10 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.way.capture.R;
+import com.way.capture.data.DataInfo;
 import com.way.capture.fragment.SettingsFragment;
+import com.way.capture.utils.RxBus;
+import com.way.capture.utils.RxEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -301,6 +304,7 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
                                 mHandler.post(new Runnable() {
                                     @Override
                                     public void run() {
+                                        RxBus.getInstance().post(new RxEvent.NewPathEvent(DataInfo.TYPE_SCREEN_RECORD, mOutputFile));
                                         showNotification(uri, null);
                                     }
                                 });

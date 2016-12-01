@@ -98,11 +98,7 @@ public abstract class BaseFragment extends RxFragment {
 
     }
 
-    public abstract boolean onBackPressed();
 
-    public abstract void onActivityReenter(Bundle bundle);
-
-    public abstract void changeSharedElements(List<String> names, Map<String, View> sharedElements, int position);
 
     protected <T extends View> T findView(int viewId) {
         return (T) mRoot.findViewById(viewId);
@@ -153,5 +149,4 @@ public abstract class BaseFragment extends RxFragment {
         findView(id).setVisibility(View.INVISIBLE);
     }
 
-    public abstract void scrollToTop();
 }

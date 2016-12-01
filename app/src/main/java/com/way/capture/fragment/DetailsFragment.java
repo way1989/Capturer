@@ -1,18 +1,17 @@
 package com.way.capture.fragment;
 
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
@@ -29,20 +28,30 @@ import com.way.capture.widget.subscaleview.SubsamplingScaleImageView;
 
 import java.io.File;
 
+import butterknife.BindView;
+import butterknife.OnClick;
 import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 /**
  * Created by way on 16/4/10.
  */
-public class DetailsFragment extends Fragment implements View.OnClickListener {
+public class DetailsFragment extends BaseFragment implements View.OnClickListener {
     private static final String TAG = "DetailsFragment";
     private static final String ARG_IMAGE_PATH = "arg_image_path";
     private static final String ARG_IMAGE_TYPE = "arg_image_type";
-    private PhotoView mImageView;
-    private ImageView mPlayButton;
-    private Button mShowHeighQualityButton;
-    private SubsamplingScaleImageView mSubsamplingScaleImageView;
+    @BindView(R.id.circleLoading)
+    ProgressBar mCircleLoading;
+    @BindView(R.id.detail_image_height_quality)
+    SubsamplingScaleImageView mDetailImageHeightQuality;
+    @BindView(R.id.detail_image)
+    PhotoView mDetailImage;
+    @BindView(R.id.video_indicator)
+    ImageView mVideoIndicator;
+    @BindView(R.id.height_quality_btn)
+    Button mHeightQualityBtn;
+    private int mType;
+    private String mPath;
 
     public static DetailsFragment newInstance(int type, String path) {
         Bundle args = new Bundle();
@@ -65,50 +74,49 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser || mImageView == null)
+        if (isVisibleToUser || mDetailImage == null)
             return;
 
-        final int type = getArguments().getInt(ARG_IMAGE_TYPE, DataInfo.TYPE_SCREEN_SHOT);
-        final String path = getArguments().getString(ARG_IMAGE_PATH);
-        switch (type) {
+        switch (mType) {
             case DataInfo.TYPE_SCREEN_SHOT:
-                if (mSubsamplingScaleImageView != null) {
-                    mSubsamplingScaleImageView.recycle();
-                    mSubsamplingScaleImageView.setTransitionName("");
-                    mSubsamplingScaleImageView.setVisibility(View.GONE);
-                }
-                mImageView.setVisibility(View.VISIBLE);
-                GlideHelper.loadResourceBitmap(path, mImageView);
-                mImageView.setTransitionName(path);
-                if (mShowHeighQualityButton != null)
-                    mShowHeighQualityButton.setVisibility(View.VISIBLE);
+                mDetailImageHeightQuality.recycle();
+                mDetailImageHeightQuality.setTransitionName("");
+                mDetailImageHeightQuality.setVisibility(View.GONE);
+                mDetailImage.setVisibility(View.VISIBLE);
+                GlideHelper.loadResourceBitmap(mPath, mDetailImage);
+                mDetailImage.setTransitionName(mPath);
+                if (mHeightQualityBtn != null)
+                    mHeightQualityBtn.setVisibility(View.VISIBLE);
                 break;
             case DataInfo.TYPE_SCREEN_GIF:
-                Glide.clear(mImageView);
-                GlideHelper.loadResourceBitmap(path, mImageView);
-                mPlayButton.setVisibility(View.VISIBLE);
+                Glide.clear(mDetailImage);
+                GlideHelper.loadResourceBitmap(mPath, mDetailImage);
+                mVideoIndicator.setVisibility(View.VISIBLE);
                 break;
         }
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_detail_layout, container, false);
+    protected int getLayoutId() {
+        return R.layout.fragment_detail_layout;
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        final int type = getArguments().getInt(ARG_IMAGE_TYPE, DataInfo.TYPE_SCREEN_SHOT);
-        final String path = getArguments().getString(ARG_IMAGE_PATH);
-        loadImage(view, type, path);
+    protected void initBundle(Bundle bundle) {
+        super.initBundle(bundle);
+        mType = bundle.getInt(ARG_IMAGE_TYPE, DataInfo.TYPE_SCREEN_SHOT);
+        mPath = bundle.getString(ARG_IMAGE_PATH);
     }
 
-    private void loadImage(View view, int type, String path) {
-        mImageView = (PhotoView) view.findViewById(R.id.detail_image);
-        mImageView.setTransitionName(path);
-        mImageView.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
+    @Override
+    protected void initData() {
+        super.initData();
+        loadImage();
+    }
+
+    private void loadImage() {
+        mDetailImage.setTransitionName(mPath);
+        mDetailImage.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
             @Override
             public void onPhotoTap(View view, float x, float y) {
                 ((DetailsActivity) getActivity()).toggleSystemUI();
@@ -119,61 +127,42 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
                 ((DetailsActivity) getActivity()).toggleSystemUI();
             }
         });
-        switch (type) {
-            case DataInfo.TYPE_SCREEN_SHOT:
-                mSubsamplingScaleImageView = (SubsamplingScaleImageView) view.findViewById(R.id.detail_image_height_quality);
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inJustDecodeBounds = true;
-                BitmapFactory.decodeFile(path, options);
-                int height = options.outHeight;
-                boolean isLongImage = height > 2 * DensityUtil.getDisplayHeight(getContext());
-                if (isLongImage) {
-                    mShowHeighQualityButton = (Button) view.findViewById(R.id.height_quality_btn);
-                    mShowHeighQualityButton.setOnClickListener(this);
-                    mShowHeighQualityButton.setVisibility(View.VISIBLE);
-                }
-                break;
-            case DataInfo.TYPE_SCREEN_GIF:
-                GlideHelper.loadResourceBitmap(path, mImageView);
-                mImageView.postDelayed(new Runnable() {
+
+        boolean isLongImage = isLongImage(mPath);
+        mHeightQualityBtn.setVisibility(isLongImage ? View.VISIBLE : View.GONE);
+        mVideoIndicator.setVisibility(mType == DataInfo.TYPE_SCREEN_SHOT ? View.GONE : View.VISIBLE);
+
+        Glide.with(mDetailImage.getContext()).load(mPath).asBitmap()
+                .listener(new RequestListener<String, Bitmap>() {
                     @Override
-                    public void run() {
+                    public boolean onException(Exception e, String model, Target<Bitmap> target, boolean isFirstResource) {
+                        mCircleLoading.setVisibility(View.GONE);
                         startPostponedEnterTransition();
+                        return false;
                     }
-                }, 200L);
-                break;
-            case DataInfo.TYPE_SCREEN_RECORD:
-                break;
-        }
 
-        if (type != DataInfo.TYPE_SCREEN_GIF) {
-            Glide.with(mImageView.getContext()).load(path).dontAnimate()
-                    .listener(new RequestListener<String, GlideDrawable>() {
-                        @Override
-                        public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                            startPostponedEnterTransition();
-                            return false;
-                        }
+                    @Override
+                    public boolean onResourceReady(Bitmap resource, String model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        mCircleLoading.setVisibility(View.GONE);
+                        startPostponedEnterTransition();
+                        return false;
+                    }
+                }).into(mDetailImage);
+    }
 
-                        @Override
-                        public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                            startPostponedEnterTransition();
-                            return false;
-                        }
-                    }).fitCenter().into(mImageView);
-        }
-        if (type != DataInfo.TYPE_SCREEN_SHOT) {
-            mPlayButton = (ImageView) view.findViewById(R.id.video_indicator);
-            mPlayButton.setVisibility(View.VISIBLE);
-            mPlayButton.setOnClickListener(this);
-        }
+    private boolean isLongImage(String path) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(path, options);
+        int height = options.outHeight;
+        return height > 2 * DensityUtil.getDisplayHeight(getContext());
     }
 
     private void startPostponedEnterTransition() {
-        mImageView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+        mDetailImage.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
-                mImageView.getViewTreeObserver().removeOnPreDrawListener(this);
+                mDetailImage.getViewTreeObserver().removeOnPreDrawListener(this);
                 getActivity().startPostponedEnterTransition();
                 return true;
             }
@@ -186,42 +175,38 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
      */
     @Nullable
     public View getAlbumImage() {
-        if (isViewInBounds(getActivity().getWindow().getDecorView(), mImageView)) {
-            return mImageView;
+        if (isViewInBounds(getActivity().getWindow().getDecorView(), mDetailImage)) {
+            return mDetailImage;
         }
         return null;
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
+    @OnClick({R.id.video_indicator, R.id.height_quality_btn})
+    public void onClick(View view) {
+        switch (view.getId()) {
             case R.id.video_indicator:
-                final int type = getArguments().getInt(ARG_IMAGE_TYPE, DataInfo.TYPE_SCREEN_SHOT);
-                if (type == DataInfo.TYPE_SCREEN_RECORD) {
-                    VideoActivity.startVideoActivity(getActivity(), getArguments().getString(ARG_IMAGE_PATH), mImageView);
-                } else if (type == DataInfo.TYPE_SCREEN_GIF) {
-                    v.setVisibility(View.GONE);
+                if (mType == DataInfo.TYPE_SCREEN_RECORD) {
+                    VideoActivity.startVideoActivity(getActivity(), mPath, mDetailImage);
+                }else if(mType == DataInfo.TYPE_SCREEN_GIF){
+                    view.setVisibility(View.GONE);
                     final String path = getArguments().getString(ARG_IMAGE_PATH);
-                    GlideHelper.loadResource(path, mImageView);
+                    GlideHelper.loadResource(path, mDetailImage);
                 }
                 break;
             case R.id.height_quality_btn:
-                String path = getArguments().getString(ARG_IMAGE_PATH);
-                v.setVisibility(View.GONE);
-                mSubsamplingScaleImageView.setVisibility(View.VISIBLE);
-                mImageView.setTransitionName("");
-                mSubsamplingScaleImageView.setTransitionName(path);
-                mSubsamplingScaleImageView.setImage(ImageSource.uri(Uri.fromFile(new File(path))));
-                mSubsamplingScaleImageView.postDelayed(new Runnable() {
+                view.setVisibility(View.GONE);
+                mDetailImageHeightQuality.setVisibility(View.VISIBLE);
+                mDetailImage.setTransitionName("");
+                mDetailImageHeightQuality.setTransitionName(mPath);
+                mDetailImageHeightQuality.setImage(ImageSource.uri(Uri.fromFile(new File(mPath))));
+                mDetailImageHeightQuality.post(new Runnable() {
                     @Override
                     public void run() {
-                        mImageView.setVisibility(View.GONE);
-                        Glide.clear(mImageView);
+                        mDetailImage.setVisibility(View.GONE);
+                        Glide.clear(mDetailImage);
                     }
-                }, 300L);
+                });
                 break;
-
         }
     }
-
 }

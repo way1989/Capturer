@@ -25,6 +25,7 @@ import com.way.capture.App;
 import com.way.capture.R;
 import com.way.capture.data.DataInfo;
 import com.way.capture.fragment.BaseFragment;
+import com.way.capture.fragment.BaseScreenshotFragment;
 import com.way.capture.fragment.ScreenshotFragment;
 import com.way.capture.service.ShakeService;
 import com.way.capture.utils.AppUtils;
@@ -85,7 +86,7 @@ public class MainActivity extends BaseActivity implements
         }
     };
     private ViewPager mViewPager;
-    private BaseFragment mCurrentFragment;
+    private BaseScreenshotFragment mCurrentFragment;
     private long mLastPressTime;
     private FloatingActionButton mFab;
     private Bundle mTmpReenterState;
@@ -327,7 +328,7 @@ public class MainActivity extends BaseActivity implements
         @Override
         public void setPrimaryItem(ViewGroup container, int position, Object object) {
             super.setPrimaryItem(container, position, object);
-            mCurrentFragment = (BaseFragment) object;
+            mCurrentFragment = (BaseScreenshotFragment) object;
         }
 
         @Override

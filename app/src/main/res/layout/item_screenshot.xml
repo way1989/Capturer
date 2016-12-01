@@ -39,9 +39,9 @@
 
     <ImageView
         android:id="@+id/iv_is_gif"
-        android:layout_width="30dp"
-        android:layout_height="18dp"
-        android:layout_gravity="right|bottom"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="center"
         android:contentDescription="@string/app_name"
         android:padding="2dp"
         android:scaleType="centerInside"

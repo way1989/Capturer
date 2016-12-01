@@ -8,6 +8,7 @@ import com.way.capture.App;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by android on 16-2-16.
@@ -112,5 +113,12 @@ public class DataProvider {
 
     public void clear() {
         mData.clear();
+    }
+
+    public void addData(String path) {
+        final List<String> tmps = new ArrayList<>(mData);
+        mData.clear();
+        mData.add(path);
+        mData.addAll(tmps);
     }
 }

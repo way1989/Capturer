@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -32,8 +33,12 @@ import android.widget.Toast;
 
 import com.way.capture.App;
 import com.way.capture.R;
+import com.way.capture.data.DataInfo;
 import com.way.capture.utils.AppUtils;
+import com.way.capture.utils.FilesOptHelper;
 import com.way.capture.utils.GifUtils;
+import com.way.capture.utils.RxBus;
+import com.way.capture.utils.RxEvent;
 import com.way.capture.utils.ffmpeg.ExecuteBinaryResponseHandler;
 import com.way.capture.utils.ffmpeg.FFmpeg;
 import com.way.capture.utils.ffmpeg.LoadBinaryResponseHandler;
@@ -47,6 +52,9 @@ import com.way.downloadlibrary.DownloadManager;
 import com.way.downloadlibrary.DownloadRequest;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -127,7 +135,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
     private void setStatusBarColor() {
         final android.view.Window window = getWindow();
         ObjectAnimator animator = ObjectAnimator.ofInt(window,
-                "statusBarColor", window.getStatusBarColor(), getResources().getColor(R.color.colorPrimaryDark));
+                "statusBarColor", window.getStatusBarColor(), Color.BLACK);
         animator.setEvaluator(new ArgbEvaluator());
         animator.setDuration(200L);
         animator.start();
@@ -300,6 +308,29 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
                 Snackbar.make(mVideoView, R.string.not_support_devices, Snackbar.LENGTH_LONG).show();
                 return false;
             }
+            if(platform.startsWith("armeabi")){
+                File tagetFile = new File(getFilesDir().getAbsolutePath(), AppUtils.FFMPEG_FILE_NAME);
+                try {
+                    InputStream is = getAssets().open("ffmpeg.zip");
+                    FileOutputStream fos = new FileOutputStream(tagetFile);
+                    byte[] buffer = new byte[is.available()];// 本地文件读写可用此方法
+                    is.read(buffer);
+                    fos.write(buffer);
+                    fos.close();
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    FilesOptHelper.getInstance().unCompressFile(tagetFile.getAbsolutePath(), getFilesDir().getAbsolutePath());
+                    tagetFile = new File(getFilesDir().getAbsolutePath(), AppUtils.FFMPEG_FILE_NAME);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (!tagetFile.canExecute())
+                    tagetFile.setExecutable(true);
+                return true;
+            }
             showDownloadDialog(platform);
             return false;
         }
@@ -344,6 +375,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
                                 @Override
                                 public void onScanCompleted(String path, Uri uri) {
                                     Log.d("way", "Media scanner completed.");
+                                    RxBus.getInstance().post(new RxEvent.NewPathEvent(DataInfo.TYPE_SCREEN_GIF, outputFile));
                                 }
                             });
                 }

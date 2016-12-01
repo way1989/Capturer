@@ -79,7 +79,8 @@ public abstract class CommonControllerOverlay extends FrameLayout implements
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 
         mBackground = new View(context);
-        mBackground.setBackgroundColor(context.getResources().getColor(R.color.darker_transparent));
+        //mBackground.setBackgroundColor(context.getResources().getColor(R.color.darker_transparent));
+        mBackground.setBackgroundResource(R.drawable.video_control_bg);
         addView(mBackground, matchParent);
 
         // Depending on the usage, the timeBar can show a single scrubber, or

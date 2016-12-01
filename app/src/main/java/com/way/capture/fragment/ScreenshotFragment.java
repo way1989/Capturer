@@ -20,24 +20,29 @@ import android.widget.Toast;
 import com.afollestad.dragselectrecyclerview.DragSelectRecyclerView;
 import com.afollestad.dragselectrecyclerview.DragSelectRecyclerViewAdapter;
 import com.afollestad.materialcab.MaterialCab;
+import com.trello.rxlifecycle.android.FragmentEvent;
 import com.way.capture.R;
 import com.way.capture.activity.DetailsActivity;
 import com.way.capture.adapter.ScreenshotAdapter;
 import com.way.capture.data.DataInfo;
 import com.way.capture.data.DataLoader;
-import com.way.capture.data.DataProvider;
 import com.way.capture.utils.DensityUtil;
+import com.way.capture.utils.RxBus;
+import com.way.capture.utils.RxEvent;
 import com.weavey.loading.lib.LoadingLayout;
 
 import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by way on 16/4/10.
  */
-public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener,
+public class ScreenshotFragment extends BaseScreenshotFragment implements SwipeRefreshLayout.OnRefreshListener,
         LoaderManager.LoaderCallbacks<DataLoader.Result>, ScreenshotAdapter.OnItemClickListener,
         DragSelectRecyclerViewAdapter.SelectionListener, MaterialCab.Callback {
     public static final String ARGS_TYPE = "type";
@@ -51,11 +56,11 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     DragSelectRecyclerView mRecyclerView;
     @BindView(R.id.swipe_refresh)
     SwipeRefreshLayout mSwipeRefresh;
-    private DataProvider mDataProvider = new DataProvider();
     private ScreenshotAdapter mAdapter;
 
     private MaterialCab mCab;
     private boolean mIsDetailsActivityStarted;
+    private int mType;
 
     public static BaseFragment newInstance(int type) {
         Bundle args = new Bundle();
@@ -115,7 +120,7 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
 
     @Override
     public void changeSharedElements(List<String> names, Map<String, View> sharedElements, int position) {
-        String newTransitionName = mDataProvider.getItem(position);
+        String newTransitionName = mAdapter.getItem(position);
         View newSharedElement = mRecyclerView.findViewHolderForAdapterPosition(position).itemView.findViewById(R.id.iv_image);
         Log.i("way", "changeSharedElements newSharedElement = " + newSharedElement);
         if (newSharedElement != null) {
@@ -143,14 +148,19 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     }
 
     @Override
+    protected void initBundle(Bundle bundle) {
+        super.initBundle(bundle);
+        mType = bundle.getInt(ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT);
+    }
+
+    @Override
     protected void initWidget(View root) {
         super.initWidget(root);
-        int type = mBundle.getInt(ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT);
 
         GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
         mRecyclerView.addItemDecoration(new SpaceGridItemDecoration(DensityUtil.dip2px(getContext(), 2)));
         mRecyclerView.setLayoutManager(layoutManager);
-        mAdapter = new ScreenshotAdapter(getContext(), type, this);
+        mAdapter = new ScreenshotAdapter(getContext(), mType, this);
         mAdapter.setSelectionListener(this);
         mRecyclerView.setAdapter(mAdapter);
 
@@ -161,6 +171,20 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
     @Override
     protected void initData() {
         super.initData();
+        RxBus.getInstance().toObservable(RxEvent.NewPathEvent.class)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .compose(this.<RxEvent.NewPathEvent>bindUntilEvent(FragmentEvent.DESTROY))
+                .subscribe(new Action1<RxEvent.NewPathEvent>() {
+                    @Override
+                    public void call(RxEvent.NewPathEvent newPathEvent) {
+                        final int type = newPathEvent.type;
+                        final String path = newPathEvent.path;
+                        if(type == mType){
+                            mAdapter.addData(path);
+                        }
+                    }
+                });
         mLoadingLayout.setStatus(LoadingLayout.Loading);
         getLoaderManager().initLoader(SCREENSHOT_LOADER_ID, null, ScreenshotFragment.this);
     }
@@ -186,9 +210,9 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
         mSwipeRefresh.setEnabled(true);
         if (data.dataInfoes != null && !data.dataInfoes.isEmpty()) {
             mLoadingLayout.setStatus(LoadingLayout.Success);
-            mDataProvider.setData(data.dataInfoes);
-            mAdapter.setDatas(mDataProvider);
+            mAdapter.setData(data.dataInfoes);
         } else {
+            mAdapter.clearData();
             mLoadingLayout.setStatus(LoadingLayout.Empty);
         }
     }
@@ -210,8 +234,8 @@ public class ScreenshotFragment extends BaseFragment implements SwipeRefreshLayo
             if (!mIsDetailsActivityStarted) {
                 mIsDetailsActivityStarted = true;
                 Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                intent.putExtra(ARGS_TYPE, getArguments().getInt(ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT));
-                intent.putStringArrayListExtra(EXTRA_DATAS, mDataProvider.getData());
+                intent.putExtra(ARGS_TYPE, mType);
+                intent.putStringArrayListExtra(EXTRA_DATAS, mAdapter.getData());
                 intent.putExtra(EXTRA_STARTING_POSITION, position);
                 startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(getActivity(), imageView,
                         imageView.getTransitionName()).toBundle());

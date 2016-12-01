@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
@@ -14,17 +15,23 @@ import android.graphics.Paint;
 import android.media.MediaActionSound;
 import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.way.capture.App;
 import com.way.capture.R;
+import com.way.capture.data.DataInfo;
 import com.way.capture.fragment.SettingsFragment;
 import com.way.capture.screenshot.LongScreenshotUtil;
+import com.way.capture.utils.RxBus;
+import com.way.capture.utils.RxEvent;
 
 import rx.Observer;
 import rx.Subscriber;
 import rx.subscriptions.CompositeSubscription;
+
+import static com.thefinestartist.utils.content.ContextUtil.getContentResolver;
 
 /**
  * Created by android on 16-8-19.
@@ -122,7 +129,17 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                 }));
 
     }
-
+    private String getRealPathFromURI(Uri contentUri) {
+        String res = null;
+        String[] proj = { MediaStore.Images.Media.DATA };
+        Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
+        if(cursor.moveToFirst()){;
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            res = cursor.getString(column_index);
+        }
+        cursor.close();
+        return res;
+    }
     @Override
     public void stopLongScreenshot() {
         mSubscriptions.clear();
@@ -219,6 +236,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     }
 
     private void onSaveFinish(Uri uri, Notification.Builder builder, int style) {
+        RxBus.getInstance().post(new RxEvent.NewPathEvent(DataInfo.TYPE_SCREEN_SHOT, getRealPathFromURI(uri)));
         Resources r = mContext.getResources();
         // Create the intent to show the screenshot in gallery
         Intent launchIntent = new Intent(Intent.ACTION_VIEW);

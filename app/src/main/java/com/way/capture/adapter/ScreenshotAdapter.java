@@ -14,6 +14,8 @@ import com.way.capture.data.DataInfo;
 import com.way.capture.data.DataProvider;
 import com.way.capture.utils.glide.GlideHelper;
 
+import java.util.ArrayList;
+
 /**
  * Created by android on 16-2-1.
  */
@@ -28,11 +30,6 @@ public class ScreenshotAdapter extends DragSelectRecyclerViewAdapter<ScreenshotA
         mListener = listener;
         mInflater = LayoutInflater.from(context);
         setHasStableIds(true);
-    }
-
-    public void setDatas(DataProvider dataProvider) {
-        mDataProvider = dataProvider;
-        notifyDataSetChanged();
     }
 
     public void removeItem(int pos) {
@@ -100,19 +97,33 @@ public class ScreenshotAdapter extends DragSelectRecyclerViewAdapter<ScreenshotA
         return mDataProvider.getItem(position).hashCode();
     }
 
+    public ArrayList<String> getData() {
+        return mDataProvider.getData();
+    }
+
+    public void setData(ArrayList<String> data) {
+        mDataProvider.setData(data);
+        notifyDataSetChanged();
+    }
+
+    public void addData(String path) {
+        mDataProvider.addData(path);
+        notifyDataSetChanged();
+    }
+
     public interface OnItemClickListener {
         void onItemClick(View v);
 
         void onLongClick(int position);
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         ImageView image;
         ImageView videoIndicator;
         ImageView selectImageView;
         View coverView;
 
-        public ViewHolder(View itemView) {
+         ViewHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);

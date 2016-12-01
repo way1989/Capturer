@@ -143,6 +143,7 @@ public class TimeBar extends View {
         float textSizeInPx = metrics.density * TEXT_SIZE_IN_DP;
         mTimeTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mTimeTextPaint.setColor(0xFFCECECE);
+        mTimeTextPaint.setShadowLayer(2.0f, 1.0f, 1.0f, 0xFF000000);
         mTimeTextPaint.setTextSize(textSizeInPx);
         mTimeTextPaint.setTextAlign(Paint.Align.CENTER);
 

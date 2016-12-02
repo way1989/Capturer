@@ -151,7 +151,7 @@ public class MainActivity extends BaseActivity implements
 
     @Override
     protected int getContentView() {
-        return R.layout.app_bar_main;
+        return R.layout.activity_main;
     }
 
     private void showIntro(View view, String usageId) {

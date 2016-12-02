@@ -16,6 +16,8 @@ import android.widget.ProgressBar;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.davemorrissey.labs.subscaleview.ImageSource;
+import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 import com.way.capture.R;
 import com.way.capture.activity.DetailsActivity;
 import com.way.capture.activity.VideoActivity;
@@ -23,14 +25,11 @@ import com.way.capture.base.BaseFragment;
 import com.way.capture.data.DataInfo;
 import com.way.capture.utils.DensityUtil;
 import com.way.capture.utils.glide.GlideHelper;
-import com.way.capture.widget.subscaleview.ImageSource;
-import com.way.capture.widget.subscaleview.SubsamplingScaleImageView;
 
 import java.io.File;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 /**
@@ -45,13 +44,14 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
     @BindView(R.id.detail_image_height_quality)
     SubsamplingScaleImageView mDetailImageHeightQuality;
     @BindView(R.id.detail_image)
-    PhotoView mDetailImage;
+    ImageView mDetailImage;
     @BindView(R.id.video_indicator)
     ImageView mVideoIndicator;
     @BindView(R.id.height_quality_btn)
     Button mHeightQualityBtn;
     private int mType;
     private String mPath;
+    private PhotoViewAttacher mPhotoViewAttacher;
 
     public static DetailsFragment newInstance(int type, String path) {
         Bundle args = new Bundle();
@@ -116,14 +116,9 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
 
     private void loadImage() {
         mDetailImage.setTransitionName(mPath);
-        mDetailImage.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
+        mDetailImage.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onPhotoTap(View view, float x, float y) {
-                ((DetailsActivity) getActivity()).toggleSystemUI();
-            }
-
-            @Override
-            public void onOutsidePhotoTap() {
+            public void onClick(View view) {
                 ((DetailsActivity) getActivity()).toggleSystemUI();
             }
         });

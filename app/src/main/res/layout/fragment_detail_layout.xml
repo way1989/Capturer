@@ -9,19 +9,16 @@
         android:layout_height="50dp"
         android:layout_gravity="center"/>
 
-    <com.way.capture.widget.subscaleview.SubsamplingScaleImageView
+    <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
         android:id="@+id/detail_image_height_quality"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"/>
 
-    <uk.co.senab.photoview.PhotoView
+    <ImageView
         android:id="@+id/detail_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-
-        android:minWidth="360dp"
-        android:minHeight="640dp"
         android:layout_gravity="center"/>
 
     <ImageView

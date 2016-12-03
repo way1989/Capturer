@@ -59,9 +59,10 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class VideoActivity extends BaseActivity implements MediaPlayer.OnCompletionListener,
-        ControllerOverlay.Listener {
+        ControllerOverlay.Listener, VideoContract.View {
     private static final String TAG = "VideoActivity";
     private static final String ARG_IMAGE_PATH = "arg_image_path";
     private final static int PROGRESS_CHANGED = 0;
@@ -228,8 +229,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
                     public void onClick(DialogInterface dialog, int which) {
                         toGif(mChoiceQualityItem);
                     }
-                })
-                .create().show();
+                }).show();
     }
 
     private void toGif(int which) {
@@ -626,6 +626,40 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
         toolbar.animate().translationY(AppUtils.getStatusBarHeight(getResources()))
                 .setInterpolator(new DecelerateInterpolator()).setDuration(240);
         fullscreen = false;
+
+    }
+
+    @Override
+    public void showCheckQuality() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.gif_quality_title)
+                .setSingleChoiceItems(R.array.gif_quality_items, 0, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //toGif(which);
+                        mChoiceQualityItem = which;
+                    }
+                }).setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        toGif(mChoiceQualityItem);
+                    }
+                }).show();
+    }
+
+    @Override
+    public void showFinished(boolean succeed) {
+
+    }
+
+    @Override
+    public void showError(String msg) {
+
+    }
+
+    @Override
+    public void showLoading(String msg) {
 
     }
 }

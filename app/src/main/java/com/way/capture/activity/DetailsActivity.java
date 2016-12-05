@@ -76,9 +76,9 @@ public class DetailsActivity extends BaseActivity {
         mType = intent.getIntExtra(ScreenshotFragment.ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT);
         mDatas = getIntent().getStringArrayListExtra(ScreenshotFragment.EXTRA_DATAS);
         mStartingPosition = getIntent().getIntExtra(ScreenshotFragment.EXTRA_STARTING_POSITION, 0);
-        if(savedInstanceState != null){
+        if (savedInstanceState != null) {
             mCurrentPosition = savedInstanceState.getInt(STATE_CURRENT_PAGE_POSITION, 0);
-        }else {
+        } else {
             mCurrentPosition = mStartingPosition;
         }
         super.onCreate(savedInstanceState);

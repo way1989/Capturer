@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
-import android.graphics.Path;
 import android.graphics.Point;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;

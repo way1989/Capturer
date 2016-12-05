@@ -21,7 +21,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
@@ -117,9 +116,9 @@ public class PermissionCheckActivity extends AppCompatActivity implements OnClic
     }
 
     private void checkcanDrawOverlays() {
-        if(OsUtil.canDrawOverlays(this)){
+        if (OsUtil.canDrawOverlays(this)) {
             redirect();
-        }else {
+        } else {
             requestAlertWindowPermission();
         }
     }
@@ -167,7 +166,7 @@ public class PermissionCheckActivity extends AppCompatActivity implements OnClic
      * Returns true if the redirecting was performed
      */
     private boolean redirectIfNeeded() {
-        if(!OsUtil.canDrawOverlays(this))
+        if (!OsUtil.canDrawOverlays(this))
             return false;
         if (!OsUtil.hasRequiredPermissions()) {
             return false;

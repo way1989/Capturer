@@ -1,24 +1,30 @@
 package com.way.capture.screenshot;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.way.capture.R;
-import com.way.capture.module.ModuleService;
 
 public class TakeScreenshotActivity extends Activity {
-    private String mAction;
+
+    public static void startCaptureActivity(Context context, String action) {
+        Intent intent = new Intent(context, TakeScreenshotActivity.class);
+        intent.setAction(action);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        context.startActivity(intent);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(getIntent() == null || getIntent().getAction() == null)
-            mAction = ModuleService.Action.ACTION_SCREENSHOT;
-        else
-            mAction = getIntent().getAction();
+        if (getIntent() == null || getIntent().getAction() == null) {
+            finish();
+            return;
+        }
+
         try {
             ScreenshotHelper.fireScreenCaptureIntent(this);
         } catch (Exception e) {
@@ -30,7 +36,7 @@ public class TakeScreenshotActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        ScreenshotHelper.handleActivityResult(this, requestCode, resultCode, data, mAction);
+        ScreenshotHelper.handleActivityResult(this, requestCode, resultCode, data, getIntent().getAction());
         finish();
     }
 

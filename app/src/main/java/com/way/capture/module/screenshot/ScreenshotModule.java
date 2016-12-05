@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -13,17 +14,24 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -38,6 +46,8 @@ import com.way.capture.fragment.SettingsFragment;
 import com.way.capture.module.BaseModule;
 import com.way.capture.module.ModuleService;
 import com.way.capture.utils.DensityUtil;
+import com.way.capture.widget.freecrop.FreeCropView;
+import com.way.capture.widget.rectcrop.CropImageView;
 import com.way.capture.widget.swipe.SwipeHelper;
 import com.way.capture.widget.swipe.SwipeVerticalLayout;
 
@@ -50,10 +60,10 @@ import java.util.Date;
 public class ScreenshotModule implements BaseModule, ScreenshotContract.View, SwipeVerticalLayout.Callback,
         SwipeHelper.PressListener, View.OnClickListener {
     //save style
-    public static final int STYLE_SAVE_ONLY = 0;
-    public static final int STYLE_SAVE_TO_SHARE = 1;
-    public static final int STYLE_SAVE_TO_EDIT = 2;
-    protected static final int SCREENSHOT_NOTIFICATION_ID = 789;
+    static final int STYLE_SAVE_ONLY = 0;
+    static final int STYLE_SAVE_TO_SHARE = 1;
+    static final int STYLE_SAVE_TO_EDIT = 2;
+    private static final int SCREENSHOT_NOTIFICATION_ID = 789;
     private static final String TAG = "TakeScreenshotService";
     private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
     private static final long PREVIEW_OUT_TIME = 3000L;// 超时自动保存
@@ -69,7 +79,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     private static final int SCREENSHOT_DROP_OUT_SCALE_DURATION = 370;
     private static final float BACKGROUND_ALPHA = 0.8f;
     private static final float SCREENSHOT_SCALE = 1f;
-    public static final float SCREENSHOT_DROP_IN_MIN_SCALE = SCREENSHOT_SCALE * 0.689f;
+    private static final float SCREENSHOT_DROP_IN_MIN_SCALE = SCREENSHOT_SCALE * 0.689f;
     private static final boolean IS_DEVICE_ROOT = ScrollUtils.isDeviceRoot();
     //system manager
     private NotificationManager mNotificationManager;
@@ -94,6 +104,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     private ValueAnimator mScreenshotAnimation;
     private ValueAnimator mExitScreenshotAnimation;
     private Context mContext;
+    private String mAction;
     private ScreenshotContract.Presenter mPresenter;
     private boolean mIsAutoLongScreenshot;
     private Handler mHandler = new Handler() {
@@ -126,10 +137,13 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         }
     };
     private ObjectAnimator mFloatAnim;
+    private Dialog mRectCropDialog;
+    private Dialog mFreeCropDialog;
 
     @Override
-    public void onStart(Context context, int resultCode, Intent data) {
+    public void onStart(Context context, String action, int resultCode, Intent data) {
         mContext = context;
+        mAction = action;
         //init system manager
         initSystemManager(context);
 
@@ -140,7 +154,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         //init presenter
         mPresenter = new ScreenshotPresenter(this, resultCode, data);
         mHandler.removeMessages(TAKE_SCREENSHOT_MESSAGE);
-        mHandler.sendEmptyMessageDelayed(TAKE_SCREENSHOT_MESSAGE, 500L);
+        mHandler.sendEmptyMessageDelayed(TAKE_SCREENSHOT_MESSAGE, TAKE_SCREENSHOT_DELAY);
     }
 
     private void initSystemManager(Context context) {
@@ -202,8 +216,68 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         return Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
     }
 
+    private boolean hasNavigationBar() {
+        boolean hasMenukey = ViewConfiguration.get(mContext).hasPermanentMenuKey();
+        boolean hasBackkey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
+        return !hasMenukey && !hasBackkey;
+    }
+
+    private int getNavigationBarWidth() {
+        Resources resources = mContext.getResources();
+        int resourceId = resources.getIdentifier("navigation_bar_width", "dimen", "android");
+        if (resourceId > 0) {
+            return resources.getDimensionPixelSize(resourceId);
+        }
+        return 0;
+
+    }
+
+    private int getNavigationBarHeight() {
+        Resources resources = mContext.getResources();
+        int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            return resources.getDimensionPixelSize(resourceId);
+        }
+        return 0;
+    }
+
+    private Bitmap removeNavigationBar(Bitmap bitmap) {
+        boolean hasNavigationBar = hasNavigationBar();
+        if (!hasNavigationBar)
+            return bitmap;
+
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+
+        if (height > width) {//竖屏情况
+            int navigationHeight = getNavigationBarHeight();
+            if (navigationHeight == 0)
+                return bitmap;
+            return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
+                    bitmap.getHeight() - navigationHeight);
+        }
+
+        //横屏
+        int navigationWidth = getNavigationBarWidth();
+        if (navigationWidth == 0)
+            return bitmap;
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth() - navigationWidth,
+                bitmap.getHeight());
+
+    }
+
     @Override
-    public void showScreenshotAnim(Bitmap bitmap, final boolean longScreenshot) {
+    public void showScreenshotAnim(Bitmap bitmap, final boolean longScreenshot, final boolean needCheckAction) {
+        if (needCheckAction) {
+            switch (mAction) {
+                case ModuleService.Action.ACTION_FREE_CROP:
+                    showFreeCropLayout(removeNavigationBar(bitmap));
+                    return;
+                case ModuleService.Action.ACTION_RECT_CROP:
+                    showRectCropLayout(removeNavigationBar(bitmap));
+                    return;
+            }
+        }
         // Add the view for the animation
         if (longScreenshot) {
             int heightPixels = DensityUtil.getDisplayHeight(mContext);
@@ -234,7 +308,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                onCaptureFinish(longScreenshot);
+                onCaptureFinish(longScreenshot, needCheckAction);
             }
         });
         try {
@@ -253,7 +327,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         }
     }
 
-    private void onCaptureFinish(boolean longScreenshot) {
+    private void onCaptureFinish(boolean longScreenshot, boolean needCheckAction) {
         Log.i(TAG, "onCaptureFinish... longScreenshot = " + longScreenshot);
 
         if (longScreenshot) {
@@ -266,7 +340,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
             mEditBtn.setVisibility(View.VISIBLE);
             mEditBtn.animate().alpha(1f);
         }
-        if (!longScreenshot && mContext.getResources().getConfiguration().orientation
+        if (needCheckAction && !longScreenshot && mContext.getResources().getConfiguration().orientation
                 != Configuration.ORIENTATION_LANDSCAPE && !mKeyguardManager.isKeyguardLocked()) {
             mLongScreenshotBtn.setVisibility(View.VISIBLE);
             mLongScreenshotBtn.animate().alpha(1f);
@@ -454,10 +528,10 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     }
 
     private void takeLongScreenshot() {
-        if(mIsAutoLongScreenshot) {
+        if (mIsAutoLongScreenshot) {
             mHandler.removeMessages(TAKE_LONG_SCREENSHOT_MESSAGE);
             mHandler.sendEmptyMessage(TAKE_LONG_SCREENSHOT_MESSAGE);
-        }else{
+        } else {
             enableDialogTouchFlag(true);
         }
     }
@@ -486,6 +560,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
             mLongScreenshotCover.findViewById(R.id.long_screenshot_indicator_arrow).setVisibility(View.GONE);
         }
     }
+
     private void showLongScreenshotToast() {
         addCover();
         addToast();
@@ -704,5 +779,150 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
                 .setColor(context.getResources().getColor(R.color.system_notification_accent_color));
         Notification n = new Notification.BigTextStyle(b).bigText(r.getString(R.string.screenshot_failed_text)).build();
         nManager.notify(SCREENSHOT_NOTIFICATION_ID, n);
+    }
+
+    private void showRectCropLayout(Bitmap bitmap) {
+        if (mRectCropDialog == null) {
+            mRectCropDialog = new Dialog(mContext);
+            final Window window = mRectCropDialog.getWindow();
+            window.requestFeature(Window.FEATURE_NO_TITLE);
+            mRectCropDialog.setContentView(R.layout.layout_crop_float);
+            mRectCropDialog.create();
+
+            final WindowManager.LayoutParams lp = window.getAttributes();
+            lp.token = null;
+            lp.y = 0;
+            lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED;
+            lp.type = WindowManager.LayoutParams.TYPE_TOAST;
+            lp.format = PixelFormat.TRANSLUCENT;
+            lp.setTitle(TAG);
+            window.setAttributes(lp);
+            updateRectCropLayoutWidth();
+
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                    | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+        }
+        final CropImageView cropImageView = (CropImageView) mRectCropDialog.findViewById(R.id.cropImageView);
+        cropImageView.setImageBitmap(bitmap);
+        cropImageView.setOnDoubleTapListener(new CropImageView.OnDoubleTapListener() {
+            @Override
+            public void onDoubleTab() {
+                final Bitmap result = cropImageView.getCroppedBitmap();
+                mPresenter.setBitmap(result);
+                showScreenshotAnim(result, false, false);
+                dismissRectCropLayout();
+            }
+        });
+        final View toastView = mRectCropDialog.findViewById(R.id.crop_toast);
+        toastView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                toastView.setVisibility(View.GONE);
+                return true;
+            }
+        });
+
+        if (!mRectCropDialog.isShowing())
+            mRectCropDialog.show();
+    }
+
+    private void updateRectCropLayoutWidth() {
+        if (mRectCropDialog != null) {
+            int screenShowWidth = DensityUtil.getDisplayWidth(mContext);
+            int screenShowHeight = DensityUtil.getDisplayHeight(mContext);
+            final Resources res = mContext.getResources();
+            final WindowManager.LayoutParams lp = mRectCropDialog.getWindow().getAttributes();
+            lp.width = screenShowWidth;
+            lp.height = screenShowHeight;
+            lp.gravity = res.getInteger(
+                    R.integer.standard_notification_panel_layout_gravity);
+            mRectCropDialog.getWindow().setAttributes(lp);
+        }
+    }
+
+    private void dismissRectCropLayout() {
+        if (mRectCropDialog != null && mRectCropDialog.isShowing())
+            mRectCropDialog.dismiss();
+    }
+
+
+    private void showFreeCropLayout(Bitmap bitmap) {
+        if (mFreeCropDialog == null) {
+            mFreeCropDialog = new Dialog(mContext);
+            final Window window = mFreeCropDialog.getWindow();
+            window.requestFeature(Window.FEATURE_NO_TITLE);
+            mFreeCropDialog.setContentView(R.layout.layout_free_crop_float);
+            mFreeCropDialog.create();
+
+            final WindowManager.LayoutParams lp = window.getAttributes();
+            lp.token = null;
+            lp.y = 0;
+            lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED;
+            lp.type = WindowManager.LayoutParams.TYPE_TOAST;
+            lp.format = PixelFormat.TRANSLUCENT;
+            lp.setTitle(TAG);
+            window.setAttributes(lp);
+            updateFreeCropLayoutWidth();
+
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                    | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+        }
+        final FreeCropView freeCropView = (FreeCropView) mFreeCropDialog.findViewById(R.id.free_crop_view);
+        final View confirmBtn = mFreeCropDialog.findViewById(R.id.free_crop_ok_btn);
+        freeCropView.setFreeCropBitmap(bitmap);
+        freeCropView.setOnStateListener(new FreeCropView.OnStateListener() {
+            @Override
+            public void onStart() {
+                confirmBtn.setVisibility(View.GONE);
+                mFreeCropDialog.findViewById(R.id.free_crop_toast).setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onEnd() {
+                confirmBtn.setVisibility(View.VISIBLE);
+            }
+        });
+        confirmBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                final Bitmap result = freeCropView.getFreeCropBitmap();
+                mPresenter.setBitmap(result);
+                showScreenshotAnim(result, false, false);
+                dismissFreeCropLayout();
+            }
+        });
+
+        if (!mFreeCropDialog.isShowing())
+            mFreeCropDialog.show();
+    }
+
+    private void updateFreeCropLayoutWidth() {
+        if (mFreeCropDialog != null) {
+            int screenShowWidth = DensityUtil.getDisplayWidth(mContext);
+            int screenShowHeight = DensityUtil.getDisplayHeight(mContext);
+            final Resources res = mContext.getResources();
+            final WindowManager.LayoutParams lp = mFreeCropDialog.getWindow().getAttributes();
+            lp.width = screenShowWidth;
+            lp.height = screenShowHeight;
+            lp.gravity = res.getInteger(
+                    R.integer.standard_notification_panel_layout_gravity);
+            mFreeCropDialog.getWindow().setAttributes(lp);
+        }
+    }
+
+    private void dismissFreeCropLayout() {
+        if (mFreeCropDialog != null && mFreeCropDialog.isShowing())
+            mFreeCropDialog.dismiss();
     }
 }

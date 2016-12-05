@@ -79,7 +79,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
             public void onNext(Bitmap bitmap) {
                 Log.d(TAG, "takeScreenshot... onNext bitmap = " + bitmap);
                 mScreenBitmap = bitmap;
-                mView.showScreenshotAnim(mScreenBitmap, false);
+                mView.showScreenshotAnim(mScreenBitmap, false, true);
             }
         }));
 
@@ -108,7 +108,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                     @Override
                     public void onError(Throwable e) {
                         if (mScreenBitmap != null && !mScreenBitmap.isRecycled())
-                            mView.showScreenshotAnim(mScreenBitmap, true);
+                            mView.showScreenshotAnim(mScreenBitmap, true, false);
                         else
                             mView.showScreenshotError(e);
                     }
@@ -118,7 +118,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                         Log.i("LongScreenshotUtil", "onNext...");
                         if (bitmap.getHeight() == mScreenBitmap.getHeight()
                                 || mScreenBitmap.getHeight() / mScreenshotModel.getHeight() > 9) {
-                            mView.showScreenshotAnim(bitmap, true);
+                            mView.showScreenshotAnim(bitmap, true, false);
                         } else {
                             mView.onCollageFinish();
                             mScreenBitmap.recycle();
@@ -145,11 +145,18 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     public void stopLongScreenshot() {
         mSubscriptions.clear();
         LongScreenshotUtil.getInstance().stop();
-        if(mScreenBitmap != null && !mScreenBitmap.isRecycled()){
-            mView.showScreenshotAnim(mScreenBitmap, true);
-        }else {
+        if (mScreenBitmap != null && !mScreenBitmap.isRecycled()) {
+            mView.showScreenshotAnim(mScreenBitmap, true, false);
+        } else {
             mView.showScreenshotError(new Throwable("bitmap is null..."));
         }
+    }
+
+    @Override
+    public void setBitmap(Bitmap bitmap) {
+        if(mScreenBitmap != null && !mScreenBitmap.isRecycled())
+            mScreenBitmap.recycle();
+        mScreenBitmap = bitmap;
     }
 
     @Override

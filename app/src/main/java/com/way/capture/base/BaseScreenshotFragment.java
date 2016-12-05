@@ -10,7 +10,7 @@ import java.util.Map;
  * Created by android on 16-12-1.
  */
 
-public abstract class BaseScreenshotFragment extends BaseFragment{
+public abstract class BaseScreenshotFragment extends BaseFragment {
     public abstract boolean onBackPressed();
 
     public abstract void onActivityReenter(Bundle bundle);

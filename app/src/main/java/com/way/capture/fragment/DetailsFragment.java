@@ -183,7 +183,7 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
                 mCircleLoading.setVisibility(View.VISIBLE);
                 if (mType == DataInfo.TYPE_SCREEN_RECORD) {
                     VideoActivity.startVideoActivity(getActivity(), mPath, mDetailImage);
-                }else if(mType == DataInfo.TYPE_SCREEN_GIF){
+                } else if (mType == DataInfo.TYPE_SCREEN_GIF) {
                     view.setVisibility(View.GONE);
                     final String path = getArguments().getString(ARG_IMAGE_PATH);
                     GlideHelper.loadResource(path, mDetailImage);

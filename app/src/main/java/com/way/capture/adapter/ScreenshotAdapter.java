@@ -124,7 +124,7 @@ public class ScreenshotAdapter extends DragSelectRecyclerViewAdapter<ScreenshotA
         ImageView selectImageView;
         View coverView;
 
-         ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);

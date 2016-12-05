@@ -3,13 +3,10 @@ package com.way.capture.base;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
-import android.view.MotionEvent;
 
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 import com.way.capture.App;
-import com.way.capture.BuildConfig;
 
 import butterknife.ButterKnife;
 //import com.way.firupgrade.FIRUtils;

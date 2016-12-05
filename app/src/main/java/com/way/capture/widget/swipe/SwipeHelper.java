@@ -1,4 +1,3 @@
-
 package com.way.capture.widget.swipe;
 
 import android.animation.Animator;
@@ -23,59 +22,50 @@ import com.way.capture.R;
 import com.way.capture.widget.freecrop.Gefingerpoken;
 
 public class SwipeHelper implements Gefingerpoken {
+    public static final int SWIPE_TO_INVALIDATE = -1;
+    public static final int SWIPE_TO_TOP = 0;
+    public static final int SWIPE_TO_BOTTOM = 1;
+    public static final int SWIPE_TO_START = 2;
+    public static final int SWIPE_TO_END = 3;
+    public static final int X = 0;
+    public static final int Y = 1;
     static final String TAG = "SwipeHelper";
+    // where fade starts
+    static final float SWIPE_PROGRESS_FADE_END = 0.5f; // fraction of thumbnail width
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_INVALIDATE = false;
     private static final boolean SLOW_ANIMATIONS = false; // DEBUG;
     private static final boolean CONSTRAIN_SWIPE = true;
     private static final boolean FADE_OUT_DURING_SWIPE = true;
     private static final boolean DISMISS_IF_SWIPED_FAR_ENOUGH = true;
-    
-    public static final int SWIPE_TO_INVALIDATE = -1;
-    public static final int SWIPE_TO_TOP = 0;
-    public static final int SWIPE_TO_BOTTOM = 1;
-    public static final int SWIPE_TO_START = 2;
-    public static final int SWIPE_TO_END = 3;
-    
-    public static final int X = 0;
-    public static final int Y = 1;
-
+    private static final int SNAP_ANIM_LEN = SLOW_ANIMATIONS ? 1000 : 150; // ms
+    public static float SWIPE_PROGRESS_FADE_START = 0f; // fraction of thumbnail width
     private static LinearInterpolator sLinearInterpolator = new LinearInterpolator();
     private final Interpolator mFastOutLinearInInterpolator;
-
+    final private int[] mTmpPos = new int[2];
     private float SWIPE_ESCAPE_VELOCITY = 100f; // dp/sec
     private int DEFAULT_ESCAPE_ANIMATION_DURATION = 200; // ms
     private int MAX_ESCAPE_ANIMATION_DURATION = 400; // ms
     private int MAX_DISMISS_VELOCITY = 2000; // dp/sec
-    private static final int SNAP_ANIM_LEN = SLOW_ANIMATIONS ? 1000 : 150; // ms
-
-    public static float SWIPE_PROGRESS_FADE_START = 0f; // fraction of thumbnail width
-                                                 // where fade starts
-    static final float SWIPE_PROGRESS_FADE_END = 0.5f; // fraction of thumbnail width
-                                              // beyond which swipe progress->0
+    // beyond which swipe progress->0
     private float mMinSwipeProgress = 0f;
     private float mMaxSwipeProgress = 1f;
-
     private float mPagingTouchSlop;
     private Callback mCallback;
     private Handler mHandler;
     private int mSwipeDirection;
     private VelocityTracker mVelocityTracker;
-
     private float mInitialTouchPos;
     private boolean mDragging;
     private View mCurrView;
     private View mCurrAnimView;
     private boolean mCanCurrViewBeDimissed;
     private float mDensityScale;
-
     private boolean mLongPressSent;
     private LongPressListener mLongPressListener;
     private PressListener mPressListener;
     private Runnable mWatchLongPress;
     private long mLongPressTimeout;
-
-    final private int[] mTmpPos = new int[2];
     private int mFalsingThreshold;
     private boolean mTouchAboveFalsingThreshold;
 
@@ -84,7 +74,7 @@ public class SwipeHelper implements Gefingerpoken {
         mHandler = new Handler();
         mSwipeDirection = swipeDirection;
         mVelocityTracker = VelocityTracker.obtain();
-        mDensityScale =  context.getResources().getDisplayMetrics().density;
+        mDensityScale = context.getResources().getDisplayMetrics().density;
         mPagingTouchSlop = ViewConfiguration.get(context).getScaledPagingTouchSlop();
 
         mLongPressTimeout = (long) (ViewConfiguration.getLongPressTimeout() * 1.5f); // extra long-press!
@@ -92,6 +82,35 @@ public class SwipeHelper implements Gefingerpoken {
                 android.R.interpolator.fast_out_linear_in);
         mFalsingThreshold = context.getResources().getDimensionPixelSize(
                 R.dimen.swipe_helper_falsing_threshold);
+    }
+
+    // invalidate the view's own bounds all the way up the view hierarchy
+    public static void invalidateGlobalRegion(View view) {
+        invalidateGlobalRegion(
+                view,
+                new RectF(view.getLeft(), view.getTop(), view.getRight(), view.getBottom()));
+    }
+
+    // invalidate a rectangle relative to the view's coordinate system all the way up the view
+    // hierarchy
+    public static void invalidateGlobalRegion(View view, RectF childBounds) {
+        //childBounds.offset(view.getTranslationX(), view.getTranslationY());
+        if (DEBUG_INVALIDATE)
+            Log.v(TAG, "-------------");
+        while (view.getParent() != null && view.getParent() instanceof View) {
+            view = (View) view.getParent();
+            view.getMatrix().mapRect(childBounds);
+            view.invalidate((int) Math.floor(childBounds.left),
+                    (int) Math.floor(childBounds.top),
+                    (int) Math.ceil(childBounds.right),
+                    (int) Math.ceil(childBounds.bottom));
+            if (DEBUG_INVALIDATE) {
+                Log.v(TAG, "INVALIDATE(" + (int) Math.floor(childBounds.left)
+                        + "," + (int) Math.floor(childBounds.top)
+                        + "," + (int) Math.ceil(childBounds.right)
+                        + "," + (int) Math.ceil(childBounds.bottom));
+            }
+        }
     }
 
     public void setLongPressListener(LongPressListener listener) {
@@ -184,35 +203,6 @@ public class SwipeHelper implements Gefingerpoken {
         invalidateGlobalRegion(animView);
     }
 
-    // invalidate the view's own bounds all the way up the view hierarchy
-    public static void invalidateGlobalRegion(View view) {
-        invalidateGlobalRegion(
-            view,
-            new RectF(view.getLeft(), view.getTop(), view.getRight(), view.getBottom()));
-    }
-
-    // invalidate a rectangle relative to the view's coordinate system all the way up the view
-    // hierarchy
-    public static void invalidateGlobalRegion(View view, RectF childBounds) {
-        //childBounds.offset(view.getTranslationX(), view.getTranslationY());
-        if (DEBUG_INVALIDATE)
-            Log.v(TAG, "-------------");
-        while (view.getParent() != null && view.getParent() instanceof View) {
-            view = (View) view.getParent();
-            view.getMatrix().mapRect(childBounds);
-            view.invalidate((int) Math.floor(childBounds.left),
-                            (int) Math.floor(childBounds.top),
-                            (int) Math.ceil(childBounds.right),
-                            (int) Math.ceil(childBounds.bottom));
-            if (DEBUG_INVALIDATE) {
-                Log.v(TAG, "INVALIDATE(" + (int) Math.floor(childBounds.left)
-                        + "," + (int) Math.floor(childBounds.top)
-                        + "," + (int) Math.ceil(childBounds.right)
-                        + "," + (int) Math.ceil(childBounds.bottom));
-            }
-        }
-    }
-
     public void removeLongPressCallback() {
         if (mWatchLongPress != null) {
             mHandler.removeCallbacks(mWatchLongPress);
@@ -230,7 +220,7 @@ public class SwipeHelper implements Gefingerpoken {
                 mLongPressSent = false;
                 mCurrView = mCallback.getChildAtPosition(ev);
                 mVelocityTracker.clear();
-                if(mPressListener != null && mCurrView != null)
+                if (mPressListener != null && mCurrView != null)
                     mPressListener.onPress(true);
                 if (mCurrView != null) {
                     mCurrAnimView = mCallback.getChildContentView(mCurrView);
@@ -278,7 +268,7 @@ public class SwipeHelper implements Gefingerpoken {
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                if(mPressListener != null && mCurrView != null)
+                if (mPressListener != null && mCurrView != null)
                     mPressListener.onPress(false);
                 final boolean captured = (mDragging || mLongPressSent);
                 mDragging = false;
@@ -294,7 +284,7 @@ public class SwipeHelper implements Gefingerpoken {
     }
 
     /**
-     * @param view The view to be dismissed
+     * @param view     The view to be dismissed
      * @param velocity The desired pixels/second speed at which the view should move
      */
     public void dismissChild(final View view, float velocity) {
@@ -302,15 +292,15 @@ public class SwipeHelper implements Gefingerpoken {
     }
 
     /**
-     * @param view The view to be dismissed
-     * @param velocity The desired pixels/second speed at which the view should move
-     * @param endAction The action to perform at the end
-     * @param delay The delay after which we should start
+     * @param view                      The view to be dismissed
+     * @param velocity                  The desired pixels/second speed at which the view should move
+     * @param endAction                 The action to perform at the end
+     * @param delay                     The delay after which we should start
      * @param useAccelerateInterpolator Should an accelerating Interpolator be used
-     * @param fixedDuration If not 0, this exact duration will be taken
+     * @param fixedDuration             If not 0, this exact duration will be taken
      */
     public void dismissChild(final View view, float velocity, final Runnable endAction,
-            long delay, boolean useAccelerateInterpolator, long fixedDuration) {
+                             long delay, boolean useAccelerateInterpolator, long fixedDuration) {
         final View animView = mCallback.getChildContentView(view);
         final boolean canAnimViewBeDismissed = mCallback.canChildBeDismissed(view);
         float newPos;
@@ -328,13 +318,13 @@ public class SwipeHelper implements Gefingerpoken {
         }
         //Log.i("liweiping", "newPos  = " + newPos);
         int direction = SWIPE_TO_INVALIDATE;
-        if(mSwipeDirection == X){
-        	if(isLayoutRtl)
-        		direction = newPos > 0 ? SWIPE_TO_START :SWIPE_TO_END;
-        	else
-        		direction = newPos > 0 ? SWIPE_TO_END :SWIPE_TO_START;
-        }else if(mSwipeDirection == Y){
-        	direction = newPos > 0 ? SWIPE_TO_BOTTOM :SWIPE_TO_TOP;
+        if (mSwipeDirection == X) {
+            if (isLayoutRtl)
+                direction = newPos > 0 ? SWIPE_TO_START : SWIPE_TO_END;
+            else
+                direction = newPos > 0 ? SWIPE_TO_END : SWIPE_TO_START;
+        } else if (mSwipeDirection == Y) {
+            direction = newPos > 0 ? SWIPE_TO_BOTTOM : SWIPE_TO_TOP;
         }
         final int finalDriection = direction;
         long duration;
@@ -351,7 +341,7 @@ public class SwipeHelper implements Gefingerpoken {
         } else {
             duration = fixedDuration;
         }
- 
+
         animView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         ObjectAnimator anim = createTranslationAnimation(animView, newPos);
         if (useAccelerateInterpolator) {
@@ -440,7 +430,7 @@ public class SwipeHelper implements Gefingerpoken {
                         if (absDelta >= size) {
                             delta = delta > 0 ? maxScrollDistance : -maxScrollDistance;
                         } else {
-                            delta = maxScrollDistance * (float) Math.sin((delta/size)*(Math.PI/2));
+                            delta = maxScrollDistance * (float) Math.sin((delta / size) * (Math.PI / 2));
                         }
                     }
                     setTranslation(mCurrAnimView, delta);
@@ -523,13 +513,16 @@ public class SwipeHelper implements Gefingerpoken {
     public interface LongPressListener {
         /**
          * Equivalent to {@link View.OnLongClickListener#onLongClick(View)} with coordinates
+         *
          * @return whether the longpress was handled
          */
         boolean onLongPress(View v, int x, int y);
     }
+
     public interface PressListener {
         /**
          * Equivalent to {@link View.OnLongClickListener#onLongClick(View)} with coordinates
+         *
          * @return whether the longpress was handled
          */
         boolean onPress(boolean isDown);

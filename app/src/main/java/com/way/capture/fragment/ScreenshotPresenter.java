@@ -13,7 +13,7 @@ import rx.subscriptions.CompositeSubscription;
  * Created by android on 16-12-1.
  */
 
-public class ScreenshotPresenter extends ScreenshotContract.Presenter{
+public class ScreenshotPresenter extends ScreenshotContract.Presenter {
     @NonNull
     private final CompositeSubscription mSubscriptions;
     private final ScreenshotContract.Model mModel;
@@ -35,21 +35,21 @@ public class ScreenshotPresenter extends ScreenshotContract.Presenter{
                     }
                 })
                 .subscribe(new Observer<List<String>>() {
-            @Override
-            public void onCompleted() {
+                    @Override
+                    public void onCompleted() {
 
-            }
+                    }
 
-            @Override
-            public void onError(Throwable e) {
-                mView.onError(e);
-            }
+                    @Override
+                    public void onError(Throwable e) {
+                        mView.onError(e);
+                    }
 
-            @Override
-            public void onNext(List<String> data) {
-                mView.onLoadFinished(data);
-            }
-        });
+                    @Override
+                    public void onNext(List<String> data) {
+                        mView.onLoadFinished(data);
+                    }
+                });
         mSubscriptions.add(subscription);
     }
 

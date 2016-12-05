@@ -14,7 +14,6 @@ import com.way.capture.BuildConfig;
 import com.way.capture.R;
 import com.way.capture.module.screenrecord.ScreenRecordModule;
 import com.way.capture.module.screenshot.ScreenshotModule;
-import com.way.capture.screenrecord.ScreenRecordService;
 
 public class ModuleService extends Service {
     private static final String TAG = "ModuleService";
@@ -81,7 +80,7 @@ public class ModuleService extends Service {
         }
 
         mCurrentModulel = getModuleByAction(action);
-        mCurrentModulel.onStart(this, resultCode, data);
+        mCurrentModulel.onStart(getApplicationContext(), action, resultCode, data);
         return START_NOT_STICKY;
     }
 
@@ -89,6 +88,8 @@ public class ModuleService extends Service {
         BaseModule module;
         switch (action) {
             case Action.ACTION_SCREENSHOT:
+            case Action.ACTION_FREE_CROP:
+            case Action.ACTION_RECT_CROP:
                 module = new ScreenshotModule();
                 break;
             case Action.ACTION_RECORD:
@@ -104,7 +105,7 @@ public class ModuleService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(mCurrentModulel != null)
+        if (mCurrentModulel != null)
             mCurrentModulel.onDestroy();
         mCurrentModulel = null;
     }
@@ -112,6 +113,7 @@ public class ModuleService extends Service {
     public static final class Action {
         public static final String ACTION_SCREENSHOT = BuildConfig.APPLICATION_ID + ".SCREENSHOT";
         public static final String ACTION_RECORD = BuildConfig.APPLICATION_ID + ".RECORD";
-        public static final String ACTION_CROP = BuildConfig.APPLICATION_ID + ".CROP";
+        public static final String ACTION_FREE_CROP = BuildConfig.APPLICATION_ID + ".FREE_CROP";
+        public static final String ACTION_RECT_CROP = BuildConfig.APPLICATION_ID + ".RECT_CROP";
     }
 }

@@ -3,7 +3,6 @@ package com.way.capture.activity;
 import com.way.capture.base.BaseModel;
 import com.way.capture.base.BasePresenter;
 import com.way.capture.base.BaseView;
-import com.way.capture.utils.ffmpeg.FFmpegExecuteResponseHandler;
 import com.way.downloadlibrary.DownloadRequest;
 import com.way.downloadlibrary.net.exception.DataErrorEnum;
 

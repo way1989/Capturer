@@ -4,7 +4,6 @@ import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -25,11 +24,7 @@ import android.view.View;
 import com.way.capture.R;
 import com.way.capture.activity.MainActivity;
 import com.way.capture.module.ModuleService;
-import com.way.capture.screenrecord.ScreenRecordShortcutLaunchActivity;
 import com.way.capture.screenshot.TakeScreenshotActivity;
-import com.way.capture.screenshot.TakeScreenshotService;
-import com.way.capture.screenshot.crop.TakeCropScreenshotActivity;
-import com.way.capture.screenshot.crop.TakeCropScreenshotService;
 import com.way.capture.widget.FloatMenuDialog;
 
 
@@ -48,7 +43,6 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
     private boolean mIsRunning;
     private KeyguardManager mKeyguardManager;
     private SensorManager mSensorManager = null;
-    private Sensor mSensor;
     private FloatMenuDialog mFloatMenuDialog;
     private float mLastX;
     private float mLastY;
@@ -93,9 +87,9 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
         mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         mSensorManager = (SensorManager) this
                 .getSystemService(Context.SENSOR_SERVICE);
-        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        if (mSensor != null) {
-            mSensorManager.registerListener(this, mSensor,
+        Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        if (sensor != null) {
+            mSensorManager.registerListener(this, sensor,
                     SensorManager.SENSOR_DELAY_GAME);
         }
         //注册Home监听广播
@@ -158,58 +152,21 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
     public void onClick(final View v) {
         switch (v.getId()) {
             case R.id.menu_screnshot_center:
-                try {
-                    Intent i = new Intent(ShakeService.this, MainActivity.class);
-                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-                    startActivity(i);
-                } catch (Exception e) {
-                }
+                Intent i = new Intent(ShakeService.this, MainActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                startActivity(i);
                 break;
             case R.id.menu_normal_screenshot:
-                try {
-                    Intent screenRecordIntent = new Intent(ShakeService.this, TakeScreenshotActivity.class);
-                    screenRecordIntent.setAction(ModuleService.Action.ACTION_SCREENSHOT);
-                    screenRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-                    startActivity(screenRecordIntent);
-                } catch (ActivityNotFoundException e) {
-                }
+                TakeScreenshotActivity.startCaptureActivity(this, ModuleService.Action.ACTION_SCREENSHOT);
                 break;
             case R.id.menu_screenrecord:
-                try {
-                    Intent screenRecordIntent = new Intent(ShakeService.this, TakeScreenshotActivity.class);
-                    screenRecordIntent.setAction(ModuleService.Action.ACTION_RECORD);
-                    screenRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-                    startActivity(screenRecordIntent);
-                } catch (ActivityNotFoundException e) {
-                }
-
+                TakeScreenshotActivity.startCaptureActivity(this, ModuleService.Action.ACTION_RECORD);
                 break;
-           /* case R.id.menu_long_screenshot:
-                try {
-                    Intent screenRecordIntent = new Intent(ShakeService.this, TakeScreenshotActivity.class);
-                    screenRecordIntent.setAction(TakeScreenshotService.ACTION_LONG_SCREENSHOT);
-                    screenRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-                    startActivity(screenRecordIntent);
-                } catch (ActivityNotFoundException e) {
-                }
-                break;*/
             case R.id.menu_free_screenshot:
-                try {
-                    Intent screenRecordIntent = new Intent(ShakeService.this, TakeCropScreenshotActivity.class);
-                    screenRecordIntent.setAction(TakeCropScreenshotService.ACTION_FREE_SCREENSHOT);
-                    screenRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-                    startActivity(screenRecordIntent);
-                } catch (ActivityNotFoundException e) {
-                }
+                TakeScreenshotActivity.startCaptureActivity(this, ModuleService.Action.ACTION_FREE_CROP);
                 break;
             case R.id.menu_rect_screenshot:
-                try {
-                    Intent screenRecordIntent = new Intent(ShakeService.this, TakeCropScreenshotActivity.class);
-                    screenRecordIntent.setAction(TakeCropScreenshotService.ACTION_RECT_SCREENSHOT);
-                    screenRecordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-                    startActivity(screenRecordIntent);
-                } catch (ActivityNotFoundException e) {
-                }
+                TakeScreenshotActivity.startCaptureActivity(this, ModuleService.Action.ACTION_RECT_CROP);
                 break;
             default:
                 break;

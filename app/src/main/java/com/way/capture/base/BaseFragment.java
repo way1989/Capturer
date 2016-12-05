@@ -13,8 +13,6 @@ import android.widget.TextView;
 import com.trello.rxlifecycle.components.support.RxFragment;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
 
 import butterknife.ButterKnife;
 
@@ -97,7 +95,6 @@ public abstract class BaseFragment extends RxFragment {
     protected void initData() {
 
     }
-
 
 
     protected <T extends View> T findView(int viewId) {

@@ -40,8 +40,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-import static android.R.attr.data;
-
 /**
  * Created by way on 16/4/10.
  */

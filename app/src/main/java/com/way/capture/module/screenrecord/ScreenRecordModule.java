@@ -113,7 +113,7 @@ public class ScreenRecordModule implements BaseModule {
     }
 
     @Override
-    public void onStart(Context context, int resultCode, Intent data) {
+    public void onStart(Context context, String action, int resultCode, Intent data) {
         mContext = context;
         mContentResolver = mContext.getContentResolver();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);

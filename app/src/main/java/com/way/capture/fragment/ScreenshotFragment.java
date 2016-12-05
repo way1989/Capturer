@@ -4,8 +4,6 @@ import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -15,19 +13,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.afollestad.dragselectrecyclerview.DragSelectRecyclerView;
 import com.afollestad.dragselectrecyclerview.DragSelectRecyclerViewAdapter;
 import com.afollestad.materialcab.MaterialCab;
 import com.trello.rxlifecycle.android.FragmentEvent;
+import com.way.capture.App;
 import com.way.capture.R;
 import com.way.capture.activity.DetailsActivity;
 import com.way.capture.adapter.ScreenshotAdapter;
 import com.way.capture.base.BaseFragment;
 import com.way.capture.base.BaseScreenshotFragment;
 import com.way.capture.data.DataInfo;
-import com.way.capture.data.DataLoader;
+import com.way.capture.utils.AppUtils;
 import com.way.capture.utils.DensityUtil;
 import com.way.capture.utils.RxBus;
 import com.way.capture.utils.RxEvent;
@@ -42,11 +40,13 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
+import static android.R.attr.data;
+
 /**
  * Created by way on 16/4/10.
  */
 public class ScreenshotFragment extends BaseScreenshotFragment implements SwipeRefreshLayout.OnRefreshListener,
-       ScreenshotAdapter.OnItemClickListener,
+        ScreenshotAdapter.OnItemClickListener,
         DragSelectRecyclerViewAdapter.SelectionListener, MaterialCab.Callback, ScreenshotContract.View {
     public static final String ARGS_TYPE = "type";
     public static final String EXTRA_DATAS = "extra_datas";
@@ -64,6 +64,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements SwipeR
     private MaterialCab mCab;
     private boolean mIsDetailsActivityStarted;
     private int mType;
+    private ScreenshotPresenter mPresenter;
 
     public static BaseFragment newInstance(int type) {
         Bundle args = new Bundle();
@@ -183,7 +184,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements SwipeR
                     public void call(RxEvent.NewPathEvent newPathEvent) {
                         final int type = newPathEvent.type;
                         final String path = newPathEvent.path;
-                        if(type == mType){
+                        if (type == mType) {
                             mAdapter.addData(path);
                         }
                     }
@@ -191,7 +192,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements SwipeR
         mPresenter = new ScreenshotPresenter(this);
         mPresenter.getData(mType);
     }
-    private ScreenshotPresenter mPresenter;
+
     @Override
     public void onRefresh() {
         mSwipeRefresh.setEnabled(false);
@@ -228,7 +229,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements SwipeR
             mSwipeRefresh.setEnabled(false);
             if (mCab == null) {
                 mCab = new MaterialCab((AppCompatActivity) getActivity(), R.id.cab_stub)
-                        .setMenu(R.menu.menu_info)
+                        .setMenu(R.menu.menu_screenshot_item)
                         .setCloseDrawableRes(R.drawable.ic_clear_white_24dp)
                         .start(this);
             }
@@ -248,19 +249,26 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements SwipeR
 
     @Override
     public boolean onCabItemClicked(MenuItem item) {
-        if (item.getItemId() == R.id.done) {
-            StringBuilder sb = new StringBuilder();
-            int traverse = 0;
-            for (Integer index : mAdapter.getSelectedIndices()) {
-                if (traverse > 0) sb.append(", ");
-                sb.append(mAdapter.getItem(index));
-                traverse++;
-            }
-            Toast.makeText(getContext(),
-                    String.format("Selected letters (%d): %s", mAdapter.getSelectedCount(), sb.toString()),
-                    Toast.LENGTH_LONG).show();
+        Integer[] selections = mAdapter.getSelectedIndices();
+        if (selections.length < 1) {
             mAdapter.clearSelected();
+            return true;
         }
+        switch (item.getItemId()) {
+            case R.id.image_delete:
+                for (int index : selections) {
+                    mAdapter.removeItem(index);
+                }
+                break;
+            case R.id.image_share:
+                String[] paths = new String[selections.length];
+                for (int i = 0; i < selections.length; i++) {
+                    paths[i] = mAdapter.getItem(i);
+                }
+                AppUtils.shareMultipleScreenshot(App.getContext(), paths, mType);
+                break;
+        }
+        mAdapter.clearSelected();
         return true;
     }
 

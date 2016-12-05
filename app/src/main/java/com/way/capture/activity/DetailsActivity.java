@@ -234,6 +234,9 @@ public class DetailsActivity extends BaseActivity {
             case android.R.id.home:
                 finishAfterTransition();
                 break;
+            /*case R.id.image_delete:
+
+                break;*/
             case R.id.image_info:
                 AppUtils.showDetails(this, path, mType);
                 break;

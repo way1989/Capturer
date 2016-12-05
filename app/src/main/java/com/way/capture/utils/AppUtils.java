@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
+import android.graphics.Path;
 import android.graphics.Point;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
@@ -21,6 +22,7 @@ import com.way.capture.data.DataInfo;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.Locale;
@@ -249,6 +251,34 @@ public class AppUtils {
     public static void shareScreenshot(Context context, String path, int type) {
         Intent sharingIntent = new Intent(Intent.ACTION_SEND);
         sharingIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(path)));
+        String subjectDate = DateFormat.getDateTimeInstance().format(new Date(System.currentTimeMillis()));
+        switch (type) {
+            case DataInfo.TYPE_SCREEN_SHOT:
+                sharingIntent.setType("image/png");
+                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate));
+                break;
+            case DataInfo.TYPE_SCREEN_GIF:
+                sharingIntent.setType("image/gif");
+                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, String.format(GIF_SHARE_SUBJECT_TEMPLATE, subjectDate));
+                break;
+            case DataInfo.TYPE_SCREEN_RECORD:
+                sharingIntent.setType("video/mp4");
+                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, String.format(SCREEN_RECORD_SHARE_SUBJECT_TEMPLATE, subjectDate));
+                break;
+        }
+        Intent chooserIntent = Intent.createChooser(sharingIntent, null);
+        chooserIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(chooserIntent);
+    }
+
+    public static void shareMultipleScreenshot(Context context, String[] path, int type) {
+        Intent sharingIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+        ArrayList<Uri> imageUris = new ArrayList<Uri>();
+        for (String p : path) {
+            imageUris.add(Uri.fromFile(new File(p)));
+        }
+        sharingIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
+        //sharingIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(path)));
         String subjectDate = DateFormat.getDateTimeInstance().format(new Date(System.currentTimeMillis()));
         switch (type) {
             case DataInfo.TYPE_SCREEN_SHOT:

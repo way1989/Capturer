@@ -1,11 +1,9 @@
-package com.way.capture.screenshot;
+package com.way.capture.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.util.Log;
-
-import com.way.capture.utils.DensityUtil;
 
 
 /**

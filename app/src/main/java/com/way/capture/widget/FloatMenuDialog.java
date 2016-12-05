@@ -17,7 +17,7 @@ import android.view.animation.OvershootInterpolator;
 
 import com.ogaclejapan.arclayout.ArcLayout;
 import com.way.capture.R;
-import com.way.capture.screenrecord.CheatSheet;
+import com.way.capture.core.screenrecord.CheatSheet;
 import com.way.capture.utils.AnimatorUtils;
 import com.way.capture.utils.ViewUtils;
 

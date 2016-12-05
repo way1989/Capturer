@@ -1,4 +1,4 @@
-package com.way.capture.module.screenshot;
+package com.way.capture.core.screenshot;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -24,7 +24,7 @@ import com.way.capture.App;
 import com.way.capture.R;
 import com.way.capture.data.DataInfo;
 import com.way.capture.fragment.SettingsFragment;
-import com.way.capture.screenshot.LongScreenshotUtil;
+import com.way.capture.utils.LongScreenshotUtil;
 import com.way.capture.utils.RxBus;
 import com.way.capture.utils.RxEvent;
 
@@ -154,7 +154,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
 
     @Override
     public void setBitmap(Bitmap bitmap) {
-        if(mScreenBitmap != null && !mScreenBitmap.isRecycled())
+        if (mScreenBitmap != null && !mScreenBitmap.isRecycled())
             mScreenBitmap.recycle();
         mScreenBitmap = bitmap;
     }

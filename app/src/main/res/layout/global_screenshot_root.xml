@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
 
-    <include layout="@layout/global_screenshot" />
+    <include layout="@layout/global_screenshot"/>
 
     <LinearLayout
         android:id="@+id/btn_view"
@@ -31,7 +31,7 @@
                 android:background="@drawable/btn_default_material"
                 android:maxLines="2"
                 android:text="@string/edit"
-                android:visibility="gone" />
+                android:visibility="gone"/>
         </FrameLayout>
 
         <FrameLayout
@@ -48,7 +48,7 @@
                 android:background="@drawable/btn_default_material"
                 android:maxLines="2"
                 android:text="@string/long_screenshot"
-                android:visibility="gone" />
+                android:visibility="gone"/>
         </FrameLayout>
 
         <FrameLayout
@@ -65,7 +65,7 @@
                 android:background="@drawable/btn_default_material"
                 android:maxLines="2"
                 android:text="@string/share"
-                android:visibility="gone" />
+                android:visibility="gone"/>
         </FrameLayout>
     </LinearLayout>
 
@@ -83,6 +83,6 @@
             android:layout_gravity="center"
             android:background="@null"
             android:indeterminate="true"
-            android:indeterminateOnly="true" />
+            android:indeterminateOnly="true"/>
     </FrameLayout>
 </FrameLayout>

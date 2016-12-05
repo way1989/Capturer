@@ -15,10 +15,10 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="false"
-          android:alpha="@dimen/disabled_alpha_material_dark"
-          android:color="@android:color/transparent"/>
-    <item android:state_pressed="true"
-        android:color="@color/button_material_dark"/>
+    <item android:alpha="@dimen/disabled_alpha_material_dark"
+          android:color="@android:color/transparent"
+          android:state_enabled="false"/>
+    <item android:color="@color/button_material_dark"
+          android:state_pressed="true"/>
     <item android:color="@android:color/transparent"/>
 </selector>

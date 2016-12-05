@@ -1,4 +1,4 @@
-package com.way.capture.module;
+package com.way.capture.core;
 
 import android.content.Context;
 import android.content.Intent;

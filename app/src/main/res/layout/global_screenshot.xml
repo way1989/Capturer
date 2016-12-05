@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.way.capture.widget.swipe.SwipeVerticalLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/swipe_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+                                                  android:id="@+id/swipe_layout"
+                                                  android:layout_width="match_parent"
+                                                  android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/global_screenshot_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@android:color/black"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/swipe_to_delete"
@@ -25,7 +25,7 @@
         android:text="@string/delete"
         android:textAllCaps="true"
         android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        android:textSize="16sp"/>
 
     <TextView
         android:id="@+id/swipe_to_save"
@@ -41,7 +41,7 @@
         android:text='@string/save'
         android:textAllCaps="true"
         android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        android:textSize="16sp"/>
 
     <ImageView
         android:id="@+id/global_screenshot"
@@ -50,13 +50,13 @@
         android:layout_gravity="center"
         android:adjustViewBounds="true"
         android:background="@drawable/screenshot_panel"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
     <ImageView
         android:id="@+id/global_screenshot_flash"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@android:color/white"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
 </com.way.capture.widget.swipe.SwipeVerticalLayout>

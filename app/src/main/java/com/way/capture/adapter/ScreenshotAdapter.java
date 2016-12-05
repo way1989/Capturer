@@ -11,7 +11,6 @@ import android.widget.ImageView;
 import com.afollestad.dragselectrecyclerview.DragSelectRecyclerViewAdapter;
 import com.way.capture.R;
 import com.way.capture.data.DataInfo;
-import com.way.capture.data.DataProvider;
 import com.way.capture.utils.glide.GlideHelper;
 
 import java.util.ArrayList;
@@ -22,7 +21,7 @@ import java.util.List;
  */
 public class ScreenshotAdapter extends DragSelectRecyclerViewAdapter<ScreenshotAdapter.ViewHolder> {
     private LayoutInflater mInflater;
-    private DataProvider mDataProvider = new DataProvider();
+    private ArrayList<String> mData = new ArrayList<>();
     private int mType;
     private OnItemClickListener mListener;
 
@@ -34,17 +33,17 @@ public class ScreenshotAdapter extends DragSelectRecyclerViewAdapter<ScreenshotA
     }
 
     public void removeItem(int pos) {
-        mDataProvider.removeItem(pos);
+        mData.remove(pos);
         notifyItemChanged(pos);
     }
 
     public void clearData() {
-        mDataProvider.clear();
+        mData.clear();
         notifyDataSetChanged();
     }
 
     public String getItem(int pos) {
-        return mDataProvider.getItem(pos);
+        return mData.get(pos);
     }
 
     @Override
@@ -56,7 +55,7 @@ public class ScreenshotAdapter extends DragSelectRecyclerViewAdapter<ScreenshotA
     @Override
     public void onBindViewHolder(ScreenshotAdapter.ViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
-        String info = mDataProvider.getItem(position);
+        String info = mData.get(position);
         GlideHelper.loadResourceBitmapCenterCrop(info, holder.image);
         boolean isSelected = isIndexSelected(position);
         holder.image.animate().scaleX(isSelected ? 0.8f : 1.0f).scaleY(isSelected ? 0.8f : 1.0f);
@@ -75,6 +74,8 @@ public class ScreenshotAdapter extends DragSelectRecyclerViewAdapter<ScreenshotA
                 holder.videoIndicator.setVisibility(View.VISIBLE);
                 holder.videoIndicator.setImageResource(R.drawable.ic_gallery_play);
                 break;
+            default:
+                break;
         }
 
         // 把每个图片视图设置不同的Transition名称, 防止在一个视图内有多个相同的名称, 在变换的时候造成混乱
@@ -90,25 +91,32 @@ public class ScreenshotAdapter extends DragSelectRecyclerViewAdapter<ScreenshotA
 
     @Override
     public int getItemCount() {
-        return mDataProvider.getCount();
+        return mData.size();
     }
 
     @Override
     public long getItemId(int position) {
-        return mDataProvider.getItem(position).hashCode();
+        return mData.get(position).hashCode();
     }
 
     public ArrayList<String> getData() {
-        return mDataProvider.getData();
+        return mData;
     }
 
     public void setData(List<String> data) {
-        mDataProvider.setData(data);
+        if (data == null || data.isEmpty())
+            return;
+        mData.clear();
+        mData.addAll(data);
         notifyDataSetChanged();
     }
 
     public void addData(String path) {
-        mDataProvider.addData(path);
+        //mData.addData(path);
+        final List<String> tmps = new ArrayList<>(mData);
+        mData.clear();
+        mData.add(path);
+        mData.addAll(tmps);
         notifyDataSetChanged();
     }
 

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main_view"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/main_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
 
     <RelativeLayout
         android:id="@+id/record_overlay_buttons"
@@ -34,7 +34,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="2.0dip"
-                    android:src="@drawable/icon_float_record_cancel" />
+                    android:src="@drawable/icon_float_record_cancel"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -42,13 +42,13 @@
                     android:gravity="center"
                     android:text="@string/float_record_cancel"
                     android:textColor="@color/white"
-                    android:textSize="12.0sp" />
+                    android:textSize="12.0sp"/>
             </LinearLayout>
 
             <View
                 android:layout_width="0.0dip"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.0" />
+                android:layout_weight="1.0"/>
 
             <LinearLayout
                 android:id="@+id/record_change_quality"
@@ -65,7 +65,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="2.0dip"
-                    android:src="@drawable/icon_float_change_quality" />
+                    android:src="@drawable/icon_float_change_quality"/>
 
                 <TextView
                     android:id="@+id/show_record_quality"
@@ -74,7 +74,7 @@
                     android:gravity="center"
                     android:text="@string/float_record_normal_quality"
                     android:textColor="@color/white"
-                    android:textSize="12.0sp" />
+                    android:textSize="12.0sp"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -90,7 +90,7 @@
                 android:layout_width="52.0dip"
                 android:layout_height="52.0dip"
                 android:background="@drawable/bg_float_record_start"
-                android:contentDescription="@string/float_record_start_content" />
+                android:contentDescription="@string/float_record_start_content"/>
 
             <TextView
                 android:layout_width="fill_parent"
@@ -100,7 +100,7 @@
                 android:shadowRadius="2"
                 android:text="@string/float_record_start"
                 android:textColor="@color/white"
-                android:textSize="12.0sp" />
+                android:textSize="12.0sp"/>
         </LinearLayout>
     </RelativeLayout>
 
@@ -119,12 +119,12 @@
             android:layout_height="32dip"
             android:layout_gravity="center"
             android:gravity="center"
-            app:text_color="#ffffff" />
+            app:text_color="#ffffff"/>
     </FrameLayout>
 
     <include
         layout="@layout/float_view_record"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"/>
 </RelativeLayout>

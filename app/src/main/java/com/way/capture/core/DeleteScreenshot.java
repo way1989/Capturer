@@ -1,4 +1,4 @@
-package com.way.capture.screenshot;
+package com.way.capture.core;
 
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.way.capture.R;
+
+import static com.way.capture.core.screenshot.ScreenshotModule.SCREENSHOT_NOTIFICATION_ID;
 
 
 public class DeleteScreenshot extends BroadcastReceiver {
@@ -32,7 +34,7 @@ public class DeleteScreenshot extends BroadcastReceiver {
         // Dismiss the notification that brought us here.
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(GlobalScreenshot.SCREENSHOT_NOTIFICATION_ID);
+        notificationManager.cancel(SCREENSHOT_NOTIFICATION_ID);
 
         Toast.makeText(context, R.string.screenshot_delete_confirmation, Toast.LENGTH_SHORT).show();
     }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
 
     <TextView
         style="@style/PromoScreenTextStyle.CenterAligned"
@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:layout_marginTop="16dp"
-        android:text="@string/required_permissions_promo" />
+        android:text="@string/required_permissions_promo"/>
 
     <TextView
         android:id="@+id/enable_permission_procedure"
@@ -20,7 +20,7 @@
         android:layout_marginBottom="16dp"
         android:contentDescription="@string/enable_permission_procedure_description"
         android:text="@string/enable_permission_procedure"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
     <!-- Buttons -->
     <LinearLayout
@@ -34,7 +34,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="@string/exit" />
+            android:text="@string/exit"/>
 
         <TextView
             android:id="@+id/next"
@@ -43,7 +43,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:contentDescription="@string/next"
-            android:text="@string/next_with_arrow" />
+            android:text="@string/next_with_arrow"/>
 
         <TextView
             android:id="@+id/settings"
@@ -53,6 +53,6 @@
             android:layout_weight="1"
             android:contentDescription="@string/settings"
             android:text="@string/settings_with_arrow"
-            android:visibility="gone" />
+            android:visibility="gone"/>
     </LinearLayout>
 </LinearLayout>

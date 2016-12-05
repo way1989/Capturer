@@ -1,4 +1,4 @@
-package com.way.capture.module;
+package com.way.capture.service;
 
 import android.app.Service;
 import android.content.Context;
@@ -12,8 +12,9 @@ import android.widget.Toast;
 
 import com.way.capture.BuildConfig;
 import com.way.capture.R;
-import com.way.capture.module.screenrecord.ScreenRecordModule;
-import com.way.capture.module.screenshot.ScreenshotModule;
+import com.way.capture.core.BaseModule;
+import com.way.capture.core.screenrecord.ScreenRecordModule;
+import com.way.capture.core.screenshot.ScreenshotModule;
 
 public class ModuleService extends Service {
     private static final String TAG = "ModuleService";

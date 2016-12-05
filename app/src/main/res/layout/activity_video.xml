@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.way.capture.activity.VideoActivity">
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             tools:context="com.way.capture.activity.VideoActivity">
 
     <com.way.capture.widget.FastVideoView
         android:id="@+id/video_view"
@@ -12,12 +12,12 @@
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:gravity="center"
-        android:transitionName="@string/image_transition" />
+        android:transitionName="@string/image_transition"/>
 
     <FrameLayout
         android:id="@+id/trim_view_root"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"/>
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
@@ -25,6 +25,6 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@drawable/actionbar_linear_bg"
         android:theme="@style/AppTheme.AppBarOverlay"
-        app:popupTheme="@style/AppTheme.DayNight" />
+        app:popupTheme="@style/AppTheme.DayNight"/>
 
 </FrameLayout>

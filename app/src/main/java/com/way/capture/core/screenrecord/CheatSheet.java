@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.way.capture.screenrecord;
+package com.way.capture.core.screenrecord;
 
 import android.content.Context;
 import android.graphics.Rect;

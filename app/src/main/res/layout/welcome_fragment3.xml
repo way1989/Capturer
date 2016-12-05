@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/welcome_fragment"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_weight="6"
-    android:background="#00bcd4"
-    android:clipChildren="false"
-    android:orientation="vertical"
-    android:paddingTop="48dp">
+              android:id="@+id/welcome_fragment"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_weight="6"
+              android:background="#00bcd4"
+              android:clipChildren="false"
+              android:orientation="vertical"
+              android:paddingTop="48dp">
 
     <FrameLayout
         android:id="@+id/images"
@@ -25,7 +25,7 @@
             android:paddingEnd="16dp"
             android:paddingStart="16dp"
             android:scaleType="centerInside"
-            android:src="@drawable/welcome_03" />
+            android:src="@drawable/welcome_03"/>
 
     </FrameLayout>
 
@@ -39,7 +39,7 @@
         android:paddingEnd="24dp"
         android:paddingStart="24dp"
         android:text="@string/welcome_head_3"
-        android:textAppearance="@style/WelcomeHeadingAppearance" />
+        android:textAppearance="@style/WelcomeHeadingAppearance"/>
 
     <TextView
         android:id="@+id/content"
@@ -51,11 +51,11 @@
         android:paddingEnd="24dp"
         android:paddingStart="24dp"
         android:text="@string/welcome_content_3"
-        android:textAppearance="@style/WelcomeContentAppearance" />
+        android:textAppearance="@style/WelcomeContentAppearance"/>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:background="@android:color/transparent" />
+        android:background="@android:color/transparent"/>
 
 </LinearLayout>

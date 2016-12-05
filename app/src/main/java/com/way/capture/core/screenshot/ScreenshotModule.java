@@ -1,4 +1,4 @@
-package com.way.capture.module.screenshot;
+package com.way.capture.core.screenshot;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -42,10 +42,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.way.capture.R;
+import com.way.capture.core.BaseModule;
 import com.way.capture.fragment.SettingsFragment;
-import com.way.capture.module.BaseModule;
-import com.way.capture.module.ModuleService;
+import com.way.capture.service.ModuleService;
 import com.way.capture.utils.DensityUtil;
+import com.way.capture.utils.ScrollUtils;
 import com.way.capture.widget.freecrop.FreeCropView;
 import com.way.capture.widget.rectcrop.CropImageView;
 import com.way.capture.widget.swipe.SwipeHelper;
@@ -59,11 +60,11 @@ import java.util.Date;
  */
 public class ScreenshotModule implements BaseModule, ScreenshotContract.View, SwipeVerticalLayout.Callback,
         SwipeHelper.PressListener, View.OnClickListener {
+    public static final int SCREENSHOT_NOTIFICATION_ID = 789;
     //save style
     static final int STYLE_SAVE_ONLY = 0;
     static final int STYLE_SAVE_TO_SHARE = 1;
     static final int STYLE_SAVE_TO_EDIT = 2;
-    private static final int SCREENSHOT_NOTIFICATION_ID = 789;
     private static final String TAG = "TakeScreenshotService";
     private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
     private static final long PREVIEW_OUT_TIME = 3000L;// 超时自动保存

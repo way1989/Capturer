@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="288dp"
-    android:layout_height="288dp">
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+             android:layout_width="288dp"
+             android:layout_height="288dp">
 
     <com.ogaclejapan.arclayout.ArcLayout
         android:id="@+id/arc_layout"
@@ -17,35 +17,35 @@
             style="@style/Item_Tumblr"
             android:background="@drawable/tumblr_orange_oval"
             android:contentDescription="@string/normal_screen_shot"
-            android:src="@drawable/ic_screenshot_normal" />
+            android:src="@drawable/ic_screenshot_normal"/>
 
         <ImageView
             android:id="@+id/menu_screenrecord"
             style="@style/Item_Tumblr"
             android:background="@drawable/tumblr_green_oval"
             android:contentDescription="@string/record_screenshot"
-            android:src="@drawable/ic_screenshot_movie" />
+            android:src="@drawable/ic_screenshot_movie"/>
 
-<!--        <ImageView
-            android:id="@+id/menu_long_screenshot"
-            style="@style/Item_Tumblr"
-            android:background="@drawable/tumblr_grey_oval"
-            android:contentDescription="@string/long_screenshot"
-            android:src="@drawable/ic_screenshot_long" />-->
+        <!--        <ImageView
+                    android:id="@+id/menu_long_screenshot"
+                    style="@style/Item_Tumblr"
+                    android:background="@drawable/tumblr_grey_oval"
+                    android:contentDescription="@string/long_screenshot"
+                    android:src="@drawable/ic_screenshot_long" />-->
 
         <ImageView
             android:id="@+id/menu_free_screenshot"
             style="@style/Item_Tumblr"
             android:background="@drawable/tumblr_blue_oval"
             android:contentDescription="@string/free_screenshot"
-            android:src="@drawable/ic_screenshot_free" />
+            android:src="@drawable/ic_screenshot_free"/>
 
         <ImageView
             android:id="@+id/menu_rect_screenshot"
             style="@style/Item_Tumblr"
             android:background="@drawable/tumblr_teal_oval"
             android:contentDescription="@string/rect_screenshot"
-            android:src="@drawable/ic_screenshot_rect" />
+            android:src="@drawable/ic_screenshot_rect"/>
     </com.ogaclejapan.arclayout.ArcLayout>
 
     <ImageView
@@ -54,6 +54,6 @@
         android:layout_gravity="center"
         android:background="@drawable/tumblr_red_oval"
         android:contentDescription="@string/home"
-        android:src="@drawable/ic_screenshot_home" />
+        android:src="@drawable/ic_screenshot_home"/>
 
 </FrameLayout>

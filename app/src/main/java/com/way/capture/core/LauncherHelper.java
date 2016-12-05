@@ -1,4 +1,4 @@
-package com.way.capture.screenshot;
+package com.way.capture.core;
 
 import android.app.Activity;
 import android.content.Context;
@@ -6,13 +6,13 @@ import android.content.Intent;
 import android.media.projection.MediaProjectionManager;
 import android.util.Log;
 
-import com.way.capture.module.ModuleService;
+import com.way.capture.service.ModuleService;
 
-final class ScreenshotHelper {
-    private static final String TAG = "ScreenshotHelper";
+final class LauncherHelper {
+    private static final String TAG = "LauncherHelper";
     private static final int CREATE_SCREENSHOT = 100;
 
-    private ScreenshotHelper() {
+    private LauncherHelper() {
         throw new AssertionError("No instances.");
     }
 

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.way.capture">
+          package="com.way.capture">
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
-    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
     <!-- 开机启动权限 -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
 
     <application
         android:name=".App"
@@ -23,102 +23,76 @@
             android:label="@string/app_name"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.DayNight.NoActionBar" />
+            android:theme="@style/AppTheme.DayNight.NoActionBar"/>
         <activity
             android:name=".activity.PermissionCheckActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/permission_title"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"/>
 
         <service
-            android:name=".screenrecord.ScreenRecordService"
-            android:exported="false" />
+            android:name=".core.screenrecord.ScreenRecordService"
+            android:exported="false"/>
 
         <activity
-            android:name=".screenrecord.ScreenRecordShortcutConfigureActivity"
-            android:excludeFromRecents="true"
-            android:taskAffinity=""
-            android:theme="@style/Theme.Telecine.Transparent">
-            <intent-filter>
-                <action android:name="android.intent.action.CREATE_SHORTCUT" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".screenrecord.ScreenRecordShortcutLaunchActivity"
+            android:name=".core.LauncherActivity"
             android:excludeFromRecents="true"
             android:exported="true"
             android:taskAffinity=""
-            android:theme="@style/Theme.Telecine.Transparent" />
-        <activity
-            android:name=".screenshot.TakeScreenshotActivity"
-            android:excludeFromRecents="true"
-            android:exported="true"
-            android:taskAffinity=""
-            android:theme="@style/Theme.Telecine.Transparent" />
-
-        <service android:name=".screenshot.TakeScreenshotService" />
+            android:theme="@style/Theme.Telecine.Transparent"/>
 
         <receiver
-            android:name=".screenshot.DeleteScreenshot"
-            android:exported="false" />
+            android:name=".core.DeleteScreenshot"
+            android:exported="false"/>
         <receiver
-            android:name=".screenrecord.RecordingSession$DeleteRecordingBroadcastReceiver"
-            android:exported="false" />
+            android:name=".core.screenrecord.RecordingSession$DeleteRecordingBroadcastReceiver"
+            android:exported="false"/>
 
         <service
             android:name=".service.ShakeService"
-            android:exported="false" />
+            android:exported="false"/>
         <service
             android:name=".service.ShakeService$GrayInnerService"
-            android:exported="false" />
+            android:exported="false"/>
 
         <activity
             android:name=".activity.SettingsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/action_settings"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"/>
 
         <receiver
             android:name=".BootReceiver"
             android:label="@string/app_name">
             <intent-filter android:priority="1000">
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
-
-        <activity
-            android:name=".screenshot.crop.TakeCropScreenshotActivity"
-            android:excludeFromRecents="true"
-            android:exported="true"
-            android:taskAffinity=""
-            android:theme="@style/Theme.Telecine.Transparent" />
-
-        <service android:name=".screenshot.crop.TakeCropScreenshotService" />
 
         <activity
             android:name=".activity.FeedbackActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/feedback"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".activity.DetailsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="sensor"
             android:label=""
-            android:theme="@style/AppTheme.DayNight.NoActionBar" />
+            android:screenOrientation="sensor"
+            android:theme="@style/AppTheme.DayNight.NoActionBar"/>
         <activity
             android:name=".activity.VideoActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
-            android:theme="@style/SplashTheme.NoActionBar" />
+            android:theme="@style/SplashTheme.NoActionBar"/>
         <activity
             android:name=".activity.SplashActivity"
             android:screenOrientation="portrait"
             android:theme="@style/SplashTheme.NoActionBar.Splash">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
@@ -126,17 +100,17 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.DayNight.NoActionBar" />
+            android:theme="@style/AppTheme.DayNight.NoActionBar"/>
         <activity
             android:name="com.thefinestartist.finestwebview.FinestWebViewActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.DayNight.NoActionBar" />
+            android:theme="@style/AppTheme.DayNight.NoActionBar"/>
 
         <service
-            android:name=".module.ModuleService"
+            android:name=".service.ModuleService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true"/>
     </application>
 
 </manifest>

@@ -16,9 +16,9 @@ import android.preference.SwitchPreference;
 
 import com.thefinestartist.finestwebview.FinestWebView;
 import com.way.capture.R;
-import com.way.capture.screenshot.ShellCmdUtils;
 import com.way.capture.service.ShakeService;
 import com.way.capture.utils.AppUtils;
+import com.way.capture.utils.ShellCmdUtils;
 //import com.way.firupgrade.FIRUtils;
 
 /**

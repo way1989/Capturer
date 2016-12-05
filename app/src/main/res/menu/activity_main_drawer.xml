@@ -5,15 +5,15 @@
         <item
             android:id="@+id/nav_screenshot"
             android:icon="@drawable/ic_menu_camera"
-            android:title="@string/screen_shot_title" />
+            android:title="@string/screen_shot_title"/>
         <item
             android:id="@+id/nav_gifs"
             android:icon="@drawable/ic_menu_gallery"
-            android:title="@string/gif_title" />
+            android:title="@string/gif_title"/>
         <item
             android:id="@+id/nav_videos"
             android:icon="@drawable/ic_menu_slideshow"
-            android:title="@string/video_title" />
+            android:title="@string/video_title"/>
 
     </group>
 
@@ -22,23 +22,23 @@
             <item
                 android:id="@+id/nav_night_mode"
                 android:icon="@drawable/ic_mode_day"
-                android:title="@string/nav_night_mode" />
+                android:title="@string/nav_night_mode"/>
             <item
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_share"
-                android:title="@string/share" />
+                android:title="@string/share"/>
             <item
                 android:id="@+id/nav_feedback"
                 android:icon="@drawable/ic_menu_send"
-                android:title="@string/feedback" />
+                android:title="@string/feedback"/>
             <item
                 android:id="@+id/nav_help"
                 android:icon="@drawable/ic_help"
-                android:title="@string/help" />
+                android:title="@string/help"/>
             <item
                 android:id="@+id/nav_settings"
                 android:icon="@drawable/ic_menu_settings"
-                android:title="@string/action_settings" />
+                android:title="@string/action_settings"/>
         </menu>
     </item>
 

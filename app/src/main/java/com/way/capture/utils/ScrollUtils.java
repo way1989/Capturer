@@ -1,4 +1,4 @@
-package com.way.capture.module.screenshot;
+package com.way.capture.utils;
 
 import android.util.Log;
 

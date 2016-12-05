@@ -1,4 +1,4 @@
-package com.way.capture.screenrecord;
+package com.way.capture.core.screenrecord;
 
 import android.app.Notification;
 import android.app.NotificationManager;

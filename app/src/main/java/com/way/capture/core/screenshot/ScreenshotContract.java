@@ -1,4 +1,4 @@
-package com.way.capture.module.screenshot;
+package com.way.capture.core.screenshot;
 
 import android.app.Notification;
 import android.graphics.Bitmap;

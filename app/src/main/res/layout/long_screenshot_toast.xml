@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/toast_dialog_bg_container"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/colorPrimary"
-    android:gravity="center"
-    android:maxHeight="88dp"
-    android:orientation="vertical"
-    android:paddingTop="24dp"
-    android:translationZ="8dp">
+              android:id="@+id/toast_dialog_bg_container"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@color/colorPrimary"
+              android:gravity="center"
+              android:maxHeight="88dp"
+              android:orientation="vertical"
+              android:paddingTop="24dp"
+              android:translationZ="8dp">
 
     <TextView
         android:id="@+id/long_screenshot_title"
@@ -17,12 +17,12 @@
         android:ellipsize="end"
         android:fontFamily="sans-serif-thin"
         android:gravity="center|top"
+        android:maxLines="1"
         android:paddingEnd="8dp"
         android:paddingStart="8dp"
-        android:maxLines="1"
         android:text="@string/scroll_screenshot_toast_title"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="?android:attr/textColorPrimary" />
+        android:textColor="?android:attr/textColorPrimary"/>
 
     <TextView
         android:id="@+id/long_screenshot_text"
@@ -35,5 +35,5 @@
         android:paddingEnd="8dp"
         android:paddingStart="8dp"
         android:text="@string/scroll_screenshot_toast_text"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:textAppearance="?android:attr/textAppearanceSmall"/>
 </LinearLayout>

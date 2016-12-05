@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.way.capture.activity.SplashActivity">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:context="com.way.capture.activity.SplashActivity">
 
     <ImageView
         android:id="@+id/image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"/>
 
     <View
         android:id="@+id/foreMask"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/black" />
+        android:background="@android:color/black"/>
 
     <ImageView
         android:id="@+id/logo"
@@ -23,7 +23,7 @@
         android:layout_height="64dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="88dp"
-        android:src="@mipmap/ic_launcher" />
+        android:src="@mipmap/ic_launcher"/>
 
     <TextView
         android:id="@+id/logo_title"
@@ -38,7 +38,7 @@
         android:text="@string/logo_title"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        android:textSize="16sp"/>
 
     <TextView
         android:id="@+id/title"
@@ -52,5 +52,5 @@
         android:maxLines="1"
         android:text="@string/all_rights_reserved"
         android:textColor="#b3ffffff"
-        android:textSize="10sp" />
+        android:textSize="10sp"/>
 </RelativeLayout>

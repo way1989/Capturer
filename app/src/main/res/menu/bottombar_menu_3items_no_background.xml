@@ -10,13 +10,13 @@
     <item
         android:id="@+id/bbn_item1"
         android:icon="@drawable/ic_photo_white_24dp"
-        android:title="@string/screen_shot_title" />
+        android:title="@string/screen_shot_title"/>
     <item
         android:id="@+id/bbn_item2"
         android:icon="@drawable/gif"
-        android:title="@string/gif_title" />
+        android:title="@string/gif_title"/>
     <item
         android:id="@+id/bbn_item3"
         android:icon="@drawable/ic_video_library_white_24dp"
-        android:title="@string/video_title" />
+        android:title="@string/video_title"/>
 </menu>

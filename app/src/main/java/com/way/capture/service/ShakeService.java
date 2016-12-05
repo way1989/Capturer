@@ -23,8 +23,7 @@ import android.view.View;
 
 import com.way.capture.R;
 import com.way.capture.activity.MainActivity;
-import com.way.capture.module.ModuleService;
-import com.way.capture.screenshot.TakeScreenshotActivity;
+import com.way.capture.core.LauncherActivity;
 import com.way.capture.widget.FloatMenuDialog;
 
 
@@ -157,16 +156,16 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
                 startActivity(i);
                 break;
             case R.id.menu_normal_screenshot:
-                TakeScreenshotActivity.startCaptureActivity(this, ModuleService.Action.ACTION_SCREENSHOT);
+                LauncherActivity.startCaptureActivity(this, ModuleService.Action.ACTION_SCREENSHOT);
                 break;
             case R.id.menu_screenrecord:
-                TakeScreenshotActivity.startCaptureActivity(this, ModuleService.Action.ACTION_RECORD);
+                LauncherActivity.startCaptureActivity(this, ModuleService.Action.ACTION_RECORD);
                 break;
             case R.id.menu_free_screenshot:
-                TakeScreenshotActivity.startCaptureActivity(this, ModuleService.Action.ACTION_FREE_CROP);
+                LauncherActivity.startCaptureActivity(this, ModuleService.Action.ACTION_FREE_CROP);
                 break;
             case R.id.menu_rect_screenshot:
-                TakeScreenshotActivity.startCaptureActivity(this, ModuleService.Action.ACTION_RECT_CROP);
+                LauncherActivity.startCaptureActivity(this, ModuleService.Action.ACTION_RECT_CROP);
                 break;
             default:
                 break;

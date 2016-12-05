@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
 
     <com.way.capture.widget.freecrop.FreeCropView
         android:id="@+id/free_crop_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"/>
 
     <Button
         android:id="@+id/free_crop_ok_btn"
@@ -17,7 +17,7 @@
         android:layout_marginEnd="24dp"
         android:backgroundTint="@color/colorAccent"
         android:text="@android:string/ok"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
     <FrameLayout
         android:id="@+id/free_crop_toast"
@@ -38,7 +38,7 @@
             android:shadowRadius="2"
             android:text="@string/free_crop_toast"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"/>
     </FrameLayout>
 
 

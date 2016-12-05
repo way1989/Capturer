@@ -1,4 +1,4 @@
-package com.way.capture.screenrecord;
+package com.way.capture.core.screenrecord;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;

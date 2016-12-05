@@ -1,15 +1,15 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.way.capture.activity.DetailsActivity">
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             tools:context="com.way.capture.activity.DetailsActivity">
 
     <com.way.capture.widget.HackyViewPager
         android:id="@+id/pager"
-        android:background="@android:color/black"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:background="@android:color/black"/>
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
@@ -17,6 +17,6 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@drawable/actionbar_linear_bg"
         android:theme="@style/AppTheme.AppBarOverlay"
-        app:popupTheme="@style/AppTheme.DayNight" />
+        app:popupTheme="@style/AppTheme.DayNight"/>
 
 </FrameLayout>

@@ -1,4 +1,4 @@
-package com.way.capture.module.screenshot;
+package com.way.capture.core.screenshot;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -27,10 +27,11 @@ import android.view.WindowManager;
 
 import com.way.capture.App;
 import com.way.capture.R;
-import com.way.capture.screenshot.DeleteScreenshot;
-import com.way.capture.screenshot.LongScreenshotUtil;
+import com.way.capture.core.DeleteScreenshot;
+import com.way.capture.utils.LongScreenshotUtil;
 import com.way.capture.utils.OsUtil;
 import com.way.capture.utils.RxSchedulers;
+import com.way.capture.utils.ScrollUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;

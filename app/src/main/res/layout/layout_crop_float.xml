@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:custom="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+             xmlns:custom="http://schemas.android.com/apk/res-auto"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content">
 
     <com.way.capture.widget.rectcrop.CropImageView
         android:id="@+id/cropImageView"
@@ -20,7 +20,7 @@
         custom:handleSize="8dp"
         custom:minFrameSize="50dp"
         custom:overlayColor="@color/overlay"
-        custom:touchPadding="8dp" />
+        custom:touchPadding="8dp"/>
 
     <FrameLayout
         android:id="@+id/crop_toast"
@@ -41,7 +41,7 @@
             android:shadowRadius="2"
             android:text="@string/crop_toast"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"/>
 
     </FrameLayout>
 

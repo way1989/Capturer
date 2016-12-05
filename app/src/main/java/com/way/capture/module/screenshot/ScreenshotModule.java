@@ -553,7 +553,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         layoutParams.gravity = mContext.getResources().getInteger(
                 R.integer.standard_notification_panel_layout_gravity);
         layoutParams.width = DensityUtil.getDisplayWidth(mContext);
-        layoutParams.height = DensityUtil.dip2px(mContext, 104);
+        layoutParams.height = DensityUtil.dip2px(mContext, 88);
         layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED;
         mWindowManager.addView(mLongScreenshotToast, layoutParams);
     }
@@ -562,6 +562,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         try {
             mWindowManager.removeViewImmediate(mRootView);
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

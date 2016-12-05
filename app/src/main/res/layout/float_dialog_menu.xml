@@ -26,12 +26,12 @@
             android:contentDescription="@string/record_screenshot"
             android:src="@drawable/ic_screenshot_movie" />
 
-        <ImageView
+<!--        <ImageView
             android:id="@+id/menu_long_screenshot"
             style="@style/Item_Tumblr"
             android:background="@drawable/tumblr_grey_oval"
             android:contentDescription="@string/long_screenshot"
-            android:src="@drawable/ic_screenshot_long" />
+            android:src="@drawable/ic_screenshot_long" />-->
 
         <ImageView
             android:id="@+id/menu_free_screenshot"

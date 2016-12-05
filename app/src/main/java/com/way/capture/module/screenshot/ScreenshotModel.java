@@ -149,8 +149,12 @@ public class ScreenshotModel implements ScreenshotContract.Model {
             public Bitmap call(Bitmap bitmap) {
                 return collageLongBitmap(oldBitmap, bitmap);
             }
-        }).timeout(5, TimeUnit.SECONDS)
-                .compose(RxSchedulers.<Bitmap>io_main());
+        }).filter(new Func1<Bitmap, Boolean>() {
+            @Override
+            public Boolean call(Bitmap bitmap) {
+                return bitmap != null && !bitmap.isRecycled();
+            }
+        }).compose(RxSchedulers.<Bitmap>io_main());
     }
 
     @Override
@@ -268,10 +272,12 @@ public class ScreenshotModel implements ScreenshotContract.Model {
 
     private Bitmap collageLongBitmap(Bitmap oldBitmap, Bitmap newBitmap) {
         if (oldBitmap == null || oldBitmap.isRecycled()) {
-            throw new NullPointerException("bitmap is null");
+            //throw new NullPointerException("bitmap is null");
+            return null;
         }
         if (newBitmap == null || newBitmap.isRecycled()) {
-            throw new NullPointerException("bitmap is null");
+            //throw new NullPointerException("bitmap is null");
+            return null;
         }
 
         //collage a new bitmap
@@ -279,7 +285,8 @@ public class ScreenshotModel implements ScreenshotContract.Model {
                 .collageLongBitmap(oldBitmap, newBitmap);
 
         if (collageBitmap == null || collageBitmap.isRecycled()) {
-            throw new NullPointerException("bitmap is null");
+            //throw new NullPointerException("bitmap is null");
+            return null;
         }
         return collageBitmap;
     }

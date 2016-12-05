@@ -39,14 +39,14 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     private static final String TAG = "ScreenshotPresenter";
 
     private final Context mContext;
-    private final ScreenshotContract.View mScreenshotView;
+    private final ScreenshotContract.View mView;
     private MediaActionSound mCameraSound;
     private Bitmap mScreenBitmap;
     private CompositeSubscription mSubscriptions;
     private ScreenshotModel mScreenshotModel;
 
-    public ScreenshotPresenter(ScreenshotContract.View screenshotView, int resultCode, Intent data) {
-        mScreenshotView = screenshotView;
+    public ScreenshotPresenter(ScreenshotContract.View view, int resultCode, Intent data) {
+        mView = view;
 
         mScreenshotModel = new ScreenshotModel(resultCode, data);
         mSubscriptions = new CompositeSubscription();
@@ -72,14 +72,14 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
             @Override
             public void onError(Throwable e) {
                 Log.d(TAG, "takeScreenshot... onError e = " + e.getMessage());
-                mScreenshotView.showScreenshotError(e);
+                mView.showScreenshotError(e);
             }
 
             @Override
             public void onNext(Bitmap bitmap) {
                 Log.d(TAG, "takeScreenshot... onNext bitmap = " + bitmap);
                 mScreenBitmap = bitmap;
-                mScreenshotView.showScreenshotAnim(mScreenBitmap, false);
+                mView.showScreenshotAnim(mScreenBitmap, false);
             }
         }));
 
@@ -94,7 +94,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     @Override
     public void takeLongScreenshot(boolean isAutoScroll) {
         if (mScreenBitmap == null || mScreenBitmap.isRecycled()) {
-            mScreenshotView.showScreenshotError(new NullPointerException("bitmap is null"));
+            mView.showScreenshotError(new NullPointerException("bitmap is null"));
             return;
         }
         mSubscriptions.clear();
@@ -108,9 +108,9 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                     @Override
                     public void onError(Throwable e) {
                         if (mScreenBitmap != null && !mScreenBitmap.isRecycled())
-                            mScreenshotView.showScreenshotAnim(mScreenBitmap, true);
+                            mView.showScreenshotAnim(mScreenBitmap, true);
                         else
-                            mScreenshotView.showScreenshotError(e);
+                            mView.showScreenshotError(e);
                     }
 
                     @Override
@@ -118,9 +118,9 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                         Log.i("LongScreenshotUtil", "onNext...");
                         if (bitmap.getHeight() == mScreenBitmap.getHeight()
                                 || mScreenBitmap.getHeight() / mScreenshotModel.getHeight() > 9) {
-                            mScreenshotView.showScreenshotAnim(bitmap, true);
+                            mView.showScreenshotAnim(bitmap, true);
                         } else {
-                            mScreenshotView.onCollageFinish();
+                            mView.onCollageFinish();
                             mScreenBitmap.recycle();
                             mScreenBitmap = bitmap;
                         }
@@ -145,6 +145,11 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     public void stopLongScreenshot() {
         mSubscriptions.clear();
         LongScreenshotUtil.getInstance().stop();
+        if(mScreenBitmap != null && !mScreenBitmap.isRecycled()){
+            mView.showScreenshotAnim(mScreenBitmap, true);
+        }else {
+            mView.showScreenshotError(new Throwable("bitmap is null..."));
+        }
     }
 
     @Override
@@ -160,7 +165,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     public void saveScreenshot(final int style) {
         final Notification.Builder notificationBuilder = initNotificationBuilder();
         if (style == ScreenshotModule.STYLE_SAVE_ONLY) {
-            mScreenshotView.notify(notificationBuilder.build());
+            mView.notify(notificationBuilder.build());
         }
         mSubscriptions.clear();
         mSubscriptions.add(mScreenshotModel.saveScreenshot(mScreenBitmap, notificationBuilder).subscribe(new Observer<Uri>() {
@@ -171,7 +176,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
             @Override
             public void onError(Throwable e) {
                 Log.d(TAG, "saveScreenshot onError... e = " + e);
-                //mScreenshotView.showScreenshotError(e);
+                //mView.showScreenshotError(e);
             }
 
             @Override
@@ -258,14 +263,14 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
         n.flags &= ~Notification.FLAG_NO_CLEAR;
         switch (style) {
             case ScreenshotModule.STYLE_SAVE_ONLY:
-                mScreenshotView.notify(n);
-                mScreenshotView.finish();
+                mView.notify(n);
+                mView.finish();
                 break;
             case ScreenshotModule.STYLE_SAVE_TO_EDIT:
-                mScreenshotView.editScreenshot(uri);
+                mView.editScreenshot(uri);
                 break;
             case ScreenshotModule.STYLE_SAVE_TO_SHARE:
-                mScreenshotView.shareScreenshot(uri);
+                mView.shareScreenshot(uri);
                 break;
             default:
                 break;

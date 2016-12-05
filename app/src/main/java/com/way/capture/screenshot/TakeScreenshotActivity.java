@@ -29,9 +29,8 @@ public class TakeScreenshotActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (!ScreenshotHelper.handleActivityResult(this, requestCode, resultCode, data, mAction)) {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
+        super.onActivityResult(requestCode, resultCode, data);
+        ScreenshotHelper.handleActivityResult(this, requestCode, resultCode, data, mAction);
         finish();
     }
 

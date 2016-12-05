@@ -184,7 +184,7 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
                 }
 
                 break;
-            case R.id.menu_long_screenshot:
+           /* case R.id.menu_long_screenshot:
                 try {
                     Intent screenRecordIntent = new Intent(ShakeService.this, TakeScreenshotActivity.class);
                     screenRecordIntent.setAction(TakeScreenshotService.ACTION_LONG_SCREENSHOT);
@@ -192,7 +192,7 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
                     startActivity(screenRecordIntent);
                 } catch (ActivityNotFoundException e) {
                 }
-                break;
+                break;*/
             case R.id.menu_free_screenshot:
                 try {
                     Intent screenRecordIntent = new Intent(ShakeService.this, TakeCropScreenshotActivity.class);

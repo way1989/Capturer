@@ -29,6 +29,8 @@ import com.way.capture.App;
 import com.way.capture.R;
 import com.way.capture.screenshot.DeleteScreenshot;
 import com.way.capture.screenshot.LongScreenshotUtil;
+import com.way.capture.utils.OsUtil;
+import com.way.capture.utils.RxSchedulers;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -47,7 +49,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Cancellable;
 import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
 
 /**
@@ -149,7 +150,7 @@ public class ScreenshotModel implements ScreenshotContract.Model {
                 return collageLongBitmap(oldBitmap, bitmap);
             }
         }).timeout(5, TimeUnit.SECONDS)
-                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+                .compose(RxSchedulers.<Bitmap>io_main());
     }
 
     @Override
@@ -157,6 +158,7 @@ public class ScreenshotModel implements ScreenshotContract.Model {
         return Observable.create(new Observable.OnSubscribe<Uri>() {
             @Override
             public void call(Subscriber<? super Uri> subscriber) {
+                OutputStream out = null;
                 try {
                     Context context = App.getContext();
                     Resources r = context.getResources();
@@ -180,10 +182,9 @@ public class ScreenshotModel implements ScreenshotContract.Model {
                     long dateSeconds = imageTime / 1000;
 
                     // Save
-                    OutputStream out = new FileOutputStream(imageFilePath);
+                    out = new FileOutputStream(imageFilePath);
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
                     out.flush();
-                    out.close();
 
                     // Save the screenshot to the MediaStore
                     ContentValues values = new ContentValues();
@@ -220,14 +221,18 @@ public class ScreenshotModel implements ScreenshotContract.Model {
                         deleteIntent.putExtra(DeleteScreenshot.SCREENSHOT_URI, uri.toString());
                         notificationBuilder.addAction(R.drawable.ic_menu_delete, r.getString(R.string.screenshot_delete_action),
                                 PendingIntent.getBroadcast(context, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT));
+                        subscriber.onNext(uri);
+                        subscriber.onCompleted();
+                    } else {
+                        subscriber.onError(new Throwable("save uri is null..."));
                     }
-                    subscriber.onNext(uri);
-                    subscriber.onCompleted();
-                } catch (Exception e) {
+                } catch (IOException e) {
                     subscriber.onError(e);
+                } finally {
+                    OsUtil.closeSilently(out);
                 }
             }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+        }).compose(RxSchedulers.<Uri>io_main());
     }
 
     @Override
@@ -258,7 +263,7 @@ public class ScreenshotModel implements ScreenshotContract.Model {
                 }
 
             }
-        });
+        }).compose(RxSchedulers.<Boolean>io_main());
     }
 
     private Bitmap collageLongBitmap(Bitmap oldBitmap, Bitmap newBitmap) {

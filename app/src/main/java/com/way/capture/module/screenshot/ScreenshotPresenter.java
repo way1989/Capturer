@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.way.capture.App;
@@ -30,8 +31,6 @@ import com.way.capture.utils.RxEvent;
 import rx.Observer;
 import rx.Subscriber;
 import rx.subscriptions.CompositeSubscription;
-
-import static com.thefinestartist.utils.content.ContextUtil.getContentResolver;
 
 /**
  * Created by android on 16-8-19.
@@ -129,17 +128,19 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                 }));
 
     }
+
     private String getRealPathFromURI(Uri contentUri) {
-        String res = null;
-        String[] proj = { MediaStore.Images.Media.DATA };
-        Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
-        if(cursor.moveToFirst()){;
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            res = cursor.getString(column_index);
+        String path = null;
+        String[] projection = new String[]{MediaStore.Images.Media.DATA};
+        Cursor cursor = mContext.getContentResolver().query(contentUri, projection, null, null, null);
+        if (cursor != null) {
+            if (cursor.moveToFirst())
+                path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+            cursor.close();
         }
-        cursor.close();
-        return res;
+        return path;
     }
+
     @Override
     public void stopLongScreenshot() {
         mSubscriptions.clear();
@@ -165,16 +166,17 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
         mSubscriptions.add(mScreenshotModel.saveScreenshot(mScreenBitmap, notificationBuilder).subscribe(new Observer<Uri>() {
             @Override
             public void onCompleted() {
-
             }
 
             @Override
             public void onError(Throwable e) {
-                mScreenshotView.showScreenshotError(e);
+                Log.d(TAG, "saveScreenshot onError... e = " + e);
+                //mScreenshotView.showScreenshotError(e);
             }
 
             @Override
             public void onNext(Uri uri) {
+                Log.d(TAG, "saveScreenshot onNext...");
                 onSaveFinish(uri, notificationBuilder, style);
             }
         }));
@@ -236,7 +238,9 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     }
 
     private void onSaveFinish(Uri uri, Notification.Builder builder, int style) {
-        RxBus.getInstance().post(new RxEvent.NewPathEvent(DataInfo.TYPE_SCREEN_SHOT, getRealPathFromURI(uri)));
+        String path = getRealPathFromURI(uri);
+        if (!TextUtils.isEmpty(path))
+            RxBus.getInstance().post(new RxEvent.NewPathEvent(DataInfo.TYPE_SCREEN_SHOT, path));
         Resources r = mContext.getResources();
         // Create the intent to show the screenshot in gallery
         Intent launchIntent = new Intent(Intent.ACTION_VIEW);

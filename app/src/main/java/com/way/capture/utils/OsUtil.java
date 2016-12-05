@@ -12,6 +12,7 @@ import android.provider.Settings;
 import com.way.capture.App;
 import com.way.capture.activity.PermissionCheckActivity;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
@@ -112,5 +113,15 @@ public class OsUtil {
         // Redirect performed
         activity.finish();
         return true;
+    }
+
+    public static void closeSilently(Closeable c) {
+        if (c != null) {
+            try {
+                c.close();
+            } catch (Throwable e) {
+                // ignored
+            }
+        }
     }
 }

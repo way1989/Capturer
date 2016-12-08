@@ -24,6 +24,12 @@
                 android:background="?attr/colorPrimary"
                 app:popupTheme="@style/AppTheme.DayNight"/>
 
+            <android.support.design.widget.TabLayout
+                android:id="@+id/tab_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="48dp"/>
+
             <ViewStub
                 android:id="@+id/cab_stub"
                 android:layout_width="match_parent"
@@ -46,18 +52,8 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:tint="@android:color/white"
-        app:layout_anchor="@+id/BottomNavigation"
-        app:layout_anchorGravity="right|bottom"
-        app:layout_behavior="@string/bbn_fab_default_behavior"
+        app:layout_anchorGravity="end|bottom"
+        app:layout_behavior="com.way.capture.utils.ScrollAwareFABBehavior"
         app:srcCompat="@drawable/ic_add"/>
-
-    <it.sephiroth.android.library.bottomnavigation.BottomNavigation
-        android:id="@+id/BottomNavigation"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="@integer/app_gravity"
-        app:bbn_badgeProvider="@string/bbn_badgeProvider"
-        app:bbn_entries="@menu/bottombar_menu_3items_no_background"
-        app:layout_behavior="@string/bbn_default_view_behavior"/>
 
 </android.support.design.widget.CoordinatorLayout>

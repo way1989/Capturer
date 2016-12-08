@@ -4,7 +4,6 @@ import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.util.Log;
@@ -43,8 +42,7 @@ import rx.schedulers.Schedulers;
 /**
  * Created by way on 16/4/10.
  */
-public class ScreenshotFragment extends BaseScreenshotFragment implements SwipeRefreshLayout.OnRefreshListener,
-        ScreenshotAdapter.OnItemClickListener,
+public class ScreenshotFragment extends BaseScreenshotFragment implements ScreenshotAdapter.OnItemClickListener,
         DragSelectRecyclerViewAdapter.SelectionListener, MaterialCab.Callback, ScreenshotContract.View {
     public static final String ARGS_TYPE = "type";
     public static final String EXTRA_DATAS = "extra_datas";
@@ -55,8 +53,6 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements SwipeR
     LoadingLayout mLoadingLayout;
     @BindView(R.id.recycler_view)
     DragSelectRecyclerView mRecyclerView;
-    @BindView(R.id.swipe_refresh)
-    SwipeRefreshLayout mSwipeRefresh;
     private ScreenshotAdapter mAdapter;
 
     private MaterialCab mCab;
@@ -166,8 +162,6 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements SwipeR
         mAdapter.setSelectionListener(this);
         mRecyclerView.setAdapter(mAdapter);
 
-        mSwipeRefresh.setColorSchemeResources(R.color.colorAccent);
-        mSwipeRefresh.setOnRefreshListener(this);
     }
 
     @Override
@@ -188,12 +182,6 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements SwipeR
                     }
                 });
         mPresenter = new ScreenshotPresenter(this);
-        mPresenter.getData(mType);
-    }
-
-    @Override
-    public void onRefresh() {
-        mSwipeRefresh.setEnabled(false);
         mPresenter.getData(mType);
     }
 
@@ -224,7 +212,6 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements SwipeR
     @Override
     public void onDragSelectionChanged(int count) {
         if (count > 0) {
-            mSwipeRefresh.setEnabled(false);
             if (mCab == null) {
                 mCab = new MaterialCab((AppCompatActivity) getActivity(), R.id.cab_stub)
                         .setMenu(R.menu.menu_screenshot_item)
@@ -233,7 +220,6 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements SwipeR
             }
             mCab.setTitleRes(R.string.cab_title_x, count);
         } else if (mCab != null && mCab.isActive()) {
-            mSwipeRefresh.setEnabled(true);
             mCab.reset().finish();
             mCab = null;
         }
@@ -278,8 +264,6 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements SwipeR
 
     @Override
     public void onLoadFinished(List<String> data) {
-        mSwipeRefresh.setRefreshing(false);
-        mSwipeRefresh.setEnabled(true);
         if (!data.isEmpty()) {
             mLoadingLayout.setStatus(LoadingLayout.Success);
             mAdapter.setData(data);

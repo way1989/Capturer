@@ -131,7 +131,7 @@ dependencies {
     apt "com.jakewharton:butterknife-compiler:$rootProject.butterknifeVersion"
 
     //bottom navigation bar
-    compile 'it.sephiroth.android.library.bottomnavigation:bottom-navigation:2.0.0'
+    //compile 'it.sephiroth.android.library.bottomnavigation:bottom-navigation:2.0.0'
 
     //loading layout
     compile 'com.lai.weavey:loadinglayout:1.2'

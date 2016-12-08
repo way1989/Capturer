@@ -5,9 +5,9 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.IdRes;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.SharedElementCallback;
@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.jakewharton.rxbinding.view.RxView;
 import com.thefinestartist.finestwebview.FinestWebView;
 import com.way.capture.App;
 import com.way.capture.R;
@@ -36,11 +37,12 @@ import com.wooplr.spotlight.SpotlightView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-import it.sephiroth.android.library.bottomnavigation.BottomNavigation;
+import butterknife.BindView;
+import rx.functions.Action1;
 
-public class MainActivity extends BaseActivity implements
-        ViewPager.OnPageChangeListener, BottomNavigation.OnMenuItemSelectionListener {
+public class MainActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
     Runnable navigateShare = new Runnable() {
         public void run() {
@@ -86,10 +88,16 @@ public class MainActivity extends BaseActivity implements
             recreate();
         }
     };
-    private ViewPager mViewPager;
+    @BindView(R.id.viewpager)
+    ViewPager mViewPager;
+    @BindView(R.id.fab)
+    FloatingActionButton mFab;
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+    @BindView(R.id.tab_layout)
+    TabLayout mTabLayout;
     private BaseScreenshotFragment mCurrentFragment;
     private long mLastPressTime;
-    private FloatingActionButton mFab;
     private Bundle mTmpReenterState;
     private final SharedElementCallback mCallback = new SharedElementCallback() {
         @Override
@@ -121,7 +129,7 @@ public class MainActivity extends BaseActivity implements
             }
         }
     };
-    private BottomNavigation mBottomNavigation;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,15 +146,25 @@ public class MainActivity extends BaseActivity implements
     @Override
     protected void initWidget() {
         super.initWidget();
-        initBootNavigation();
-        initToolbar();
-        initFab();
-        initViewPager();
-    }
+        setSupportActionBar(mToolbar);
+        setTitle("");
 
-    private void initBootNavigation() {
-        mBottomNavigation = (BottomNavigation) findViewById(R.id.BottomNavigation);
-        mBottomNavigation.setOnMenuItemClickListener(this);
+        setupViewPager(mViewPager);
+        mViewPager.setOffscreenPageLimit(2);
+        mTabLayout.setupWithViewPager(mViewPager);
+        RxView.clicks(mFab).throttleFirst(500, TimeUnit.SECONDS).subscribe(new Action1<Void>() {
+            @Override
+            public void call(Void aVoid) {
+                startService(new Intent(MainActivity.this, ShakeService.class).setAction("com.way.action.SHOW_MENU"));
+
+            }
+        });
+        mFab.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                showIntro(mFab, TAG);
+            }
+        }, 500L);
     }
 
     @Override
@@ -176,42 +194,6 @@ public class MainActivity extends BaseActivity implements
                 .usageId(usageId) //UNIQUE ID
                 .show();
     }
-
-    private void initFab() {
-        mFab = (FloatingActionButton) findViewById(R.id.fab);
-        if (mFab != null) {
-            mFab.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View view) {
-                    startService(new Intent(MainActivity.this, ShakeService.class).setAction("com.way.action.SHOW_MENU"));
-                }
-            });
-            mFab.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    showIntro(mFab, TAG);
-                }
-            }, 100L);
-        }
-    }
-
-    private void initToolbar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-    }
-
-
-    private void initViewPager() {
-        mViewPager = (ViewPager) findViewById(R.id.viewpager);
-        if (mViewPager != null) {
-            setupViewPager(mViewPager);
-            mViewPager.setOffscreenPageLimit(2);
-            mViewPager.addOnPageChangeListener(this);
-        }
-
-    }
-
 
     @Override
     public void onActivityReenter(int resultCode, Intent data) {
@@ -277,40 +259,6 @@ public class MainActivity extends BaseActivity implements
         adapter.addFragment(ScreenshotFragment.newInstance(DataInfo.TYPE_SCREEN_GIF), this.getString(R.string.gif_title));
         adapter.addFragment(ScreenshotFragment.newInstance(DataInfo.TYPE_SCREEN_RECORD), this.getString(R.string.video_title));
         viewPager.setAdapter(adapter);
-    }
-
-    @Override
-    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-    }
-
-    @Override
-    public void onPageSelected(int position) {
-        mBottomNavigation.setSelectedIndex(position, false);
-    }
-
-    @Override
-    public void onPageScrollStateChanged(int state) {
-
-    }
-
-    @Override
-    public void onMenuItemSelect(@IdRes int itemId, int position, boolean fromUser) {
-        Log.d(TAG, "onMenuItemSelect(" + itemId + ", " + position + ", " + fromUser + ")");
-        if (fromUser) {
-            mBottomNavigation.getBadgeProvider().remove(itemId);
-            mViewPager.setCurrentItem(position);
-        }
-    }
-
-    @Override
-    public void onMenuItemReselect(@IdRes int itemId, int position, boolean fromUser) {
-        Log.d(TAG, "onMenuItemReselect(" + itemId + ", " + position + ", " + fromUser + ")");
-        if (fromUser) {
-            if (mCurrentFragment != null)
-                mCurrentFragment.scrollToTop();
-        }
-
     }
 
     class Adapter extends FragmentPagerAdapter {

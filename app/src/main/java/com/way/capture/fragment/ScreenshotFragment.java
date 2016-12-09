@@ -48,7 +48,6 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
     public static final String EXTRA_DATAS = "extra_datas";
     public static final String EXTRA_STARTING_POSITION = "extra_starting_item_position";
     public static final String EXTRA_CURRENT_POSITION = "extra_current_item_position";
-    private static final int SCREENSHOT_LOADER_ID = 0;
     @BindView(R.id.loading_layout)
     LoadingLayout mLoadingLayout;
     @BindView(R.id.recycler_view)
@@ -138,6 +137,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
     public void onResume() {
         super.onResume();
         mIsDetailsActivityStarted = false;
+        mPresenter.getData(mType);
     }
 
     @Override
@@ -161,7 +161,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
         mAdapter = new ScreenshotAdapter(getContext(), mType, this);
         mAdapter.setSelectionListener(this);
         mRecyclerView.setAdapter(mAdapter);
-
+        mLoadingLayout.setStatus(LoadingLayout.Loading);
     }
 
     @Override
@@ -182,7 +182,6 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
                     }
                 });
         mPresenter = new ScreenshotPresenter(this);
-        mPresenter.getData(mType);
     }
 
     @Override

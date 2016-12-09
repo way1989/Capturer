@@ -104,7 +104,7 @@ dependencies {
     compile 'com.thefinestartist:finestwebview:1.2.5'
 
     //intro
-    compile 'com.github.wooplr:Spotlight:1.1'
+    compile 'com.github.wooplr:Spotlight:1.2.2'
     //bugly
     //compile 'com.tencent.bugly:crashreport:latest.release' //其中latest.release指代最新版本号，也可以指定明确的版本号，例如2.1.5
     //photo view

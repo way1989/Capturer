@@ -134,13 +134,11 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (OsUtil.redirectToPermissionCheckIfNeeded(this)) {
-            return;
-        }
+
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(AppUtils.APP_FIRST_RUN, true))
             startActivity(new Intent(MainActivity.this, GuideActivity.class));
-        setExitSharedElementCallback(mCallback);
 
+        setExitSharedElementCallback(mCallback);
     }
 
     @Override

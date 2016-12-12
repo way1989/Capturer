@@ -81,7 +81,7 @@ public class ModuleService extends Service {
         }
 
         mCurrentModulel = getModuleByAction(action);
-        mCurrentModulel.onStart(getApplicationContext(), action, resultCode, data);
+        mCurrentModulel.onStart(this, action, resultCode, data);
         return START_NOT_STICKY;
     }
 

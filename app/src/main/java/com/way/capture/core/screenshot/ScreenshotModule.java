@@ -900,7 +900,9 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
                 Bitmap result = freeCropView.getFreeCropBitmap();
                 mPresenter.setBitmap(result);
                 if(result != null && !result.isRecycled())
-                showScreenshotAnim(result, false, false);
+                    showScreenshotAnim(result, false, false);
+                else
+                    showScreenshotError(new Throwable("bitmap is null..."));
                 dismissFreeCropLayout();
             }
         });

@@ -22,7 +22,7 @@
         android:paddingStart="8dp"
         android:text="@string/scroll_screenshot_toast_title"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="?android:attr/textColorPrimary"/>
+        android:textColor="@android:color/white"/>
 
     <TextView
         android:id="@+id/long_screenshot_text"
@@ -35,5 +35,6 @@
         android:paddingEnd="8dp"
         android:paddingStart="8dp"
         android:text="@string/scroll_screenshot_toast_text"
+        android:textColor="@android:color/white"
         android:textAppearance="?android:attr/textAppearanceSmall"/>
 </LinearLayout>

@@ -116,7 +116,13 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                     @Override
                     public void onNext(Bitmap bitmap) {
                         Log.i("LongScreenshotUtil", "onNext...");
-                        if (bitmap.getHeight() == mScreenBitmap.getHeight()
+//                        if(mScreenBitmap == null || mScreenBitmap.isRecycled()){
+//                            mView.showScreenshotError(new Throwable("bitmap is null..."));
+//                            return;
+//                        }
+                        if(bitmap == null || bitmap.isRecycled()){
+                            mView.showScreenshotAnim(mScreenBitmap, true, false);
+                        }else if (bitmap.getHeight() == mScreenBitmap.getHeight()
                                 || mScreenBitmap.getHeight() / mScreenshotModel.getHeight() > 9) {
                             mView.showScreenshotAnim(bitmap, true, false);
                         } else {

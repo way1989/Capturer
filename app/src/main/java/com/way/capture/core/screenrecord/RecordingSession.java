@@ -54,7 +54,7 @@ import static android.media.MediaRecorder.VideoSource.SURFACE;
 import static android.os.Environment.DIRECTORY_MOVIES;
 
 public final class RecordingSession implements MediaRecorder.OnErrorListener, MediaRecorder.OnInfoListener {
-    static final int NOTIFICATION_ID = 789;
+    private static final int NOTIFICATION_ID = 789;
     private static final String TAG = "RecordingSession";
     private static final String DISPLAY_NAME = "ScreenRecord";
     private static final String MIME_TYPE = "video/mp4";
@@ -74,7 +74,7 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
     private VirtualDisplay mVirtualDisplay;
     private String mOutputFile;
     private boolean mIsRunning;
-    BroadcastReceiver mStopReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mStopReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             stopRecording();
@@ -82,12 +82,11 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
     };
 
 
-    public RecordingSession(Context context, Listener listener, int resultCode, Intent data) {
+    RecordingSession(Context context, Listener listener, int resultCode, Intent data) {
         this.mContext = context;
         this.mListener = listener;
         this.mResultCode = resultCode;
         this.mIntentData = data;
-
 
         File picturesDir = Environment.getExternalStoragePublicDirectory(DIRECTORY_MOVIES);
         mOutputDir = new File(picturesDir, DISPLAY_NAME);
@@ -97,8 +96,9 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
         mProjectionManager = (MediaProjectionManager) context.getSystemService(MEDIA_PROJECTION_SERVICE);
     }
 
-    static RecordingInfo calculateRecordingInfo(int displayWidth, int displayHeight, int displayDensity,
-                                                boolean isLandscapeDevice, int cameraWidth, int cameraHeight, int sizePercentage) {
+    private static RecordingInfo calculateRecordingInfo(int displayWidth, int displayHeight,
+                                                        int displayDensity, boolean isLandscapeDevice,
+                                                        int cameraWidth, int cameraHeight, int sizePercentage) {
         // Scale the mVirtualDisplay size before any maximum size calculations.
         displayWidth = displayWidth * sizePercentage / 100;
         displayHeight = displayHeight * sizePercentage / 100;
@@ -141,8 +141,8 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
         return Bitmap.createBitmap(bitmap, x, y, width, height, null, true);
     }
 
-    public void showOverlay() {
-        Log.d("way", "Adding overlay view to window.");
+    void showOverlay() {
+        Log.d(TAG, "Adding overlay view to window.");
 
         OverlayView.Listener overlayListener = new OverlayView.Listener() {
             @Override
@@ -166,7 +166,7 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
 
     private void hideOverlay() {
         if (mOverlayView != null) {
-            Log.d("way", "Removing overlay view from window.");
+            Log.d(TAG, "Removing overlay view from window.");
             mWindowManager.removeView(mOverlayView);
             mOverlayView = null;
 
@@ -185,29 +185,29 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
         int displayWidth = displayMetrics.widthPixels;
         int displayHeight = displayMetrics.heightPixels;
         int displayDensity = displayMetrics.densityDpi;
-        Log.d("way", "Display size: " + displayWidth + " x " + displayHeight + " @ " + displayDensity);
+        Log.d(TAG, "Display size: " + displayWidth + " x " + displayHeight + " @ " + displayDensity);
 
         Configuration configuration = mContext.getResources().getConfiguration();
         boolean isLandscape = configuration.orientation == ORIENTATION_LANDSCAPE;
-        Log.d("way", "Display landscape: " + isLandscape);
+        Log.d(TAG, "Display landscape: " + isLandscape);
 
         // Get the best camera profile available. We assume MediaRecorder
         // supports the highest.
         CamcorderProfile camcorderProfile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
         int cameraWidth = camcorderProfile != null ? camcorderProfile.videoFrameWidth : -1;
         int cameraHeight = camcorderProfile != null ? camcorderProfile.videoFrameHeight : -1;
-        Log.d("way", "Camera size: " + cameraWidth + " x " + cameraHeight);
+        Log.d(TAG, "Camera size: " + cameraWidth + " x " + cameraHeight);
 
         int sizePercentage = Integer.valueOf(PreferenceManager.getDefaultSharedPreferences(mContext)
                 .getString(SettingsFragment.VIDEO_SIZE_KEY, "100"));
-        Log.d("way", "Size percentage: " + sizePercentage);
+        Log.d(TAG, "Size percentage: " + sizePercentage);
 
         return calculateRecordingInfo(displayWidth, displayHeight, displayDensity, isLandscape,
                 cameraWidth, cameraHeight, sizePercentage);
     }
 
     private void startRecording() {
-        Log.d("way", "Starting screen recording...");
+        Log.d(TAG, "Starting screen recording...");
         if (!PreferenceManager.getDefaultSharedPreferences(mContext)
                 .getBoolean(SettingsFragment.VIDEO_STOP_METHOD_KEY, true)) {
             hideOverlay();
@@ -216,12 +216,12 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
         }
 
         if (!mOutputDir.mkdirs()) {
-            Log.e("way", "Unable to create output directory '" + mOutputDir.getAbsolutePath());
+            Log.e(TAG, "Unable to create output directory '" + mOutputDir.getAbsolutePath());
             // We're probably about to crash, but at least the log will indicate as to why.
         }
 
         RecordingInfo recordingInfo = getRecordingInfo();
-        Log.d("way", "Recording: " + recordingInfo.width + " x "
+        Log.d(TAG, "Recording: " + recordingInfo.width + " x "
                 + recordingInfo.height + " @ " + recordingInfo.density);
 
         mMediaRecorder = new MediaRecorder();
@@ -234,7 +234,7 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
 
         String outputName = mFileFormat.format(new Date());
         mOutputFile = new File(mOutputDir, outputName).getAbsolutePath();
-        Log.i("way", "Output file '" + mOutputFile);
+        Log.i(TAG, "Output file '" + mOutputFile);
         mMediaRecorder.setOutputFile(mOutputFile);
 
         try {
@@ -254,12 +254,12 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
         mIsRunning = true;
         mListener.onStart();
 
-        Log.d("way", "Screen recording started.");
+        Log.d(TAG, "Screen recording started.");
 
     }
 
     private void stopRecording() {
-        Log.d("way", "Stopping screen recording...");
+        Log.d(TAG, "Stopping screen recording...");
         if (!mIsRunning) {
             throw new IllegalStateException("Not mIsRunning.");
         }
@@ -282,6 +282,7 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
         try {
             mMediaRecorder.stop();
         } catch (Exception e) {
+            Toast.makeText(mContext, "stop record failed...", Toast.LENGTH_SHORT).show();
             fail = true;
         }
         if (fail && mOutputFile != null) {
@@ -293,13 +294,13 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
 
         mListener.onStop();
 
-        Log.d("way", "Screen recording stopped. Notifying media scanner of new video.");
+        Log.d(TAG, "Screen recording stopped. Notifying media scanner of new video.");
         if (!fail)
             MediaScannerConnection.scanFile(mContext, new String[]{mOutputFile}, null,
                     new MediaScannerConnection.OnScanCompletedListener() {
                         @Override
                         public void onScanCompleted(String path, final Uri uri) {
-                            Log.d("way", "Media scanner completed.");
+                            Log.d(TAG, "Media scanner completed.");
                             if (uri != null)
                                 mHandler.post(new Runnable() {
                                     @Override
@@ -379,9 +380,9 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
         }.execute();
     }
 
-    public void destroy() {
+    void destroy() {
         if (mIsRunning) {
-            Log.w("way", "Destroyed while mIsRunning!");
+            Log.w(TAG, "Destroyed while mIsRunning!");
             stopRecording();
         }
     }
@@ -429,7 +430,7 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
         void onEnd();
     }
 
-    static final class RecordingInfo {
+    private static final class RecordingInfo {
         final int width;
         final int height;
         final int density;
@@ -455,9 +456,9 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
                 protected Void doInBackground(Void... none) {
                     int rowsDeleted = contentResolver.delete(uri, null, null);
                     if (rowsDeleted == 1) {
-                        Log.i("way", "Deleted recording.");
+                        Log.i(TAG, "Deleted recording.");
                     } else {
-                        Log.e("way", "Error deleting recording.");
+                        Log.e(TAG, "Error deleting recording.");
                     }
                     return null;
                 }

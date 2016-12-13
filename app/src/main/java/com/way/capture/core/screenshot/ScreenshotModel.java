@@ -150,11 +150,6 @@ public class ScreenshotModel implements ScreenshotContract.Model {
             public Bitmap call(Bitmap bitmap) {
                 return collageLongBitmap(oldBitmap, bitmap);
             }
-        }).filter(new Func1<Bitmap, Boolean>() {
-            @Override
-            public Boolean call(Bitmap bitmap) {
-                return bitmap != null && !bitmap.isRecycled();
-            }
         }).compose(RxSchedulers.<Bitmap>io_main());
     }
 

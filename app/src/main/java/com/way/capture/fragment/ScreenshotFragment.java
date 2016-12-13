@@ -57,7 +57,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
     private MaterialCab mCab;
     private boolean mIsDetailsActivityStarted;
     private int mType;
-    private ScreenshotPresenter mPresenter;
+    private boolean hasLoadData;
 
     public static BaseFragment newInstance(int type) {
         Bundle args = new Bundle();
@@ -72,6 +72,12 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
         super.onActivityCreated(savedInstanceState);
         mAdapter.restoreInstanceState(savedInstanceState);
         mCab = MaterialCab.restoreState(savedInstanceState, (AppCompatActivity) getActivity(), this);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        hasLoadData = false;
     }
 
     @Override
@@ -137,7 +143,6 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
     public void onResume() {
         super.onResume();
         mIsDetailsActivityStarted = false;
-        mPresenter.getData(mType);
     }
 
     @Override
@@ -155,8 +160,8 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
     protected void initWidget(View root) {
         super.initWidget(root);
 
-        GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
-        mRecyclerView.addItemDecoration(new SpaceGridItemDecoration(DensityUtil.dip2px(getContext(), 2)));
+        GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 4);
+        mRecyclerView.addItemDecoration(new SpaceGridItemDecoration(DensityUtil.dip2px(getContext(), 1)));
         mRecyclerView.setLayoutManager(layoutManager);
         mAdapter = new ScreenshotAdapter(getContext(), mType, this);
         mAdapter.setSelectionListener(this);
@@ -181,7 +186,20 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
                         }
                     }
                 });
-        mPresenter = new ScreenshotPresenter(this);
+        loadData();
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        loadData();
+    }
+
+    private void loadData() {
+        if (isAdded() && getUserVisibleHint() && !hasLoadData) {
+            new ScreenshotPresenter(this).getData(mType);
+            hasLoadData = true;
+        }
     }
 
     @Override
@@ -197,8 +215,8 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
                 intent.putExtra(ARGS_TYPE, mType);
                 intent.putStringArrayListExtra(EXTRA_DATAS, mAdapter.getData());
                 intent.putExtra(EXTRA_STARTING_POSITION, position);
-                startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(getActivity(), imageView,
-                        imageView.getTransitionName()).toBundle());
+                startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                        imageView, imageView.getTransitionName()).toBundle());
             }
         }
     }

@@ -1,35 +1,25 @@
 apply plugin: 'com.android.application'
-apply plugin: 'android-apt'
-//FIR发布Apk插件
-apply plugin: 'im.fir.plugin.gradle'
-fir {
-    //必填 上传 fir.im apk 字段，否则无法上传 APP 到 fir.im
-    apiToken API_TOKEN
-
-    //可选 上传fir.im 中显示的changelog
-    changeLog CHANGE_LOG
-}
 
 def buildTime() {
     return new Date().format("yyyyMMdd", TimeZone.getTimeZone("GMT+8:00"))
 }
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "23.0.3"
+    compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
         applicationId "com.way.capture"
-        minSdkVersion 21
-        targetSdkVersion 25
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode VERSION_CODE.toInteger()
         versionName VERSION_NAME
         //multiDexEnabled true
     }
-    signingConfigs {
-        release {
-            def filePrivateProperties = file("../local.properties")
-            if (filePrivateProperties.exists()) {
+
+    def filePrivateProperties = file("../jks/public.properties")
+    if (filePrivateProperties.exists()) {
+        signingConfigs {
+            release {
                 Properties propsPrivate = new Properties()
                 propsPrivate.load(new FileInputStream(filePrivateProperties))
 
@@ -38,7 +28,6 @@ android {
                 storePassword propsPrivate['key.store.password']
                 keyPassword propsPrivate['key.alias.password']
             }
-
         }
     }
 
@@ -46,33 +35,31 @@ android {
         debug {
             // 显示Log
             buildConfigField "boolean", "LOG_DEBUG", "true"
-            //是否开启BUGTAG
-            buildConfigField "boolean", "BUGTAG_ENABLED", "false"
-            //resValue "string", "bugtag_app_key", BUGTAG_APP_KEY
             buildConfigField "String", "BUGLY_APPID", BUGLY_APP_ID
-            signingConfig signingConfigs.release
+            if (filePrivateProperties.exists()) {
+                signingConfig signingConfigs.release
+            }
         }
 
         release {
             // 不显示Log
             buildConfigField "boolean", "LOG_DEBUG", "false"
-            //是否开启BUGTAG
-            buildConfigField "boolean", "BUGTAG_ENABLED", "true"
-            //resValue "string", "bugtag_app_key", BUGTAG_APP_KEY
             buildConfigField "String", "BUGLY_APPID", BUGLY_APP_ID
-            signingConfig signingConfigs.release
+            if (filePrivateProperties.exists()) {
+                signingConfig signingConfigs.release
+            }
             shrinkResources true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
     //配置生成的文件名
-    applicationVariants.all { variant ->
-        variant.outputs.each { output ->
-            def file = output.outputFile
-            if (file != null && file.name.endsWith('release.apk')) {//变种名为以release.apk结尾时才修改名字
-                def fileName = file.name.replace(file.name, "Capture_V" + variant.versionName + "_${buildTime()}.apk")
-                output.outputFile = new File(file.parentFile, fileName)
+    applicationVariants.all { variant ->//获取 variant 参数，就是 productFlavor x buildType
+        variant.outputs.all {
+            if(outputFileName.endsWith('-release.apk')) {//变种名以release.apk结尾时才修改名字
+                outputFileName = outputFileName.replace(outputFileName, "Capture" + "_V" + variant.versionName + "_${buildTime()}.apk")
+            } else if (outputFileName.endsWith('-debug.apk')) {
+                outputFileName = outputFileName.replace(outputFileName, "Capture-debug" + "_V" + variant.versionName + "_${buildTime()}.apk")
             }
         }
     }
@@ -86,60 +73,60 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     //compile project(':firupgrade')
-    compile project(':downloadlibrary')
-    compile 'com.android.support:appcompat-v7:25.0.1'
-    compile 'com.android.support:design:25.0.1'
-    compile 'com.android.support:recyclerview-v7:25.0.1'
-    compile 'com.android.support:cardview-v7:25.0.1'
+    implementation project(':downloadlibrary')
+    implementation "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"
+    implementation "com.android.support:design:$rootProject.supportLibraryVersion"
+    implementation "com.android.support:recyclerview-v7:$rootProject.supportLibraryVersion"
+    implementation "com.android.support:cardview-v7:$rootProject.supportLibraryVersion"
 
     //google Glide
-    compile 'com.github.bumptech.glide:glide:3.7.0'
+    implementation 'com.github.bumptech.glide:glide:3.8.0'
     //compile 'com.alexvasilkov:gesture-views:2.1.1'
-    compile 'com.davemorrissey.labs:subsampling-scale-image-view:3.6.0'
-    compile 'com.ogaclejapan.arclayout:library:1.0.1@aar'
+    implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.6.0'
+    implementation 'com.ogaclejapan.arclayout:library:1.0.1@aar'
 
     //webview
-    compile 'com.thefinestartist:finestwebview:1.2.5'
+    implementation 'com.thefinestartist:finestwebview:1.2.7'
 
     //intro
-    compile 'com.github.wooplr:Spotlight:1.2.2'
+    implementation 'com.github.wooplr:Spotlight:1.2.2'
     //bugly
-    //compile 'com.tencent.bugly:crashreport:latest.release' //其中latest.release指代最新版本号，也可以指定明确的版本号，例如2.1.5
+    implementation 'com.tencent.bugly:crashreport:latest.release' //其中latest.release指代最新版本号，也可以指定明确的版本号，例如2.1.5
     //photo view
     //compile 'com.commit451:PhotoView:1.2.5'
     //leakcanary
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
-    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'
+    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+    testImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 
     //rxjava
-    compile 'io.reactivex:rxandroid:1.2.1'
-    compile 'io.reactivex:rxjava:1.2.2'
+    implementation 'io.reactivex:rxandroid:1.2.1'
+    implementation 'io.reactivex:rxjava:1.2.2'
 
     //action bar select
-    compile "com.afollestad:material-cab:0.1.12"
+    implementation "com.afollestad:material-cab:0.1.12"
     //drag  select recyclerview
-    compile 'com.afollestad:drag-select-recyclerview:0.4.0'
+    implementation 'com.afollestad:drag-select-recyclerview:0.4.0'
 
     //loading more
     //compile 'com.github.markomilos:paginate:0.5.1'
 
     //butterknife
-    compile "com.jakewharton:butterknife:$rootProject.butterknifeVersion"
-    apt "com.jakewharton:butterknife-compiler:$rootProject.butterknifeVersion"
+    implementation "com.jakewharton:butterknife:$rootProject.butterknifeVersion"
+    annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.butterknifeVersion"
 
     //bottom navigation bar
     //compile 'it.sephiroth.android.library.bottomnavigation:bottom-navigation:2.0.0'
 
     //loading layout
-    compile 'com.lai.weavey:loadinglayout:1.2'
+    implementation 'com.lai.weavey:loadinglayout:1.3.1'
 
     //rxlife
-    compile 'com.trello:rxlifecycle:0.8.0'
-    compile 'com.trello:rxlifecycle-components:0.8.0'
+    implementation 'com.trello:rxlifecycle:0.8.0'
+    implementation 'com.trello:rxlifecycle-components:0.8.0'
 
     //rxbinding
-    compile 'com.jakewharton.rxbinding:rxbinding:0.4.0'
+    implementation 'com.jakewharton.rxbinding:rxbinding:0.4.0'
 }

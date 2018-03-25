@@ -2,7 +2,6 @@ package com.way.capture.activity;
 
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -31,7 +30,6 @@ import com.way.capture.data.DataInfo;
 import com.way.capture.fragment.ScreenshotFragment;
 import com.way.capture.service.ShakeService;
 import com.way.capture.utils.AppUtils;
-import com.way.capture.utils.OsUtil;
 import com.wooplr.spotlight.SpotlightView;
 
 import java.util.ArrayList;

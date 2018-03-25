@@ -1,6 +1,7 @@
 # svn
 *.svn*
 Log/
+jks/
 
 # built application files
 *.apk

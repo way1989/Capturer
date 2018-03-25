@@ -7,9 +7,8 @@ import android.support.v7.app.AppCompatDelegate;
 
 import com.bumptech.glide.Glide;
 import com.squareup.leakcanary.LeakCanary;
-//import com.tencent.bugly.crashreport.CrashReport;
+import com.tencent.bugly.crashreport.CrashReport;
 import com.way.downloadlibrary.WDMSharPre;
-
 
 /**
  * Created by android on 16-2-4.
@@ -27,11 +26,10 @@ public class App extends Application {
         super.onCreate();
         mContext = getApplicationContext();
         //Bugly
-        if (BuildConfig.BUGTAG_ENABLED) {
-//            CrashReport.initCrashReport(mContext, BuildConfig.BUGLY_APPID, false);
-        }
+        CrashReport.initCrashReport(mContext, BuildConfig.BUGLY_APPID, false);
+
         //LeakCanary
-        if (BuildConfig.DEBUG) LeakCanary.install(this);
+        LeakCanary.install(this);
 
         //night mode
         boolean isNightMode = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(KEY_NIGHT_MODE, false);

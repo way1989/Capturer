@@ -148,14 +148,14 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
             @Override
             public boolean onException(Exception e, String model, Target<Bitmap> target, boolean isFirstResource) {
                 mCircleLoading.setVisibility(View.GONE);
-                startPostponedEnterTransition();
+                startPostEnterTransition();
                 return false;
             }
 
             @Override
             public boolean onResourceReady(Bitmap resource, String model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
                 mCircleLoading.setVisibility(View.GONE);
-                startPostponedEnterTransition();
+                startPostEnterTransition();
                 //mPhotoViewAttacher.update();
                 return false;
             }
@@ -170,7 +170,7 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
         return height > 2 * DensityUtil.getDisplayHeight(getContext());
     }
 
-    private void startPostponedEnterTransition() {
+    private void startPostEnterTransition() {
         mDetailImage.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {

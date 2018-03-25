@@ -120,9 +120,9 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
 //                            mView.showScreenshotError(new Throwable("bitmap is null..."));
 //                            return;
 //                        }
-                        if(bitmap == null || bitmap.isRecycled()){
+                        if (bitmap == null || bitmap.isRecycled()) {
                             mView.showScreenshotAnim(mScreenBitmap, true, false);
-                        }else if (bitmap.getHeight() == mScreenBitmap.getHeight()
+                        } else if (bitmap.getHeight() == mScreenBitmap.getHeight()
                                 || mScreenBitmap.getHeight() / mScreenshotModel.getHeight() > 9) {
                             mView.showScreenshotAnim(bitmap, true, false);
                         } else {

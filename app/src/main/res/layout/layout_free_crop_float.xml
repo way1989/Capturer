@@ -18,8 +18,8 @@
         android:backgroundTint="@color/colorAccent"
         android:shadowColor="@android:color/black"
         android:shadowRadius="1"
-        android:textColor="@android:color/white"
         android:text="@android:string/ok"
+        android:textColor="@android:color/white"
         android:visibility="gone"/>
 
     <FrameLayout

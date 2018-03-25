@@ -1,8 +1,0 @@
-<resources>
-    <string name="progress_dialog_title">检查更新</string>
-    <string name="progress_dialog_message">正在检查...</string>
-    <string name="new_version_dialog_title">发现新版本:%s，是否升级?</string>
-    <string name="latest_version">已是最新版本</string>
-    <string name="net_error">网络异常!</string>
-    <string name="new_version_dialog_message">更新日志:%s</string>
-</resources>

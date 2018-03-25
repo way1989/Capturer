@@ -41,7 +41,7 @@ public class ImageUtils {
     public static Bitmap getBitmapByResource(Context context, int id) {
             /* 得到Resrouces资源对象 */
         Resources resources = context.getResources();
-			/* 得到资源中的Drawable对象 */
+            /* 得到资源中的Drawable对象 */
         Drawable drawable = resources.getDrawable(id);
         Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
 

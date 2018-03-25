@@ -79,6 +79,7 @@ public class GlideHelper {
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(image);
     }
+
     public static void loadResourceBitmap(String path, @NonNull ImageView image,
                                           RequestListener<String, Bitmap> requestListener) {
         Glide.with(image.getContext())

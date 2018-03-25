@@ -8,6 +8,7 @@ public final class WDMSharPre {
     private static final Object[] mLock = new Object[0];
     public static WDMSharPre single = null;
     private SharedPreferences sf = null;
+
     private WDMSharPre(Context c) {
         super();
         sf = c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);

@@ -19,7 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.jakewharton.rxbinding.view.RxView;
+import com.jakewharton.rxbinding2.view.RxView;
 import com.thefinestartist.finestwebview.FinestWebView;
 import com.way.capture.App;
 import com.way.capture.R;
@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
-import rx.functions.Action1;
+import io.reactivex.functions.Consumer;
 
 public class MainActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
@@ -148,9 +148,9 @@ public class MainActivity extends BaseActivity {
         setupViewPager(mViewPager);
         mViewPager.setOffscreenPageLimit(2);
         mTabLayout.setupWithViewPager(mViewPager);
-        RxView.clicks(mFab).throttleFirst(2, TimeUnit.SECONDS).subscribe(new Action1<Void>() {
+        RxView.clicks(mFab).throttleFirst(2, TimeUnit.SECONDS).subscribe(new Consumer<Object>() {
             @Override
-            public void call(Void aVoid) {
+            public void accept(Object o) throws Exception {
                 startService(new Intent(MainActivity.this, ShakeService.class).setAction("com.way.action.SHOW_MENU"));
             }
         });

@@ -8,48 +8,34 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.PixelFormat;
-import android.hardware.display.DisplayManager;
-import android.hardware.display.VirtualDisplay;
-import android.media.Image;
-import android.media.ImageReader;
-import android.media.projection.MediaProjection;
-import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
-import android.view.WindowManager;
 
 import com.way.capture.App;
 import com.way.capture.R;
 import com.way.capture.core.DeleteScreenshot;
 import com.way.capture.utils.LongScreenshotUtil;
 import com.way.capture.utils.OsUtil;
-import com.way.capture.utils.RxSchedulers;
+import com.way.capture.utils.RxScreenshot;
 import com.way.capture.utils.ScrollUtils;
+import com.way.capture.utils.ViewUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import rx.Emitter;
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Cancellable;
-import rx.functions.Func1;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.ObservableSource;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Function;
 
 
 /**
@@ -58,79 +44,38 @@ import rx.functions.Func1;
 
 public class ScreenshotModel implements ScreenshotContract.Model {
     private static final String TAG = "ScreenshotModel";
-    private static final String DISPLAY_NAME = "Screenshot";
+    //    private static final String DISPLAY_NAME = "Screenshot";
     private static final long SCROLL_DURATION = 1000L;
     private static final long WAIT_FOR_SCROLL_TIME = 2000L;
     private static final String SCREENSHOTS_DIR_NAME = "Screenshots";
     private static final String SCREENSHOT_FILE_NAME_TEMPLATE = "Screenshot_%s.png";
     private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
-    private MediaProjection mProjection;
-    private VirtualDisplay mVirtualDisplay;
-    private ImageReader mImageReader;
+    //    private MediaProjection mProjection;
+//    private VirtualDisplay mVirtualDisplay;
+//    private ImageReader mImageReader;
     private int mLastRotation;
+    private int mResultCode;
+    private Intent mIntent;
 
     public ScreenshotModel(int resultCode, Intent data) {
-        MediaProjectionManager projectionManager = (MediaProjectionManager) App.getContext()
-                .getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-        mProjection = projectionManager.getMediaProjection(resultCode, data);
+        mResultCode = resultCode;
+        mIntent = data;
+//        MediaProjectionManager projectionManager = (MediaProjectionManager) App.getContext()
+//                .getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        //mProjection = projectionManager.getMediaProjection(resultCode, data);
     }
 
     @Override
     public Observable<Bitmap> getNewBitmap() {
         Log.d(TAG, "getNewBitmap...");
-        return Observable.fromEmitter(new Action1<Emitter<Bitmap>>() {
-            @Override
-            public void call(final Emitter<Bitmap> bitmapEmitter) {
-                ImageReader.OnImageAvailableListener listener = new ImageReader.OnImageAvailableListener() {
-                    @Override
-                    public void onImageAvailable(ImageReader reader) {
-                        Image image = mImageReader.acquireLatestImage();
-                        if (image == null) {
-                            bitmapEmitter.onError(new Exception("image is null..."));
-                            return;
-                        }
-                        int imageWidth = getWidth();
-                        int imageHeight = image.getHeight();
-                        Image.Plane[] planes = image.getPlanes();
-                        ByteBuffer byteBuffer = planes[0].getBuffer();
-                        int pixelStride = planes[0].getPixelStride();
-                        int rowStride = planes[0].getRowStride() - pixelStride * imageWidth;
-                        Bitmap bitmap = Bitmap.createBitmap(imageWidth + rowStride / pixelStride, imageHeight,
-                                Bitmap.Config.ARGB_8888);
-                        bitmap.copyPixelsFromBuffer(byteBuffer);
-                        if (rowStride != 0) {
-                            bitmap = addBorder(bitmap, -(rowStride / pixelStride));
-                        }
-                        image.close();
-
-                        if (bitmap == null || bitmap.isRecycled()) {
-                            bitmapEmitter.onError(new Exception("bitmap is null"));
-                        } else {
-                            bitmapEmitter.onNext(bitmap);
-                            bitmapEmitter.onCompleted();
-                        }
-                    }
-                };
-                bitmapEmitter.setCancellation(new Cancellable() {
-                    @Override
-                    public void cancel() throws Exception {
-                        mImageReader.setOnImageAvailableListener(null, null);
-                    }
-                });
-                mLastRotation = getRotation();
-                mImageReader = ImageReader.newInstance(getWidth(), getHeight(), PixelFormat.RGBA_8888, 1);// 只获取一张图片
-                mVirtualDisplay = mProjection.createVirtualDisplay(DISPLAY_NAME, getWidth(), getHeight(),
-                        getDensityDpi(), DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION,
-                        mImageReader.getSurface(), null, null);
-                mImageReader.setOnImageAvailableListener(listener, null);
-            }
-        }, Emitter.BackpressureMode.LATEST).timeout(2, TimeUnit.SECONDS)//2s out time
-                .observeOn(AndroidSchedulers.mainThread()).subscribeOn(AndroidSchedulers.mainThread());
+        mLastRotation = ViewUtils.getRotation();
+        return new RxScreenshot(App.getContext(), mResultCode, mIntent)
+                .subscribeOn(AndroidSchedulers.mainThread());
     }
 
     @Override
     public Observable<Bitmap> takeLongScreenshot(final Bitmap oldBitmap, boolean isAutoScroll) {
-        int rotation = getRotation();
+        int rotation = ViewUtils.getRotation();
         if (rotation != mLastRotation) {
             return Observable.error(new Throwable("device rotation is change..."));
         }
@@ -140,26 +85,27 @@ public class ScreenshotModel implements ScreenshotContract.Model {
         } else {
             observable = Observable.just(true);
         }
-        return observable.flatMap(new Func1<Boolean, Observable<Bitmap>>() {
+        return observable.flatMap(new Function<Boolean, ObservableSource<Bitmap>>() {
             @Override
-            public Observable<Bitmap> call(Boolean aBoolean) {
+            public ObservableSource<Bitmap> apply(Boolean aBoolean) throws Exception {
                 return getNewBitmap();
             }
-        }).map(new Func1<Bitmap, Bitmap>() {
+        }).map(new Function<Bitmap, Bitmap>() {
             @Override
-            public Bitmap call(Bitmap bitmap) {
+            public Bitmap apply(Bitmap bitmap) throws Exception {
                 return collageLongBitmap(oldBitmap, bitmap);
             }
-        }).compose(RxSchedulers.<Bitmap>io_main());
+        });
     }
 
     @Override
     public Observable<Uri> saveScreenshot(final Bitmap bitmap, final Notification.Builder notificationBuilder) {
-        return Observable.create(new Observable.OnSubscribe<Uri>() {
+        return Observable.create(new ObservableOnSubscribe<Uri>() {
             @Override
-            public void call(Subscriber<? super Uri> subscriber) {
+            public void subscribe(ObservableEmitter<Uri> e) throws Exception {
                 OutputStream out = null;
                 try {
+
                     Context context = App.getContext();
                     Resources r = context.getResources();
                     final long imageTime = System.currentTimeMillis();
@@ -221,49 +167,41 @@ public class ScreenshotModel implements ScreenshotContract.Model {
                         deleteIntent.putExtra(DeleteScreenshot.SCREENSHOT_URI, uri.toString());
                         notificationBuilder.addAction(R.drawable.ic_menu_delete, r.getString(R.string.screenshot_delete_action),
                                 PendingIntent.getBroadcast(context, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT));
-                        subscriber.onNext(uri);
-                        subscriber.onCompleted();
+                        e.onNext(uri);
+                        e.onComplete();
                     } else {
-                        subscriber.onError(new Throwable("save uri is null..."));
+                        e.onError(new Throwable("save uri is null..."));
                     }
-                } catch (IOException e) {
-                    subscriber.onError(e);
                 } finally {
                     OsUtil.closeSilently(out);
                 }
             }
-        }).compose(RxSchedulers.<Uri>io_main());
+        });
     }
 
     @Override
     public void release() {
-        if (mImageReader != null)
-            mImageReader.close();
-        if (mVirtualDisplay != null)
-            mVirtualDisplay.release();
-        if (mProjection != null) {
-            mProjection.stop();
-        }
+//        if (mImageReader != null)
+//            mImageReader.close();
+//        if (mVirtualDisplay != null)
+//            mVirtualDisplay.release();
+//        if (mProjection != null) {
+//            mProjection.stop();
+//        }
     }
 
     private Observable<Boolean> scrollNextScreen(final long duration) {
-        return Observable.create(new Observable.OnSubscribe<Boolean>() {
-
+        return Observable.create(new ObservableOnSubscribe<Boolean>() {
             @Override
-            public void call(Subscriber<? super Boolean> subscriber) {
-                Log.i(TAG, "scrollNextScreen... screenHeight = " + getHeight()
+            public void subscribe(ObservableEmitter<Boolean> e) throws Exception {
+                final int height = ViewUtils.getHeight();
+                Log.i(TAG, "scrollNextScreen... screenHeight = " + height
                         + ", current thread name = " + Thread.currentThread().getName());
-                try {
-                    ScrollUtils.scrollToNextScreen(getHeight(), duration);//scroll
-                    subscriber.onNext(true);
-                    subscriber.onCompleted();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    subscriber.onError(e);
-                }
-
+                ScrollUtils.scrollToNextScreen(height, duration);//scroll
+                e.onNext(true);
+                e.onComplete();
             }
-        }).compose(RxSchedulers.<Boolean>io_main());
+        });
     }
 
     private Bitmap collageLongBitmap(Bitmap oldBitmap, Bitmap newBitmap) {
@@ -286,46 +224,5 @@ public class ScreenshotModel implements ScreenshotContract.Model {
         }
         return collageBitmap;
     }
-
-    private Bitmap addBorder(Bitmap bitmap, int width) {
-        Bitmap newBitmap = Bitmap.createBitmap(width + bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
-        Canvas canvas = new Canvas(newBitmap);
-        canvas.drawColor(Color.TRANSPARENT);
-        canvas.drawBitmap(bitmap, 0.0F, 0.0F, null);
-        return newBitmap;
-    }
-
-    private int getDensityDpi() {
-        Display display = ((WindowManager) App.getContext().getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay();
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        display.getRealMetrics(displayMetrics);
-        return displayMetrics.densityDpi;
-    }
-
-    public int getHeight() {
-        Display display = ((WindowManager) App.getContext().getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay();
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        display.getRealMetrics(displayMetrics);
-        return displayMetrics.heightPixels;
-    }
-
-    public int getWidth() {
-        Display display = ((WindowManager) App.getContext().getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay();
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        display.getRealMetrics(displayMetrics);
-        return displayMetrics.widthPixels;
-    }
-
-    public int getRotation() {
-        Display display = ((WindowManager) App.getContext().getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay();
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        display.getRealMetrics(displayMetrics);
-        return display.getRotation();
-    }
-
 
 }

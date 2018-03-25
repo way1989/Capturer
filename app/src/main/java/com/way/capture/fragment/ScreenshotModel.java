@@ -1,12 +1,13 @@
 package com.way.capture.fragment;
 
 import com.way.capture.data.DataInfo;
-import com.way.capture.utils.RxSchedulers;
 
 import java.util.List;
 
-import rx.Observable;
-import rx.Subscriber;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+
 
 /**
  * Created by android on 16-12-1.
@@ -16,13 +17,12 @@ public class ScreenshotModel implements ScreenshotContract.Model {
 
     @Override
     public Observable<List<String>> getData(final int type) {
-        return Observable.create(new Observable.OnSubscribe<List<String>>() {
+        return Observable.create(new ObservableOnSubscribe<List<String>>() {
             @Override
-            public void call(Subscriber<? super List<String>> subscriber) {
-                List<String> data = DataInfo.getDataInfos(type);
-                subscriber.onNext(data);
-                subscriber.onCompleted();
+            public void subscribe(ObservableEmitter<List<String>> e) throws Exception {
+                e.onNext(DataInfo.getDataInfos(type));
+                e.onComplete();
             }
-        }).compose(RxSchedulers.<List<String>>io_main());
+        });
     }
 }

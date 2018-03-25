@@ -4,7 +4,8 @@ import android.app.Notification;
 import android.graphics.Bitmap;
 import android.net.Uri;
 
-import rx.Observable;
+import io.reactivex.Observable;
+
 
 /**
  * Created by android on 16-8-19.

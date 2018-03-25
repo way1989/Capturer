@@ -23,10 +23,10 @@ import com.way.downloadlibrary.net.exception.DataErrorEnum;
 
 import java.io.File;
 
-import rx.Observer;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+
 
 /**
  * Created by android on 16-12-2.
@@ -35,7 +35,7 @@ import rx.subscriptions.CompositeSubscription;
 public class VideoPresenter extends VideoContract.Presenter {
     private static final String TAG = "VideoPresenter";
     @NonNull
-    private final CompositeSubscription mSubscriptions;
+    private final CompositeDisposable mSubscriptions;
     private VideoContract.View mView;
     private VideoContract.Model mModel;
     private IDownloadListener mDownloadListener = new IDownloadListener() {
@@ -77,7 +77,7 @@ public class VideoPresenter extends VideoContract.Presenter {
 
     public VideoPresenter(VideoContract.View view) {
         mView = view;
-        mSubscriptions = new CompositeSubscription();
+        mSubscriptions = new CompositeDisposable();
         mModel = new VideoModel();
     }
 
@@ -95,10 +95,11 @@ public class VideoPresenter extends VideoContract.Presenter {
         }
         if (platform.startsWith("armeabi")) {
             mSubscriptions.clear();
-            mSubscriptions.add(mModel.loadLocalLibrary().subscribe(new Observer<Boolean>() {
+            DisposableObserver<Boolean> observer = new DisposableObserver<Boolean>() {
                 @Override
-                public void onCompleted() {
-
+                public void onNext(Boolean result) {
+                    if (result) mView.showCheckQuality();
+                    else mView.showError(App.getContext().getString(R.string.not_support_devices));
                 }
 
                 @Override
@@ -107,11 +108,13 @@ public class VideoPresenter extends VideoContract.Presenter {
                 }
 
                 @Override
-                public void onNext(Boolean result) {
-                    if (result) mView.showCheckQuality();
-                    else mView.showError(App.getContext().getString(R.string.not_support_devices));
+                public void onComplete() {
+
                 }
-            }));
+            };
+            mModel.loadLocalLibrary().subscribe(observer);
+            mSubscriptions.add(observer);
+
             return;
         }
         //if all not return, begin to download library
@@ -182,9 +185,9 @@ public class VideoPresenter extends VideoContract.Presenter {
 
             @Override
             public void downloadStart(final DownloadRequest downloadRequest) {
-                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                AndroidSchedulers.mainThread().scheduleDirect(new Runnable() {
                     @Override
-                    public void call() {
+                    public void run() {
                         mView.onDownloadStart(downloadRequest);
                     }
                 });
@@ -202,9 +205,9 @@ public class VideoPresenter extends VideoContract.Presenter {
                 if (!file.canExecute())
                     file.setExecutable(true);
 
-                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                AndroidSchedulers.mainThread().scheduleDirect(new Runnable() {
                     @Override
-                    public void call() {
+                    public void run() {
                         mView.onDownloadFinish(downloadRequest);
                     }
                 });
@@ -222,9 +225,9 @@ public class VideoPresenter extends VideoContract.Presenter {
 
             @Override
             public void downloadProgress(final DownloadRequest downloadRequest, final int downloadProgress) {
-                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                AndroidSchedulers.mainThread().scheduleDirect(new Runnable() {
                     @Override
-                    public void call() {
+                    public void run() {
                         mView.onDownloadProgress(downloadRequest, downloadProgress);
                     }
                 });
@@ -232,9 +235,9 @@ public class VideoPresenter extends VideoContract.Presenter {
 
             @Override
             public void downloadError(final DownloadRequest downloadRequest, final DataErrorEnum error) {
-                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                AndroidSchedulers.mainThread().scheduleDirect(new Runnable() {
                     @Override
-                    public void call() {
+                    public void run() {
                         mView.onDownloadError(downloadRequest, error);
                     }
                 });

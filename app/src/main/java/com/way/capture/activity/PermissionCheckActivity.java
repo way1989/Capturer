@@ -83,7 +83,7 @@ public class PermissionCheckActivity extends AppCompatActivity implements OnClic
     private void tryRequestPermission() {
         final String[] missingPermissions = OsUtil.getMissingRequiredPermissions();
         if (missingPermissions.length == 0) {
-            checkcanDrawOverlays();
+            checkCanDrawOverlays();
             return;
         }
 
@@ -111,11 +111,11 @@ public class PermissionCheckActivity extends AppCompatActivity implements OnClic
                 }
             }
             Log.v(TAG, "request permission success");
-            checkcanDrawOverlays();
+            checkCanDrawOverlays();
         }
     }
 
-    private void checkcanDrawOverlays() {
+    private void checkCanDrawOverlays() {
         if (OsUtil.canDrawOverlays(this)) {
             redirect();
         } else {

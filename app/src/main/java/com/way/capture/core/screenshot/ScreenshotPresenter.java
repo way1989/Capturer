@@ -27,10 +27,12 @@ import com.way.capture.fragment.SettingsFragment;
 import com.way.capture.utils.LongScreenshotUtil;
 import com.way.capture.utils.RxBus;
 import com.way.capture.utils.RxEvent;
+import com.way.capture.utils.RxSchedulers;
+import com.way.capture.utils.ViewUtils;
 
-import rx.Observer;
-import rx.Subscriber;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+
 
 /**
  * Created by android on 16-8-19.
@@ -42,14 +44,14 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     private final ScreenshotContract.View mView;
     private MediaActionSound mCameraSound;
     private Bitmap mScreenBitmap;
-    private CompositeSubscription mSubscriptions;
+    private CompositeDisposable mSubscriptions;
     private ScreenshotModel mScreenshotModel;
 
     public ScreenshotPresenter(ScreenshotContract.View view, int resultCode, Intent data) {
         mView = view;
 
         mScreenshotModel = new ScreenshotModel(resultCode, data);
-        mSubscriptions = new CompositeSubscription();
+        mSubscriptions = new CompositeDisposable();
         mContext = App.getContext();
 
         // Setup the Camera shutter sound
@@ -63,10 +65,12 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     @Override
     public void takeScreenshot() {
         mSubscriptions.clear();
-        mSubscriptions.add(mScreenshotModel.getNewBitmap().subscribe(new Observer<Bitmap>() {
+        DisposableObserver<Bitmap> observer = new DisposableObserver<Bitmap>() {
             @Override
-            public void onCompleted() {
-
+            public void onNext(Bitmap bitmap) {
+                Log.d(TAG, "takeScreenshot... onNext bitmap = " + bitmap);
+                mScreenBitmap = bitmap;
+                mView.showScreenshotAnim(mScreenBitmap, false, true);
             }
 
             @Override
@@ -76,13 +80,12 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
             }
 
             @Override
-            public void onNext(Bitmap bitmap) {
-                Log.d(TAG, "takeScreenshot... onNext bitmap = " + bitmap);
-                mScreenBitmap = bitmap;
-                mView.showScreenshotAnim(mScreenBitmap, false, true);
-            }
-        }));
+            public void onComplete() {
 
+            }
+        };
+        mScreenshotModel.getNewBitmap().compose(RxSchedulers.<Bitmap>io_main()).subscribe(observer);
+        mSubscriptions.add(observer);
     }
 
     @Override
@@ -98,40 +101,42 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
             return;
         }
         mSubscriptions.clear();
-        mSubscriptions.add(mScreenshotModel.takeLongScreenshot(mScreenBitmap, isAutoScroll)
-                .subscribe(new Subscriber<Bitmap>() {
-                    @Override
-                    public void onCompleted() {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        if (mScreenBitmap != null && !mScreenBitmap.isRecycled())
-                            mView.showScreenshotAnim(mScreenBitmap, true, false);
-                        else
-                            mView.showScreenshotError(e);
-                    }
-
-                    @Override
-                    public void onNext(Bitmap bitmap) {
-                        Log.i("LongScreenshotUtil", "onNext...");
+        DisposableObserver<Bitmap> observer = new DisposableObserver<Bitmap>() {
+            @Override
+            public void onNext(Bitmap bitmap) {
+                Log.i("LongScreenshotUtil", "onNext...");
 //                        if(mScreenBitmap == null || mScreenBitmap.isRecycled()){
 //                            mView.showScreenshotError(new Throwable("bitmap is null..."));
 //                            return;
 //                        }
-                        if (bitmap == null || bitmap.isRecycled()) {
-                            mView.showScreenshotAnim(mScreenBitmap, true, false);
-                        } else if (bitmap.getHeight() == mScreenBitmap.getHeight()
-                                || mScreenBitmap.getHeight() / mScreenshotModel.getHeight() > 9) {
-                            mView.showScreenshotAnim(bitmap, true, false);
-                        } else {
-                            mView.onCollageFinish();
-                            mScreenBitmap.recycle();
-                            mScreenBitmap = bitmap;
-                        }
-                    }
-                }));
+                if (bitmap == null || bitmap.isRecycled()) {
+                    mView.showScreenshotAnim(mScreenBitmap, true, false);
+                } else if (bitmap.getHeight() == mScreenBitmap.getHeight()
+                        || mScreenBitmap.getHeight() / ViewUtils.getHeight() > 9) {
+                    mView.showScreenshotAnim(bitmap, true, false);
+                } else {
+                    mView.onCollageFinish();
+                    mScreenBitmap.recycle();
+                    mScreenBitmap = bitmap;
+                }
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                if (mScreenBitmap != null && !mScreenBitmap.isRecycled())
+                    mView.showScreenshotAnim(mScreenBitmap, true, false);
+                else
+                    mView.showScreenshotError(e);
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        };
+        mScreenshotModel.takeLongScreenshot(mScreenBitmap, isAutoScroll).compose(RxSchedulers.<Bitmap>io_main()).subscribe(observer);
+
+        mSubscriptions.add(observer);
 
     }
 
@@ -181,9 +186,11 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
             mView.notify(notificationBuilder.build());
         }
         mSubscriptions.clear();
-        mSubscriptions.add(mScreenshotModel.saveScreenshot(mScreenBitmap, notificationBuilder).subscribe(new Observer<Uri>() {
+        DisposableObserver<Uri> observer = new DisposableObserver<Uri>() {
             @Override
-            public void onCompleted() {
+            public void onNext(Uri uri) {
+                Log.d(TAG, "saveScreenshot onNext...");
+                onSaveFinish(uri, notificationBuilder, style);
             }
 
             @Override
@@ -193,12 +200,13 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
             }
 
             @Override
-            public void onNext(Uri uri) {
-                Log.d(TAG, "saveScreenshot onNext...");
-                onSaveFinish(uri, notificationBuilder, style);
-            }
-        }));
+            public void onComplete() {
 
+            }
+        };
+        mScreenshotModel.saveScreenshot(mScreenBitmap, notificationBuilder).compose(RxSchedulers.<Uri>io_main()).subscribe(observer);
+
+        mSubscriptions.add(observer);
     }
 
     @NonNull
@@ -210,7 +218,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
         final int iconSize = r.getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
         int previewWidth = r.getDimensionPixelSize(R.dimen.notification_panel_width);
         if (previewWidth <= 0) {
-            previewWidth = mScreenshotModel.getWidth();
+            previewWidth = ViewUtils.getWidth();
         }
         final int previewHeight = r.getDimensionPixelSize(R.dimen.notification_max_height);
 

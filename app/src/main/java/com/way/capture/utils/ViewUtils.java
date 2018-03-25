@@ -1,6 +1,12 @@
 package com.way.capture.utils;
 
+import android.content.Context;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
+
+import com.way.capture.App;
 
 public final class ViewUtils {
 
@@ -36,5 +42,38 @@ public final class ViewUtils {
         if (v.getVisibility() != visibility) {
             v.setVisibility(visibility);
         }
+    }
+
+    public static int getDensityDpi() {
+        Display display = ((WindowManager) App.getContext().getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        display.getRealMetrics(displayMetrics);
+        return displayMetrics.densityDpi;
+    }
+
+    public static int getWidth() {
+        Display display = ((WindowManager) App.getContext().getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        display.getRealMetrics(displayMetrics);
+        return displayMetrics.widthPixels;
+    }
+
+    public static int getHeight() {
+        Display display = ((WindowManager) App.getContext().getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        display.getRealMetrics(displayMetrics);
+        return displayMetrics.heightPixels;
+    }
+
+
+    public static int getRotation() {
+        Display display = ((WindowManager) App.getContext().getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        display.getRealMetrics(displayMetrics);
+        return display.getRotation();
     }
 }

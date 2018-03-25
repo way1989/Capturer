@@ -6,7 +6,7 @@ import com.way.capture.base.BaseView;
 import com.way.downloadlibrary.DownloadRequest;
 import com.way.downloadlibrary.net.exception.DataErrorEnum;
 
-import rx.Observable;
+import io.reactivex.Observable;
 
 
 /**

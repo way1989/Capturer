@@ -2,12 +2,13 @@ package com.way.capture.fragment;
 
 import android.support.annotation.NonNull;
 
+import com.way.capture.utils.RxSchedulers;
+
 import java.util.List;
 
-import rx.Observer;
-import rx.Subscription;
-import rx.functions.Action0;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+
 
 /**
  * Created by android on 16-12-1.
@@ -15,42 +16,38 @@ import rx.subscriptions.CompositeSubscription;
 
 public class ScreenshotPresenter extends ScreenshotContract.Presenter {
     @NonNull
-    private final CompositeSubscription mSubscriptions;
+    private final CompositeDisposable mSubscriptions;
     private final ScreenshotContract.Model mModel;
 
     public ScreenshotPresenter(ScreenshotContract.View view) {
         mView = view;
-        mSubscriptions = new CompositeSubscription();
+        mSubscriptions = new CompositeDisposable();
         mModel = new ScreenshotModel();
     }
 
     @Override
     public void getData(int type) {
+        mView.showLoading();
         mSubscriptions.clear();
-        Subscription subscription = mModel.getData(type)
-                .doOnSubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        mView.showLoading();
-                    }
-                })
-                .subscribe(new Observer<List<String>>() {
-                    @Override
-                    public void onCompleted() {
+        DisposableObserver<List<String>> observer = new DisposableObserver<List<String>>() {
+            @Override
+            public void onNext(List<String> data) {
+                mView.onLoadFinished(data);
+            }
 
-                    }
+            @Override
+            public void onError(Throwable e) {
+                mView.onError(e);
+            }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        mView.onError(e);
-                    }
+            @Override
+            public void onComplete() {
 
-                    @Override
-                    public void onNext(List<String> data) {
-                        mView.onLoadFinished(data);
-                    }
-                });
-        mSubscriptions.add(subscription);
+            }
+        };
+        mModel.getData(type).compose(RxSchedulers.<List<String>>io_main()).subscribe(observer);
+
+        mSubscriptions.add(observer);
     }
 
     @Override

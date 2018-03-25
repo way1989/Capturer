@@ -37,7 +37,7 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
     public FloatMenuDialog(Context context, int themeResId) {
         super(context, themeResId);
         setCanceledOnTouchOutside(true);
-        getWindow().setType(WindowManager.LayoutParams.TYPE_TOAST);
+        getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
     }
 
     public void setOnClickListener(View.OnClickListener listener) {
@@ -84,7 +84,7 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
         hideMenu();
     }
 
-    private void superDimiss() {
+    private void superDismiss() {
         super.dismiss();
     }
 
@@ -135,7 +135,7 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 isHideAnimPlaying = false;
-                superDimiss();//中心button动画结束，整个过程结束，dialog消失
+                superDismiss();//中心button动画结束，整个过程结束，dialog消失
                 if (mListener != null && mClickView != null) {
                     ((Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE)).vibrate(30);
                     mListener.onClick(mClickView);

@@ -17,8 +17,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import rx.Observable;
-import rx.Subscriber;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 
 
 /**
@@ -32,12 +33,11 @@ public class VideoModel implements VideoContract.Model {
 
     @Override
     public Observable<Boolean> loadLocalLibrary() {
-        return Observable.create(new Observable.OnSubscribe<Boolean>() {
+        return Observable.create(new ObservableOnSubscribe<Boolean>() {
             @Override
-            public void call(Subscriber<? super Boolean> subscriber) {
-                boolean result = copyAndLoadLibrary();
-                subscriber.onNext(result);
-                subscriber.onCompleted();
+            public void subscribe(ObservableEmitter<Boolean> e) throws Exception {
+                e.onNext(copyAndLoadLibrary());
+                e.onComplete();
             }
         }).compose(RxSchedulers.<Boolean>io_main());
     }

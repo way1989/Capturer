@@ -6,7 +6,8 @@ import com.way.capture.base.BaseView;
 
 import java.util.List;
 
-import rx.Observable;
+import io.reactivex.Observable;
+
 
 /**
  * Created by android on 16-12-1.

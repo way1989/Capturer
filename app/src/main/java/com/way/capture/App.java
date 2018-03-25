@@ -1,7 +1,6 @@
 package com.way.capture;
 
 import android.app.Application;
-import android.content.Context;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatDelegate;
 
@@ -15,18 +14,18 @@ import com.way.downloadlibrary.WDMSharPre;
  */
 public class App extends Application {
     public static final String KEY_NIGHT_MODE = "night_mode_key";
-    private static Context mContext;
+    private static Application mApplication;
 
-    public static Context getContext() {
-        return mContext;
+    public static Application getContext() {
+        return mApplication;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mContext = getApplicationContext();
+        mApplication = this;
         //Bugly
-        CrashReport.initCrashReport(mContext, BuildConfig.BUGLY_APPID, false);
+        CrashReport.initCrashReport(this, BuildConfig.BUGLY_APPID, false);
 
         //LeakCanary
         LeakCanary.install(this);

@@ -16,7 +16,7 @@ import android.widget.ImageView;
 import com.afollestad.dragselectrecyclerview.DragSelectRecyclerView;
 import com.afollestad.dragselectrecyclerview.DragSelectRecyclerViewAdapter;
 import com.afollestad.materialcab.MaterialCab;
-import com.trello.rxlifecycle.android.FragmentEvent;
+import com.trello.rxlifecycle2.android.FragmentEvent;
 import com.way.capture.App;
 import com.way.capture.R;
 import com.way.capture.activity.DetailsActivity;
@@ -35,9 +35,9 @@ import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by way on 16/4/10.
@@ -176,9 +176,9 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .compose(this.<RxEvent.NewPathEvent>bindUntilEvent(FragmentEvent.DESTROY))
-                .subscribe(new Action1<RxEvent.NewPathEvent>() {
+                .subscribe(new Consumer<RxEvent.NewPathEvent>() {
                     @Override
-                    public void call(RxEvent.NewPathEvent newPathEvent) {
+                    public void accept(RxEvent.NewPathEvent newPathEvent) throws Exception {
                         final int type = newPathEvent.type;
                         final String path = newPathEvent.path;
                         if (type == mType) {

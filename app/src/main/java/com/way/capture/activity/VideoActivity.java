@@ -166,7 +166,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
                 return true;
             case R.id.video_menu_to_gif:
                 if (!isModified()) {
-                    Snackbar.make(mVideoView, R.string.gif_length_error, Snackbar.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.gif_length_error, Toast.LENGTH_SHORT).show();
                     return true;
                 }
                 mVideoView.pause();

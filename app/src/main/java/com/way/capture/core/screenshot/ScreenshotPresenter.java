@@ -20,6 +20,7 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.glidebitmappool.GlideBitmapPool;
 import com.way.capture.App;
 import com.way.capture.R;
 import com.way.capture.data.DataInfo;
@@ -104,7 +105,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
         DisposableObserver<Bitmap> observer = new DisposableObserver<Bitmap>() {
             @Override
             public void onNext(Bitmap bitmap) {
-                Log.i("LongScreenshotUtil", "onNext...");
+                Log.i(TAG, "onNext...");
 //                        if(mScreenBitmap == null || mScreenBitmap.isRecycled()){
 //                            mView.showScreenshotError(new Throwable("bitmap is null..."));
 //                            return;
@@ -155,7 +156,6 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     @Override
     public void stopLongScreenshot() {
         mSubscriptions.clear();
-        LongScreenshotUtil.getInstance().stop();
         if (mScreenBitmap != null && !mScreenBitmap.isRecycled()) {
             mView.showScreenshotAnim(mScreenBitmap, true, false);
         } else {

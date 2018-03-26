@@ -15,6 +15,9 @@ import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.util.Log;
 
+import com.glidebitmappool.GlideBitmapFactory;
+import com.glidebitmappool.GlideBitmapPool;
+
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -95,7 +98,7 @@ public class RxScreenshot extends Observable<Bitmap> {
                     ByteBuffer byteBuffer = planes[0].getBuffer();
                     int pixelStride = planes[0].getPixelStride();
                     int rowStride = planes[0].getRowStride() - pixelStride * imageWidth;
-                    Bitmap bitmap = Bitmap.createBitmap(imageWidth + rowStride / pixelStride, imageHeight,
+                    Bitmap bitmap = GlideBitmapPool.getBitmap(imageWidth + rowStride / pixelStride, imageHeight,
                             Bitmap.Config.ARGB_8888);
                     bitmap.copyPixelsFromBuffer(byteBuffer);
                     if (rowStride != 0) {

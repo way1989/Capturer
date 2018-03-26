@@ -13,6 +13,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode VERSION_CODE.toInteger()
         versionName VERSION_NAME
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         //multiDexEnabled true
     }
 
@@ -74,6 +75,10 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+    testImplementation "junit:junit:$rootProject.junitVersion"
+    androidTestImplementation("com.android.support.test.espresso:espresso-core:$rootProject.espressoVersion", {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
     //compile project(':firupgrade')
     implementation project(':downloadlibrary')
     implementation "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"
@@ -130,4 +135,7 @@ dependencies {
 
     //loading layout
     implementation 'com.lai.weavey:loadinglayout:1.3.1'
+
+    //bitmap pool
+    implementation 'com.amitshekhar.android:glide-bitmap-pool:0.0.1'
 }

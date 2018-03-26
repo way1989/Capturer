@@ -34,8 +34,9 @@ ext {
 
     // App dependencies
     supportLibraryVersion = '27.1.0'
-    butterknifeVersion = '8.8.1'
     junitVersion = '4.12'
+    espressoVersion = '2.2.2'
+    butterknifeVersion = '8.8.1'
     buglyVersion = '2.1.5'
     nanohttpdVersion = '2.3.0'
     zxingVersion = '3.2.1'

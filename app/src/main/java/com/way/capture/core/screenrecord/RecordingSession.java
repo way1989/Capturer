@@ -3,6 +3,7 @@ package com.way.capture.core.screenrecord;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -12,6 +13,8 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.hardware.display.VirtualDisplay;
 import android.media.CamcorderProfile;
+import android.media.MediaCodecInfo;
+import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
@@ -23,6 +26,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -31,6 +35,10 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.way.capture.R;
+import com.way.capture.core.screenrecord.record.AudioEncodeConfig;
+import com.way.capture.core.screenrecord.record.Notifications;
+import com.way.capture.core.screenrecord.record.ScreenRecorder;
+import com.way.capture.core.screenrecord.record.VideoEncodeConfig;
 import com.way.capture.data.DataInfo;
 import com.way.capture.fragment.SettingsFragment;
 import com.way.capture.utils.RxBus;
@@ -54,6 +62,7 @@ import static android.media.MediaRecorder.OutputFormat.MPEG_4;
 import static android.media.MediaRecorder.VideoEncoder.H264;
 import static android.media.MediaRecorder.VideoSource.SURFACE;
 import static android.os.Environment.DIRECTORY_MOVIES;
+import static com.thefinestartist.utils.content.ContextUtil.sendBroadcast;
 
 public final class RecordingSession implements MediaRecorder.OnErrorListener, MediaRecorder.OnInfoListener {
     private static final int NOTIFICATION_ID = 789;
@@ -71,10 +80,7 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
     private final WindowManager mWindowManager;
     private final MediaProjectionManager mProjectionManager;
     private OverlayView mOverlayView;
-    private MediaRecorder mMediaRecorder;
     private MediaProjection mMediaProjection;
-    private VirtualDisplay mVirtualDisplay;
-    private String mOutputFile;
     private boolean mIsRunning;
     private BroadcastReceiver mStopReceiver = new BroadcastReceiver() {
         @Override
@@ -96,6 +102,7 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
         mNotificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         mWindowManager = (WindowManager) context.getSystemService(WINDOW_SERVICE);
         mProjectionManager = (MediaProjectionManager) context.getSystemService(MEDIA_PROJECTION_SERVICE);
+        mNotifications = new Notifications(context);
     }
 
     private static RecordingInfo calculateRecordingInfo(int displayWidth, int displayHeight,
@@ -221,8 +228,17 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
             Log.e(TAG, "Unable to create output directory '" + mOutputDir.getAbsolutePath());
             // We're probably about to crash, but at least the log will indicate as to why.
         }
+        mMediaProjection = mProjectionManager.getMediaProjection(mResultCode, mIntentData);
+        VideoEncodeConfig video = createVideoConfig();
+        AudioEncodeConfig audio = createAudioConfig(); // audio can be null
 
-        RecordingInfo recordingInfo = getRecordingInfo();
+        String outputName = mFileFormat.format(new Date());
+        File file = new File(mOutputDir, outputName);
+        mRecorder = newRecorder(mMediaProjection, video, audio, file);
+        mRecorder.start();
+        mContext.registerReceiver(mStopActionReceiver, new IntentFilter(Notifications.ACTION_STOP));
+
+        /*RecordingInfo recordingInfo = getRecordingInfo();
         Log.d(TAG, "Recording: " + recordingInfo.width + " x "
                 + recordingInfo.height + " @ " + recordingInfo.density);
 
@@ -252,7 +268,7 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
         mVirtualDisplay = mMediaProjection.createVirtualDisplay(DISPLAY_NAME, recordingInfo.width, recordingInfo.height,
                 recordingInfo.density, VIRTUAL_DISPLAY_FLAG_PRESENTATION, surface, null, null);
 
-        mMediaRecorder.start();
+        mMediaRecorder.start();*/
         mIsRunning = true;
         mListener.onStart();
 
@@ -273,8 +289,9 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
         } else {
             hideOverlay();
         }
-
-        // Stop the mMediaProjection in order to flush everything to the mMediaRecorder.
+        mMediaProjection.stop();
+        stopRecorder();
+/*        // Stop the mMediaProjection in order to flush everything to the mMediaRecorder.
         mMediaProjection.stop();
 
         //设置后不会崩
@@ -292,12 +309,12 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
         }
 
         mMediaRecorder.release();
-        mVirtualDisplay.release();
+        mVirtualDisplay.release();*/
 
         mListener.onStop();
 
         Log.d(TAG, "Screen recording stopped. Notifying media scanner of new video.");
-        if (!fail)
+       /* if (!fail)
             MediaScannerConnection.scanFile(mContext, new String[]{mOutputFile}, null,
                     new MediaScannerConnection.OnScanCompletedListener() {
                         @Override
@@ -312,7 +329,7 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
                                     }
                                 });
                         }
-                    });
+                    });*/
     }
 
     private void deleteVideoFile(String fileName) {
@@ -470,4 +487,140 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
             }.execute();
         }
     }
+
+
+    private Notifications mNotifications;
+    private ScreenRecorder newRecorder(MediaProjection mediaProjection, VideoEncodeConfig video,
+                                       AudioEncodeConfig audio, final File output) {
+        ScreenRecorder r = new ScreenRecorder(video, audio,
+                1, mediaProjection, output.getAbsolutePath());
+        r.setCallback(new ScreenRecorder.Callback() {
+            long startTime = 0;
+
+            @Override
+            public void onStop(Throwable error) {
+                //runOnUiThread(() -> stopRecorder());
+                if (error != null) {
+                    //toast("Recorder error ! See logcat for more details");
+                    error.printStackTrace();
+                    output.delete();
+                } else {
+                    /*Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+                            .addCategory(Intent.CATEGORY_DEFAULT)
+                            .setData(Uri.fromFile(output));
+                    sendBroadcast(intent);*/
+                    MediaScannerConnection.scanFile(mContext, new String[]{output.getAbsolutePath()}, null,
+                            new MediaScannerConnection.OnScanCompletedListener() {
+                                @Override
+                                public void onScanCompleted(String path, final Uri uri) {
+                                    Log.d(TAG, "Media scanner completed.");
+                                    if (uri != null)
+                                        mHandler.post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                RxBus.getInstance().post(new RxEvent.NewPathEvent(DataInfo.TYPE_SCREEN_RECORD, output.getAbsolutePath()));
+                                                showNotification(uri, null);
+                                            }
+                                        });
+                                }
+                            });
+                }
+            }
+
+            @Override
+            public void onStart() {
+                mNotifications.recording(0);
+            }
+
+            @Override
+            public void onRecording(long presentationTimeUs) {
+                if (startTime <= 0) {
+                    startTime = presentationTimeUs;
+                }
+                long time = (presentationTimeUs - startTime) / 1000;
+                mNotifications.recording(time);
+            }
+        });
+        return r;
+    }
+
+    private ScreenRecorder mRecorder;
+    private AudioEncodeConfig createAudioConfig() {
+        //if (!mAudioToggle.isChecked()) return null;
+        String codec = "OMX.google.aac.encoder";
+        if (codec == null) {
+            return null;
+        }
+        int bitrate = 80 * 1000;
+        int samplerate = 44100;
+        int channelCount = 1;
+        int profile = 1;
+
+        return new AudioEncodeConfig(codec, MediaFormat.MIMETYPE_AUDIO_AAC, bitrate, samplerate, channelCount, profile);
+    }
+
+    private VideoEncodeConfig createVideoConfig() {
+        final String codec = "OMX.google.h264.encoder";
+        if (codec == null) {
+            // no selected codec ??
+            return null;
+        }
+        // video size
+        RecordingInfo recordingInfo = getRecordingInfo();
+        Log.d(TAG, "Recording: " + recordingInfo.width + " x "
+                + recordingInfo.height + " @ " + recordingInfo.density);
+        int[] selectedWithHeight = new int[]{recordingInfo.width, recordingInfo.height};
+        Configuration configuration = mContext.getResources().getConfiguration();
+        boolean isLandscape = configuration.orientation == ORIENTATION_LANDSCAPE;
+        int width = selectedWithHeight[isLandscape ? 0 : 1];
+        int height = selectedWithHeight[isLandscape ? 1 : 0];
+        int framerate = 24;
+        int iframe = 5;
+        int bitrate = 800 * 1000;
+        MediaCodecInfo.CodecProfileLevel profileLevel = null;
+        return new VideoEncodeConfig(width, height, bitrate,
+                framerate, iframe, codec, MediaFormat.MIMETYPE_VIDEO_AVC, profileLevel);
+    }
+    private void stopRecorder() {
+        mNotifications.clear();
+        if (mRecorder != null) {
+            mRecorder.quit();
+        }
+        mRecorder = null;
+        try {
+            mContext.unregisterReceiver(mStopActionReceiver);
+        } catch (Exception e) {
+            //ignored
+        }
+    }
+    private BroadcastReceiver mStopActionReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            File file = new File(mRecorder.getSavedPath());
+            if (Notifications.ACTION_STOP.equals(intent.getAction())) {
+                stopRecorder();
+            }
+            Toast.makeText(context, "Recorder stopped!\n Saved file " + file, Toast.LENGTH_LONG).show();
+            StrictMode.VmPolicy vmPolicy = StrictMode.getVmPolicy();
+            try {
+                // disable detecting FileUriExposure on public file
+                StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().build());
+                viewResult(file);
+            } finally {
+                StrictMode.setVmPolicy(vmPolicy);
+            }
+        }
+
+        private void viewResult(File file) {
+            Intent view = new Intent(Intent.ACTION_VIEW);
+            view.addCategory(Intent.CATEGORY_DEFAULT);
+            view.setDataAndType(Uri.fromFile(file), MediaFormat.MIMETYPE_VIDEO_AVC);
+            view.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            try {
+                mContext.startActivity(view);
+            } catch (ActivityNotFoundException e) {
+                // no activity can open this video
+            }
+        }
+    };
 }

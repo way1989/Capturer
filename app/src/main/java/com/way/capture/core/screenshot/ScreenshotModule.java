@@ -47,6 +47,7 @@ import com.way.capture.fragment.SettingsFragment;
 import com.way.capture.service.ModuleService;
 import com.way.capture.utils.DensityUtil;
 import com.way.capture.utils.ScrollUtils;
+import com.way.capture.utils.ViewUtils;
 import com.way.capture.widget.freecrop.FreeCropView;
 import com.way.capture.widget.rectcrop.CropImageView;
 import com.way.capture.widget.swipe.SwipeHelper;
@@ -165,7 +166,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         mWindowLayoutParams = new WindowManager.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT, 0, 0, WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
+                ViewGroup.LayoutParams.MATCH_PARENT, 0, 0, ViewUtils.getFloatType(),
                 WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                         | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
@@ -584,7 +585,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         //mLongScreenshotCover.setBackgroundColor(Color.parseColor("#80ff0000"));
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 0,
-                WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
+                ViewUtils.getFloatType(),
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
                         | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
@@ -609,7 +610,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     private void addToast() {
         mLongScreenshotToast = mLayoutInflater.inflate(R.layout.long_screenshot_toast, null);
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT, 0, 0, WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
+                ViewGroup.LayoutParams.MATCH_PARENT, 0, 0, ViewUtils.getFloatType(),
                 WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                         | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
@@ -794,7 +795,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
             lp.token = null;
             lp.y = 0;
             lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED;
-            lp.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+            lp.type = ViewUtils.getFloatType();
             lp.format = PixelFormat.TRANSLUCENT;
             lp.setTitle(TAG);
             window.setAttributes(lp);
@@ -864,7 +865,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
             lp.token = null;
             lp.y = 0;
             lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED;
-            lp.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+            lp.type = ViewUtils.getFloatType();
             lp.format = PixelFormat.TRANSLUCENT;
             lp.setTitle(TAG);
             window.setAttributes(lp);

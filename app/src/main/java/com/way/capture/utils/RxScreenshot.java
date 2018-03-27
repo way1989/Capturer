@@ -98,7 +98,7 @@ public class RxScreenshot extends Observable<Bitmap> {
                     ByteBuffer byteBuffer = planes[0].getBuffer();
                     int pixelStride = planes[0].getPixelStride();
                     int rowStride = planes[0].getRowStride() - pixelStride * imageWidth;
-                    Bitmap bitmap = GlideBitmapPool.getBitmap(imageWidth + rowStride / pixelStride, imageHeight,
+                    Bitmap bitmap = Bitmap.createBitmap(imageWidth + rowStride / pixelStride, imageHeight,
                             Bitmap.Config.ARGB_8888);
                     bitmap.copyPixelsFromBuffer(byteBuffer);
                     if (rowStride != 0) {

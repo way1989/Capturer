@@ -1,6 +1,7 @@
 package com.way.capture.utils;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.View;
@@ -75,5 +76,12 @@ public final class ViewUtils {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         display.getRealMetrics(displayMetrics);
         return display.getRotation();
+    }
+
+    public static int getFloatType() {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
+            return WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        }
+        return WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
     }
 }

@@ -3,6 +3,7 @@ package com.way.capture.utils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
@@ -59,5 +60,26 @@ public class LongScreenshotUtilTest {
         Log.d(TAG, "collageLongBitmap test collage bitmap onNext: bitmap = " + bitmap.getWidth() + "x" + bitmap.getHeight());
         saveData(bitmap, new File(appContext.getExternalCacheDir(), "1.png"));
         assertNotNull(bitmap);
+    }
+
+    @Test
+    public void testColorDifferent () throws Exception {
+        int a = Color.parseColor("#000000");
+        int b = Color.parseColor("#ffffff");
+
+        final int oldRed = Color.red(a);
+        final int oldGreen = Color.green(a);
+        final int oldBlue = Color.blue(a);
+
+        final int newRed = Color.red(b);
+        final int newGreen = Color.green(b);
+        final int newBlue = Color.blue(b);
+
+        final int redDifferent = Math.abs(oldRed - newRed);
+        final int greenDifferent = Math.abs(oldGreen - newGreen);
+        final int blueDifferent = Math.abs(oldBlue - newBlue);
+
+        final double dif = Math.sqrt(redDifferent * redDifferent + greenDifferent * greenDifferent + blueDifferent * blueDifferent);
+        Log.e(TAG, "testColorDifferent: dif = " + dif);
     }
 }

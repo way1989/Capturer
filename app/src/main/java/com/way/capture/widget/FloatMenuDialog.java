@@ -37,7 +37,7 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
     public FloatMenuDialog(Context context, int themeResId) {
         super(context, themeResId);
         setCanceledOnTouchOutside(true);
-        getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        getWindow().setType(ViewUtils.getFloatType());
     }
 
     public void setOnClickListener(View.OnClickListener listener) {

@@ -39,6 +39,8 @@ import android.view.WindowManager;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 
+import com.way.capture.utils.ViewUtils;
+
 import java.lang.ref.WeakReference;
 
 /**
@@ -212,7 +214,7 @@ public class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreD
         mWindowManager.getDefaultDisplay().getMetrics(mMetrics);
         mParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
         mParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-        mParams.type = WindowManager.LayoutParams.TYPE_TOAST;
+        mParams.type = ViewUtils.getFloatType();
         mParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS |
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;

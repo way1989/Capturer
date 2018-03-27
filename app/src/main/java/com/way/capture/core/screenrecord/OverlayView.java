@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.way.capture.R;
 import com.way.capture.fragment.SettingsFragment;
 import com.way.capture.utils.AppUtils;
+import com.way.capture.utils.ViewUtils;
 import com.way.capture.widget.timely.TimelyView;
 
 import static android.graphics.PixelFormat.TRANSLUCENT;
@@ -24,7 +25,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 
 final class OverlayView extends FrameLayout implements View.OnClickListener {
     private static final String TAG = "OverlayView";
@@ -55,7 +55,7 @@ final class OverlayView extends FrameLayout implements View.OnClickListener {
         int width = WindowManager.LayoutParams.WRAP_CONTENT;
         int height = WindowManager.LayoutParams.WRAP_CONTENT;
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(width, height,
-                TYPE_SYSTEM_ALERT, FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL | FLAG_LAYOUT_NO_LIMITS
+                ViewUtils.getFloatType(), FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL | FLAG_LAYOUT_NO_LIMITS
                 | FLAG_LAYOUT_INSET_DECOR | FLAG_LAYOUT_IN_SCREEN, TRANSLUCENT);
         params.windowAnimations = R.style.VolumePanelAnimation;
         params.y = res.getDimensionPixelSize(R.dimen.overlay_height) * 2;

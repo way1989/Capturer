@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.way.capture.R;
 import com.way.capture.fragment.SettingsFragment;
 import com.way.capture.utils.AppUtils;
+import com.way.capture.utils.RxScreenshot;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -65,6 +66,9 @@ public final class ScreenRecordService extends Service {
                         .setContentTitle(title)/*.setContentText(subtitle)*/.setSmallIcon(R.drawable.ic_videocam)
                         .setColor(context.getResources().getColor(R.color.colorPrimary)).setAutoCancel(true)
                         .setPriority(Notification.PRIORITY_MIN);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    builder.setChannelId(RxScreenshot.DISPLAY_NAME);
+                }
                 Intent stopIntent = new Intent("com.way.stop");
                 stopIntent.putExtra("id", NOTIFICATION_ID);
                 builder.addAction(R.drawable.ic_clear, context.getResources()
@@ -113,6 +117,9 @@ public final class ScreenRecordService extends Service {
                 .setOngoing(true)
                 .setSmallIcon(R.drawable.ic_videocam)
                 .setContentTitle(getString(R.string.notification_recording_title));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.setChannelId(RxScreenshot.DISPLAY_NAME);
+        }
         Intent stopRecording = new Intent(ACTION_STOP_SCREENRECORD);
         stopRecording.putExtra("id", NOTIFICATION_ID);
         builder.addAction(R.drawable.ic_stop, getString(R.string.stop),

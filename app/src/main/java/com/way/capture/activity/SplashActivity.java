@@ -107,12 +107,14 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        image = (ImageView) findViewById(R.id.image);
-        title = (TextView) findViewById(R.id.title);
+        image = findViewById(R.id.image);
+        title = findViewById(R.id.title);
         foreMask = findViewById(R.id.foreMask);
         logo = findViewById(R.id.logo);
         colorDrawable = new ColorDrawable(Color.BLACK);
         image.setBackground(colorDrawable);
+        getWindow().setStatusBarColor(Color.BLACK);
+        getWindow().setNavigationBarColor(Color.BLACK);
         mHandler.sendEmptyMessageDelayed(HANDLER_MESSAGE_ANIMATION, 900L);
     }
 

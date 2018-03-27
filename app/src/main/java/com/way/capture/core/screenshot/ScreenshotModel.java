@@ -16,7 +16,7 @@ import android.util.Log;
 import com.way.capture.App;
 import com.way.capture.R;
 import com.way.capture.core.DeleteScreenshot;
-import com.way.capture.utils.LongScreenshotUtil;
+import com.way.capture.utils.BitmapCollageUtil;
 import com.way.capture.utils.OsUtil;
 import com.way.capture.utils.RxScreenshot;
 import com.way.capture.utils.ScrollUtils;
@@ -215,7 +215,7 @@ public class ScreenshotModel implements ScreenshotContract.Model {
         }
 
         //collage a new bitmap
-        Bitmap collageBitmap = LongScreenshotUtil.getInstance()
+        Bitmap collageBitmap = BitmapCollageUtil.getInstance()
                 .collageLongBitmap(oldBitmap, newBitmap);
 
         if (collageBitmap == null || collageBitmap.isRecycled()) {

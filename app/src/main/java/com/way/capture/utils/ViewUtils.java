@@ -79,7 +79,7 @@ public final class ViewUtils {
     }
 
     public static int getFloatType() {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             return WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         }
         return WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;

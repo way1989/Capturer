@@ -19,6 +19,7 @@ import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -34,6 +35,7 @@ import com.way.capture.data.DataInfo;
 import com.way.capture.fragment.SettingsFragment;
 import com.way.capture.utils.RxBus;
 import com.way.capture.utils.RxEvent;
+import com.way.capture.utils.RxScreenshot;
 
 import java.io.File;
 import java.io.IOException;
@@ -345,6 +347,9 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
                 .setColor(mContext.getResources().getColor(R.color.colorPrimary)).setContentIntent(pendingViewIntent)
                 .setAutoCancel(true).addAction(R.drawable.ic_menu_share, share, pendingShareIntent)
                 .addAction(R.drawable.ic_menu_delete, delete, pendingDeleteIntent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.setChannelId(RxScreenshot.DISPLAY_NAME);
+        }
 
         if (bitmap != null) {
             builder.setLargeIcon(createSquareBitmap(bitmap))

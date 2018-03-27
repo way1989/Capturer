@@ -14,21 +14,21 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.media.MediaActionSound;
 import android.net.Uri;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.glidebitmappool.GlideBitmapPool;
 import com.way.capture.App;
 import com.way.capture.R;
 import com.way.capture.data.DataInfo;
 import com.way.capture.fragment.SettingsFragment;
-import com.way.capture.utils.LongScreenshotUtil;
 import com.way.capture.utils.RxBus;
 import com.way.capture.utils.RxEvent;
 import com.way.capture.utils.RxSchedulers;
+import com.way.capture.utils.RxScreenshot;
 import com.way.capture.utils.ViewUtils;
 
 import io.reactivex.disposables.CompositeDisposable;
@@ -243,7 +243,9 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                 .setContentTitle(r.getString(R.string.screenshot_saving_title))
                 .setContentText(r.getString(R.string.screenshot_saving_text)).setSmallIcon(R.drawable.stat_notify_image)
                 .setWhen(now).setColor(r.getColor(R.color.system_notification_accent_color));
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationBuilder.setChannelId(RxScreenshot.DISPLAY_NAME);
+        }
         Notification.BigPictureStyle notificationStyle = new Notification.BigPictureStyle().bigPicture(preview);
         notificationBuilder.setStyle(notificationStyle);
 

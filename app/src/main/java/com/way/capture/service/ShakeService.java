@@ -2,6 +2,8 @@ package com.way.capture.service;
 
 import android.app.KeyguardManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -15,8 +17,6 @@ import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Vibrator;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -24,6 +24,7 @@ import android.view.View;
 import com.way.capture.R;
 import com.way.capture.activity.MainActivity;
 import com.way.capture.core.LauncherActivity;
+import com.way.capture.utils.RxScreenshot;
 import com.way.capture.widget.FloatMenuDialog;
 
 
@@ -39,7 +40,6 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
     private static final int SPEED_SHRESHOLD = 60;// 这个值越大需要越大的力气来摇晃手机
     private static final int UPTATE_INTERVAL_TIME = 50;
     private Vibrator mVibrator;
-    private boolean mIsRunning;
     private KeyguardManager mKeyguardManager;
     private SensorManager mSensorManager = null;
     private FloatMenuDialog mFloatMenuDialog;
@@ -84,12 +84,18 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
     public void initData() {
         mKeyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
         mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        mSensorManager = (SensorManager) this
-                .getSystemService(Context.SENSOR_SERVICE);
+        mSensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
         Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         if (sensor != null) {
             mSensorManager.registerListener(this, sensor,
                     SensorManager.SENSOR_DELAY_GAME);
+        }
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(RxScreenshot.DISPLAY_NAME,
+                    RxScreenshot.DISPLAY_NAME, NotificationManager.IMPORTANCE_MIN);
+            notificationManager.createNotificationChannel(channel);
         }
         //注册Home监听广播
         registerReceiver(mHomeKeyEventReceiver, new IntentFilter(
@@ -99,26 +105,18 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = intent == null ? null : intent.getAction();
-        if (TextUtils.equals(action, "com.way.action.SHOW_MENU"))
+        if (TextUtils.equals(action, "com.way.action.SHOW_MENU")) {
             showDialog();
-        if (mIsRunning) {
-            return START_STICKY;
         }
-        mIsRunning = true;
-        if (Build.VERSION.SDK_INT < 18) {
-            startForeground(NOTIFICATION_ID, createNotification());//API < 18 ，此方法能有效隐藏Notification上的图标
-        } else {
-            Intent innerIntent = new Intent(this, GrayInnerService.class);
-            startService(innerIntent);
-            startForeground(NOTIFICATION_ID, new Notification());
-        }
-        return START_REDELIVER_INTENT;
+
+        startForeground(NOTIFICATION_ID, createNotification());
+
+        return START_NOT_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mIsRunning = false;
         mSensorManager.unregisterListener(this);
         //注销Home键监听广播
         unregisterReceiver(mHomeKeyEventReceiver);
@@ -130,14 +128,17 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
     }
 
     private Notification createNotification() {
-        final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        final Notification.Builder builder = new Notification.Builder(this);
         builder.setWhen(System.currentTimeMillis());
         builder.setSmallIcon(R.drawable.ic_widgets);
         builder.setContentTitle(getString(R.string.chathead_content_title));
         builder.setContentText(getString(R.string.chathead_content_text));
         builder.setOngoing(true);
-        builder.setPriority(NotificationCompat.PRIORITY_MIN);
-        builder.setCategory(NotificationCompat.CATEGORY_SERVICE);
+        builder.setPriority(Notification.PRIORITY_MIN);
+        builder.setCategory(Notification.CATEGORY_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.setChannelId(RxScreenshot.DISPLAY_NAME);
+        }
 
         // PendingIntent
         final Intent notifyIntent = new Intent(this, MainActivity.class);
@@ -221,26 +222,5 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
 
     public boolean isShowDialog() {
         return mFloatMenuDialog != null && mFloatMenuDialog.isShowing();
-    }
-
-    /**
-     * 给 API >= 18 的平台上用的灰色保活手段
-     */
-    public static class GrayInnerService extends Service {
-
-        @Override
-        public int onStartCommand(Intent intent, int flags, int startId) {
-            startForeground(NOTIFICATION_ID, new Notification());
-            stopForeground(true);
-            stopSelf();
-            return super.onStartCommand(intent, flags, startId);
-        }
-
-        @Nullable
-        @Override
-        public IBinder onBind(Intent intent) {
-            return null;
-        }
-
     }
 }

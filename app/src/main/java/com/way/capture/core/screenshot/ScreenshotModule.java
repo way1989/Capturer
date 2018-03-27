@@ -20,6 +20,7 @@ import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -46,6 +47,7 @@ import com.way.capture.core.BaseModule;
 import com.way.capture.fragment.SettingsFragment;
 import com.way.capture.service.ModuleService;
 import com.way.capture.utils.DensityUtil;
+import com.way.capture.utils.RxScreenshot;
 import com.way.capture.utils.ScrollUtils;
 import com.way.capture.utils.ViewUtils;
 import com.way.capture.widget.freecrop.FreeCropView;
@@ -779,6 +781,9 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
                 .setVisibility(Notification.VISIBILITY_PUBLIC) // ok to show outside lockscreen
                 .setCategory(Notification.CATEGORY_ERROR).setAutoCancel(true)
                 .setColor(context.getResources().getColor(R.color.system_notification_accent_color));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            b.setChannelId(RxScreenshot.DISPLAY_NAME);
+        }
         Notification n = new Notification.BigTextStyle(b).bigText(r.getString(R.string.screenshot_failed_text)).build();
         nManager.notify(SCREENSHOT_NOTIFICATION_ID, n);
     }

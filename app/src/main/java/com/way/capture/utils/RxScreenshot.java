@@ -15,9 +15,6 @@ import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.util.Log;
 
-import com.glidebitmappool.GlideBitmapFactory;
-import com.glidebitmappool.GlideBitmapPool;
-
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -30,8 +27,8 @@ import io.reactivex.disposables.Disposable;
  */
 
 public class RxScreenshot extends Observable<Bitmap> {
+    public static final String DISPLAY_NAME = "Screenshot";
     private static final String TAG = "RxScreenshot";
-    private static final String DISPLAY_NAME = "Screenshot";
     private MediaProjection mProjection;
 
     public RxScreenshot(Application application, int resultCode, Intent data) {

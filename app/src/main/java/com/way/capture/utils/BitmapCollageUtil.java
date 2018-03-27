@@ -7,39 +7,38 @@ import android.graphics.Rect;
 import android.util.Log;
 import android.util.Pair;
 
-import com.glidebitmappool.GlideBitmapPool;
-
 
 /**
  * Created by android on 16-3-8.
  */
-public class LongScreenshotUtil {
-    private static final String TAG = "LongScreenshotUtil";
+public class BitmapCollageUtil {
+    private static final String TAG = "BitmapCollageUtil";
     private static final int BASE_LINE_MOVE_NUM = 5;//基线移动次数
+    private static final int COMPARE_LINE_NUM_MAX = 50;//连续50行像素一样，就认为找到了分割线
     private static final int PURE_LINE_DIF_NUM_MAX = 40;
     private static final int COLOR_LINE_DIF_NUM_MAX = 10;
 
+    private static final int RGB_PIXEL_DISTANCE_MAX = 100;
     private static final int GRAY_PIXEL_RED_DIF_MAX = 50;
     private static final int GRAY_PIXEL_GREEN_DIF_MAX = 16;
     private static final int GRAY_PIXEL_BLUE_DIF_MAX = 40;
 
-    private volatile static LongScreenshotUtil sInstance;
+    private volatile static BitmapCollageUtil sInstance;
 
     private int TOP_NOT_COMPARE_HEIGHT;
-    private int BOTTOM_NOT_COMPARE_HEIGHT;
+    //    private int BOTTOM_NOT_COMPARE_HEIGHT;
     private int BORDER_NOT_COMPARE_WIDTH;
-    private int BASE_LINE_REDUCE_BY_ONCE;
     private int MOVE_HEIGHT_MIN;
     private int mScreenWidth;
 
-    private LongScreenshotUtil() {
+    private BitmapCollageUtil() {
     }
 
-    public static LongScreenshotUtil getInstance() {
+    public static BitmapCollageUtil getInstance() {
         if (sInstance == null) {
-            synchronized (LongScreenshotUtil.class) {
+            synchronized (BitmapCollageUtil.class) {
                 if (sInstance == null) {
-                    sInstance = new LongScreenshotUtil();
+                    sInstance = new BitmapCollageUtil();
                 }
             }
         }
@@ -53,7 +52,7 @@ public class LongScreenshotUtil {
         mScreenWidth = screenWidth;//用于判断是否初始化过参数
 
         TOP_NOT_COMPARE_HEIGHT = (int) (0.14f * screenHeight);//90dp
-        BOTTOM_NOT_COMPARE_HEIGHT = (int) (0.075f * screenHeight);//48dp
+//        BOTTOM_NOT_COMPARE_HEIGHT = (int) (0.075f * screenHeight);//48dp
         BORDER_NOT_COMPARE_WIDTH = (int) (0.05f * screenWidth);//18dp
         MOVE_HEIGHT_MIN = (int) (0.008f * screenHeight);//5dp
     }
@@ -103,7 +102,7 @@ public class LongScreenshotUtil {
         }
 
         final int[] pixels = new int[width];
-        for (int i = BOTTOM_NOT_COMPARE_HEIGHT + offset; i <= (screenHeight - TOP_NOT_COMPARE_HEIGHT); i += 2) {
+        for (int i = offset; i <= (screenHeight - TOP_NOT_COMPARE_HEIGHT); i += 2) {
             //将第i行宽度为width的像素点存入数组pixels中
             bitmap.getPixels(pixels, 0, width, 0, height - 1 - i, width, 1);
             if (!isPureColorLine(pixels)) {
@@ -115,31 +114,31 @@ public class LongScreenshotUtil {
 
 
     private Pair<Integer, Integer> compareTwoBitmap(Bitmap firstBitmap, Bitmap secondBitmap) {
-        final int firstBitmapHeight = firstBitmap.getHeight();
         final int screenHeight = secondBitmap.getHeight();//屏幕的高度就是第二个bitmap的高度
 
-        //判断是否一样
+        //从下往上找到两个bitmap底部相同部分的高度
         final int bottomSameHeight = getBottomSameHeight(firstBitmap, secondBitmap);
         if (bottomSameHeight < 0 || bottomSameHeight == (screenHeight - TOP_NOT_COMPARE_HEIGHT)) {
-            Log.i(TAG, "compareTwoBitmap... two bitmap is same return");
+            Log.e(TAG, "compareTwoBitmap... two bitmap is same");
             return null;
         }
-        if (firstBitmapHeight == screenHeight) {//first compare
-            BOTTOM_NOT_COMPARE_HEIGHT += bottomSameHeight;//增加底部不用对比的高度
+        //bottomSameHeight += BOTTOM_NOT_COMPARE_HEIGHT;
 
-            final int height = screenHeight - BOTTOM_NOT_COMPARE_HEIGHT - TOP_NOT_COMPARE_HEIGHT;
-            BASE_LINE_REDUCE_BY_ONCE = height / BASE_LINE_MOVE_NUM;
-            Log.i(TAG, "compareTwoBitmap... first compare "
-                    + ", bottomSameHeight = " + bottomSameHeight
-                    + ", BOTTOM_NOT_COMPARE_HEIGHT = " + BOTTOM_NOT_COMPARE_HEIGHT
-                    + ", BASE_LINE_REDUCE_BY_ONCE = " + BASE_LINE_REDUCE_BY_ONCE);
-        }
+        //减去底部和顶部不用比较的高度，剩下中间可以用于compare的区域
+        final int compareHeight = screenHeight - bottomSameHeight - TOP_NOT_COMPARE_HEIGHT;
+        //每次基线移动的高度
+        final int baseLineReduceHeight = compareHeight / BASE_LINE_MOVE_NUM;
+        Log.i(TAG, "compareTwoBitmap..."
+                + ", bottomSameHeight = " + bottomSameHeight
+                + ", baseLineReduceHeight = " + baseLineReduceHeight);
 
         //改变first bitmap基线5次，确保找到正确的分割线
         for (int i = 0; i < BASE_LINE_MOVE_NUM; i++) {
-            final int baseLine = getNotPureLineHeight(firstBitmap, screenHeight, i * BASE_LINE_REDUCE_BY_ONCE);
+            //从下往上找到不是纯色的一行作为参考基线
+            final int baseLine = getNotPureLineHeight(firstBitmap, screenHeight, bottomSameHeight + i * baseLineReduceHeight);
             Pair<Integer, Integer> pair = getDividingLinePair(firstBitmap, secondBitmap, baseLine);
             if (pair != null) {
+                Log.d(TAG, "compareTwoBitmap: succeed!!! compare count = " + i);
                 return pair;
             }
         }
@@ -150,9 +149,9 @@ public class LongScreenshotUtil {
     /**
      * 获取两个bitmap重合部分分割线
      *
-     * @param firstBitmap 需要比较的bitmap
+     * @param firstBitmap  需要比较的bitmap
      * @param secondBitmap 被比较的bitmap
-     * @param baseLine 参考基线
+     * @param baseLine     参考基线
      * @return 是否找到分割线
      */
     private Pair<Integer, Integer> getDividingLinePair(Bitmap firstBitmap, Bitmap secondBitmap, int baseLine) {
@@ -188,7 +187,7 @@ public class LongScreenshotUtil {
                 newStartY = 0;
             }
             newY++;
-            if (count >= 50 && Math.abs(oldY - newStartY) > MOVE_HEIGHT_MIN) {
+            if (count >= COMPARE_LINE_NUM_MAX && Math.abs(oldY - newStartY) > MOVE_HEIGHT_MIN) {
                 return new Pair<>(firstBitmapHeight - baseLine, secondBitmapHeight - newStartY + 1);
             }
         }
@@ -224,15 +223,15 @@ public class LongScreenshotUtil {
                 final int blueDifferent = Math.abs(oldBlue - newBlue);
                 //cost more time
                 //计算颜色空间的距离
-//                final double distance = Math.sqrt(Math.pow(redDifferent, 2) + Math.pow(greenDifferent, 2) + Math.pow(blueDifferent, 2));
-//                if (distance > 100) {
-//                    differentCount++;
-//                }
-                if (redDifferent > GRAY_PIXEL_RED_DIF_MAX
+                final double distance = Math.sqrt(Math.pow(redDifferent, 2) + Math.pow(greenDifferent, 2) + Math.pow(blueDifferent, 2));
+                if (distance > RGB_PIXEL_DISTANCE_MAX) {
+                    differentCount++;
+                }
+                /*if (redDifferent > GRAY_PIXEL_RED_DIF_MAX
                         || greenDifferent > GRAY_PIXEL_GREEN_DIF_MAX
                         || blueDifferent > GRAY_PIXEL_BLUE_DIF_MAX) {
                     differentCount++;
-                }
+                }*/
                 //超过10个像素点颜色值不同，就认为两个像素数组不同
                 if (differentCount >= COLOR_LINE_DIF_NUM_MAX) {
                     return false;
@@ -276,34 +275,39 @@ public class LongScreenshotUtil {
         final long collageStart = System.currentTimeMillis();
         Pair<Integer, Integer> pair = compareTwoBitmap(firstBitmap, secondBitmap);
         Log.d(TAG, "collageLongBitmap compareTwoBitmap end... isSucceed = " + (pair != null)
+                + ", screenSize = " + secondBitmap.getWidth() + "x" + secondBitmap.getHeight()
+                + ", firstBitmapEndY = " + (pair != null ? pair.first : -1)
+                + ", secondBitmapStartY = " + (pair != null ? pair.second : -1)
                 + ", cost = " + (System.currentTimeMillis() - collageStart) + "ms");
 
         if (pair == null) {//failed, stop
             return null;
         }
+
         int width = firstBitmap.getWidth();
         int height = pair.first + (secondBitmap.getHeight() - pair.second);
 
-        Log.i(TAG, "collageLongBitmap start height = " + height
-                + ", screenSize = " + secondBitmap.getWidth() + "x" + secondBitmap.getHeight()
-                + ", firstBitmapEndY = " + pair.first
-                + ", secondBitmapStartY = " + pair.second);
         if (height < firstBitmap.getHeight()) {
             return null;
         }
-        final long drawStart = System.currentTimeMillis();
-        Bitmap result = GlideBitmapPool.getBitmap(width, height, Bitmap.Config.ARGB_8888);
+        try {
+            final long drawStart = System.currentTimeMillis();
+            Bitmap result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
-        Canvas canvas = new Canvas(result);
-        canvas.drawBitmap(firstBitmap, new Rect(0, 0, width, pair.first),
-                new Rect(0, 0, width, pair.first), null);
-        canvas.drawBitmap(secondBitmap, new Rect(0, pair.second, width, secondBitmap.getHeight()),
-                new Rect(0, pair.first, width, height), null);
-        GlideBitmapPool.putBitmap(firstBitmap);
-        GlideBitmapPool.putBitmap(secondBitmap);
-        Log.d(TAG, "collageLongBitmap drawBitmap end... cost = " + (System.currentTimeMillis() - drawStart) + "ms");
+            Canvas canvas = new Canvas(result);
+            canvas.drawBitmap(firstBitmap, new Rect(0, 0, width, pair.first),
+                    new Rect(0, 0, width, pair.first), null);
+            canvas.drawBitmap(secondBitmap, new Rect(0, pair.second, width, secondBitmap.getHeight()),
+                    new Rect(0, pair.first, width, height), null);
+            firstBitmap.recycle();
+            secondBitmap.recycle();
+            Log.d(TAG, "collageLongBitmap drawBitmap end... cost = " + (System.currentTimeMillis() - drawStart) + "ms");
+            return result;
+        } catch (Exception e) {
+            Log.d(TAG, "collageLongBitmap: ", e);
+        }
 
-        return result;
+        return null;
     }
 
 }

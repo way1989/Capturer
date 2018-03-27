@@ -22,8 +22,8 @@ import static org.junit.Assert.assertNotNull;
 /**
  * Created by android on 18-3-26.
  */
-public class LongScreenshotUtilTest {
-    private static final String TAG = "LongScreenshotUtilTest";
+public class BitmapCollageUtilTest {
+    private static final String TAG = "BitmapCollageUtilTest";
 
     public static void closeSilently(Closeable c) {
         if (c == null) return;
@@ -55,7 +55,7 @@ public class LongScreenshotUtilTest {
 
         Bitmap oldBitmap = BitmapFactory.decodeStream(appContext.getResources().openRawResource(R.raw.first_1080));
         Bitmap newBitmap = BitmapFactory.decodeStream(appContext.getResources().openRawResource(R.raw.second_1080));
-        Bitmap bitmap = LongScreenshotUtil.getInstance().collageLongBitmap(oldBitmap, newBitmap);
+        Bitmap bitmap = BitmapCollageUtil.getInstance().collageLongBitmap(oldBitmap, newBitmap);
 
         Log.d(TAG, "collageLongBitmap test collage bitmap onNext: bitmap = " + bitmap.getWidth() + "x" + bitmap.getHeight());
         saveData(bitmap, new File(appContext.getExternalCacheDir(), "1.png"));

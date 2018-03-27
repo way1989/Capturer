@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.hardware.display.VirtualDisplay;
 import android.media.CamcorderProfile;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
@@ -30,7 +29,6 @@ import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Surface;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -46,7 +44,6 @@ import com.way.capture.utils.RxEvent;
 import com.way.capture.utils.RxScreenshot;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -57,14 +54,9 @@ import static android.content.Context.WINDOW_SERVICE;
 import static android.content.Intent.ACTION_SEND;
 import static android.content.Intent.ACTION_VIEW;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
-import static android.media.MediaRecorder.OutputFormat.MPEG_4;
-import static android.media.MediaRecorder.VideoEncoder.H264;
-import static android.media.MediaRecorder.VideoSource.SURFACE;
 import static android.os.Environment.DIRECTORY_MOVIES;
-import static com.thefinestartist.utils.content.ContextUtil.sendBroadcast;
 
-public final class RecordingSession implements MediaRecorder.OnErrorListener, MediaRecorder.OnInfoListener {
+public final class RecordingSession {
     private static final int NOTIFICATION_ID = 789;
     private static final String TAG = "RecordingSession";
     private static final String DISPLAY_NAME = "ScreenRecord";
@@ -82,13 +74,17 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
     private OverlayView mOverlayView;
     private MediaProjection mMediaProjection;
     private boolean mIsRunning;
-    private BroadcastReceiver mStopReceiver = new BroadcastReceiver() {
+    private Notifications mNotifications;
+    private ScreenRecorder mRecorder;
+    private BroadcastReceiver mStopActionReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            stopRecording();
+            if (Notifications.ACTION_STOP.equals(intent.getAction())) {
+                stopRecorder();
+            }
+            Toast.makeText(context, "Recorder stopped...", Toast.LENGTH_LONG).show();
         }
     };
-
 
     RecordingSession(Context context, Listener listener, int resultCode, Intent data) {
         this.mContext = context;
@@ -98,6 +94,9 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
 
         File picturesDir = Environment.getExternalStoragePublicDirectory(DIRECTORY_MOVIES);
         mOutputDir = new File(picturesDir, DISPLAY_NAME);
+        if (!mOutputDir.exists() || !mOutputDir.isDirectory()) {
+            mOutputDir.mkdir();
+        }
 
         mNotificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         mWindowManager = (WindowManager) context.getSystemService(WINDOW_SERVICE);
@@ -220,14 +219,8 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
         if (!PreferenceManager.getDefaultSharedPreferences(mContext)
                 .getBoolean(SettingsFragment.VIDEO_STOP_METHOD_KEY, true)) {
             hideOverlay();
-            IntentFilter intentFilter = new IntentFilter(ScreenRecordService.ACTION_STOP_SCREENRECORD);
-            mContext.registerReceiver(mStopReceiver, intentFilter);
         }
 
-        if (!mOutputDir.mkdirs()) {
-            Log.e(TAG, "Unable to create output directory '" + mOutputDir.getAbsolutePath());
-            // We're probably about to crash, but at least the log will indicate as to why.
-        }
         mMediaProjection = mProjectionManager.getMediaProjection(mResultCode, mIntentData);
         VideoEncodeConfig video = createVideoConfig();
         AudioEncodeConfig audio = createAudioConfig(); // audio can be null
@@ -238,37 +231,6 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
         mRecorder.start();
         mContext.registerReceiver(mStopActionReceiver, new IntentFilter(Notifications.ACTION_STOP));
 
-        /*RecordingInfo recordingInfo = getRecordingInfo();
-        Log.d(TAG, "Recording: " + recordingInfo.width + " x "
-                + recordingInfo.height + " @ " + recordingInfo.density);
-
-        mMediaRecorder = new MediaRecorder();
-        mMediaRecorder.setVideoSource(SURFACE);
-        mMediaRecorder.setOutputFormat(MPEG_4);
-        mMediaRecorder.setVideoFrameRate(25);
-        mMediaRecorder.setVideoEncoder(H264);
-        mMediaRecorder.setVideoSize(recordingInfo.width, recordingInfo.height);
-        mMediaRecorder.setVideoEncodingBitRate(8 * 1000 * 1000);
-
-        String outputName = mFileFormat.format(new Date());
-        mOutputFile = new File(mOutputDir, outputName).getAbsolutePath();
-        Log.i(TAG, "Output file '" + mOutputFile);
-        mMediaRecorder.setOutputFile(mOutputFile);
-
-        try {
-            mMediaRecorder.prepare();
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to prepare MediaRecorder.", e);
-        }
-        mMediaRecorder.setOnErrorListener(this);
-        mMediaRecorder.setOnInfoListener(this);
-        mMediaProjection = mProjectionManager.getMediaProjection(mResultCode, mIntentData);
-
-        Surface surface = mMediaRecorder.getSurface();
-        mVirtualDisplay = mMediaProjection.createVirtualDisplay(DISPLAY_NAME, recordingInfo.width, recordingInfo.height,
-                recordingInfo.density, VIRTUAL_DISPLAY_FLAG_PRESENTATION, surface, null, null);
-
-        mMediaRecorder.start();*/
         mIsRunning = true;
         mListener.onStart();
 
@@ -281,63 +243,17 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
         if (!mIsRunning) {
             throw new IllegalStateException("Not mIsRunning.");
         }
-        boolean fail = false;
         mIsRunning = false;
-        if (!PreferenceManager.getDefaultSharedPreferences(mContext)
+        if (PreferenceManager.getDefaultSharedPreferences(mContext)
                 .getBoolean(SettingsFragment.VIDEO_STOP_METHOD_KEY, true)) {
-            mContext.unregisterReceiver(mStopReceiver);
-        } else {
             hideOverlay();
         }
         mMediaProjection.stop();
         stopRecorder();
-/*        // Stop the mMediaProjection in order to flush everything to the mMediaRecorder.
-        mMediaProjection.stop();
-
-        //设置后不会崩
-        mMediaRecorder.setOnErrorListener(null);
-        mMediaRecorder.setOnInfoListener(null);
-        // Stop the mMediaRecorder which writes the contents to the file.
-        try {
-            mMediaRecorder.stop();
-        } catch (Exception e) {
-            Toast.makeText(mContext, "stop record failed...", Toast.LENGTH_SHORT).show();
-            fail = true;
-        }
-        if (fail && mOutputFile != null) {
-            deleteVideoFile(mOutputFile);
-        }
-
-        mMediaRecorder.release();
-        mVirtualDisplay.release();*/
 
         mListener.onStop();
 
         Log.d(TAG, "Screen recording stopped. Notifying media scanner of new video.");
-       /* if (!fail)
-            MediaScannerConnection.scanFile(mContext, new String[]{mOutputFile}, null,
-                    new MediaScannerConnection.OnScanCompletedListener() {
-                        @Override
-                        public void onScanCompleted(String path, final Uri uri) {
-                            Log.d(TAG, "Media scanner completed.");
-                            if (uri != null)
-                                mHandler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        RxBus.getInstance().post(new RxEvent.NewPathEvent(DataInfo.TYPE_SCREEN_RECORD, mOutputFile));
-                                        showNotification(uri, null);
-                                    }
-                                });
-                        }
-                    });*/
-    }
-
-    private void deleteVideoFile(String fileName) {
-        Log.v(TAG, "Deleting video " + fileName);
-        File f = new File(fileName);
-        if (!f.delete()) {
-            Log.v(TAG, "Could not delete " + fileName);
-        }
     }
 
     private void showNotification(final Uri uri, Bitmap bitmap) {
@@ -409,29 +325,105 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
         }
     }
 
-    @Override
-    public void onError(MediaRecorder mr, int what, int extra) {
-        Log.e(TAG, "MediaRecorder error. what=" + what + ". extra=" + extra);
-        if (what == MediaRecorder.MEDIA_RECORDER_ERROR_UNKNOWN) {
-            // We may have run out of space on the sdcard.
-            if (mIsRunning)
-                stopRecording();
-        }
+    private ScreenRecorder newRecorder(MediaProjection mediaProjection, VideoEncodeConfig video,
+                                       AudioEncodeConfig audio, final File output) {
+        ScreenRecorder r = new ScreenRecorder(video, audio,
+                1, mediaProjection, output.getAbsolutePath());
+        r.setCallback(new ScreenRecorder.Callback() {
+            long startTime = 0;
+
+            @Override
+            public void onStop(Throwable error) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        stopRecorder();
+                    }
+                });
+                if (error != null) {
+                    output.delete();
+                    //toast("Recorder error ! See logcat for more details");
+                    error.printStackTrace();
+                } else {
+                    MediaScannerConnection.scanFile(mContext, new String[]{output.getAbsolutePath()}, null,
+                            new MediaScannerConnection.OnScanCompletedListener() {
+                                @Override
+                                public void onScanCompleted(String path, final Uri uri) {
+                                    Log.d(TAG, "Media scanner completed.");
+                                    if (uri != null)
+                                        mHandler.post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                RxBus.getInstance().post(new RxEvent.NewPathEvent(DataInfo.TYPE_SCREEN_RECORD, output.getAbsolutePath()));
+                                                showNotification(uri, null);
+                                            }
+                                        });
+                                }
+                            });
+                }
+            }
+
+            @Override
+            public void onStart() {
+                mNotifications.recording(0);
+            }
+
+            @Override
+            public void onRecording(long presentationTimeUs) {
+                if (startTime <= 0) {
+                    startTime = presentationTimeUs;
+                }
+                long time = (presentationTimeUs - startTime) / 1000;
+                mNotifications.recording(time);
+            }
+        });
+        return r;
     }
 
-    @Override
-    public void onInfo(MediaRecorder mr, int what, int extra) {
-        if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED) {
-            Log.v(TAG, "media recoder reached max duration");
-            if (mIsRunning)
-                stopRecording();
-        } else if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED) {
-            Log.v(TAG, "media recoder reached max size");
-            if (mIsRunning)
-                stopRecording();
-            // Show the toast.
-            Toast.makeText(mContext.getApplicationContext(), R.string.video_reach_size_limit,
-                    Toast.LENGTH_LONG).show();
+    private AudioEncodeConfig createAudioConfig() {
+        //if (true) return null;
+        String codec = "OMX.google.aac.encoder";
+        if (codec == null) {
+            return null;
+        }
+        int bitrate = 80 * 1000;
+        int samplerate = 44100;
+        int channelCount = 1;
+        int profile = 1;
+
+        return new AudioEncodeConfig(codec, MediaFormat.MIMETYPE_AUDIO_AAC, bitrate, samplerate, channelCount, profile);
+    }
+
+    private VideoEncodeConfig createVideoConfig() {
+        final String codec = "OMX.qcom.video.encoder.avc";
+        if (codec == null) {
+            // no selected codec ??
+            return null;
+        }
+        // video size
+        RecordingInfo recordingInfo = getRecordingInfo();
+        Log.d(TAG, "Recording: " + recordingInfo.width + " x "
+                + recordingInfo.height + " @ " + recordingInfo.density);
+        int width = recordingInfo.width;
+        int height = recordingInfo.height;
+        int framerate = 24;
+        int iframe = 5;
+        int bitrate = 800 * 1000;
+        MediaCodecInfo.CodecProfileLevel profileLevel = null;
+        return new VideoEncodeConfig(width, height, bitrate,
+                framerate, iframe, codec, MediaFormat.MIMETYPE_VIDEO_AVC, profileLevel);
+    }
+
+    private void stopRecorder() {
+        mNotifications.clear();
+        if (mRecorder != null) {
+            mRecorder.quit();
+        }
+        mRecorder = null;
+        try {
+            mContext.unregisterReceiver(mStopActionReceiver);
+        } catch (Exception e) {
+            //ignored
         }
     }
 
@@ -473,154 +465,13 @@ public final class RecordingSession implements MediaRecorder.OnErrorListener, Me
             notificationManager.cancel(NOTIFICATION_ID);
             final Uri uri = intent.getData();
             final ContentResolver contentResolver = context.getContentResolver();
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... none) {
-                    int rowsDeleted = contentResolver.delete(uri, null, null);
-                    if (rowsDeleted == 1) {
-                        Log.i(TAG, "Deleted recording.");
-                    } else {
-                        Log.e(TAG, "Error deleting recording.");
-                    }
-                    return null;
-                }
-            }.execute();
+
+            int rowsDeleted = contentResolver.delete(uri, null, null);
+            if (rowsDeleted == 1) {
+                Log.i(TAG, "Deleted recording.");
+            } else {
+                Log.e(TAG, "Error deleting recording.");
+            }
         }
     }
-
-
-    private Notifications mNotifications;
-    private ScreenRecorder newRecorder(MediaProjection mediaProjection, VideoEncodeConfig video,
-                                       AudioEncodeConfig audio, final File output) {
-        ScreenRecorder r = new ScreenRecorder(video, audio,
-                1, mediaProjection, output.getAbsolutePath());
-        r.setCallback(new ScreenRecorder.Callback() {
-            long startTime = 0;
-
-            @Override
-            public void onStop(Throwable error) {
-                //runOnUiThread(() -> stopRecorder());
-                if (error != null) {
-                    //toast("Recorder error ! See logcat for more details");
-                    error.printStackTrace();
-                    output.delete();
-                } else {
-                    /*Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-                            .addCategory(Intent.CATEGORY_DEFAULT)
-                            .setData(Uri.fromFile(output));
-                    sendBroadcast(intent);*/
-                    MediaScannerConnection.scanFile(mContext, new String[]{output.getAbsolutePath()}, null,
-                            new MediaScannerConnection.OnScanCompletedListener() {
-                                @Override
-                                public void onScanCompleted(String path, final Uri uri) {
-                                    Log.d(TAG, "Media scanner completed.");
-                                    if (uri != null)
-                                        mHandler.post(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                RxBus.getInstance().post(new RxEvent.NewPathEvent(DataInfo.TYPE_SCREEN_RECORD, output.getAbsolutePath()));
-                                                showNotification(uri, null);
-                                            }
-                                        });
-                                }
-                            });
-                }
-            }
-
-            @Override
-            public void onStart() {
-                mNotifications.recording(0);
-            }
-
-            @Override
-            public void onRecording(long presentationTimeUs) {
-                if (startTime <= 0) {
-                    startTime = presentationTimeUs;
-                }
-                long time = (presentationTimeUs - startTime) / 1000;
-                mNotifications.recording(time);
-            }
-        });
-        return r;
-    }
-
-    private ScreenRecorder mRecorder;
-    private AudioEncodeConfig createAudioConfig() {
-        //if (!mAudioToggle.isChecked()) return null;
-        String codec = "OMX.google.aac.encoder";
-        if (codec == null) {
-            return null;
-        }
-        int bitrate = 80 * 1000;
-        int samplerate = 44100;
-        int channelCount = 1;
-        int profile = 1;
-
-        return new AudioEncodeConfig(codec, MediaFormat.MIMETYPE_AUDIO_AAC, bitrate, samplerate, channelCount, profile);
-    }
-
-    private VideoEncodeConfig createVideoConfig() {
-        final String codec = "OMX.google.h264.encoder";
-        if (codec == null) {
-            // no selected codec ??
-            return null;
-        }
-        // video size
-        RecordingInfo recordingInfo = getRecordingInfo();
-        Log.d(TAG, "Recording: " + recordingInfo.width + " x "
-                + recordingInfo.height + " @ " + recordingInfo.density);
-        int[] selectedWithHeight = new int[]{recordingInfo.width, recordingInfo.height};
-        Configuration configuration = mContext.getResources().getConfiguration();
-        boolean isLandscape = configuration.orientation == ORIENTATION_LANDSCAPE;
-        int width = selectedWithHeight[isLandscape ? 0 : 1];
-        int height = selectedWithHeight[isLandscape ? 1 : 0];
-        int framerate = 24;
-        int iframe = 5;
-        int bitrate = 800 * 1000;
-        MediaCodecInfo.CodecProfileLevel profileLevel = null;
-        return new VideoEncodeConfig(width, height, bitrate,
-                framerate, iframe, codec, MediaFormat.MIMETYPE_VIDEO_AVC, profileLevel);
-    }
-    private void stopRecorder() {
-        mNotifications.clear();
-        if (mRecorder != null) {
-            mRecorder.quit();
-        }
-        mRecorder = null;
-        try {
-            mContext.unregisterReceiver(mStopActionReceiver);
-        } catch (Exception e) {
-            //ignored
-        }
-    }
-    private BroadcastReceiver mStopActionReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            File file = new File(mRecorder.getSavedPath());
-            if (Notifications.ACTION_STOP.equals(intent.getAction())) {
-                stopRecorder();
-            }
-            Toast.makeText(context, "Recorder stopped!\n Saved file " + file, Toast.LENGTH_LONG).show();
-            StrictMode.VmPolicy vmPolicy = StrictMode.getVmPolicy();
-            try {
-                // disable detecting FileUriExposure on public file
-                StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().build());
-                viewResult(file);
-            } finally {
-                StrictMode.setVmPolicy(vmPolicy);
-            }
-        }
-
-        private void viewResult(File file) {
-            Intent view = new Intent(Intent.ACTION_VIEW);
-            view.addCategory(Intent.CATEGORY_DEFAULT);
-            view.setDataAndType(Uri.fromFile(file), MediaFormat.MIMETYPE_VIDEO_AVC);
-            view.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            try {
-                mContext.startActivity(view);
-            } catch (ActivityNotFoundException e) {
-                // no activity can open this video
-            }
-        }
-    };
 }

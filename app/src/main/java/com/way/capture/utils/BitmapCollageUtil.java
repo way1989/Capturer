@@ -299,8 +299,6 @@ public class BitmapCollageUtil {
                     new Rect(0, 0, width, pair.first), null);
             canvas.drawBitmap(secondBitmap, new Rect(0, pair.second, width, secondBitmap.getHeight()),
                     new Rect(0, pair.first, width, height), null);
-            firstBitmap.recycle();
-            secondBitmap.recycle();
             Log.d(TAG, "collageLongBitmap drawBitmap end... cost = " + (System.currentTimeMillis() - drawStart) + "ms");
             return result;
         } catch (Exception e) {

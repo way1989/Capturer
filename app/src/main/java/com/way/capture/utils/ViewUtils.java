@@ -1,6 +1,7 @@
 package com.way.capture.utils;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.os.Build;
@@ -10,6 +11,8 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.way.capture.App;
+
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
 public final class ViewUtils {
 
@@ -86,7 +89,9 @@ public final class ViewUtils {
         Point realSize = new Point();
         display.getSize(size);
         display.getRealSize(realSize);
-        return realSize.y != size.y;
+        Configuration configuration = App.getContext().getResources().getConfiguration();
+        final boolean isLandscape = configuration.orientation == ORIENTATION_LANDSCAPE;
+        return isLandscape ? realSize.x != size.x : realSize.y != size.y;
     }
 
     public static int getNavigationBarHeight() {
@@ -94,7 +99,9 @@ public final class ViewUtils {
             return 0;
         }
         Resources resources = App.getContext().getResources();
-        int resourceId = resources.getIdentifier("navigation_bar_height",
+        Configuration configuration = resources.getConfiguration();
+        final boolean isLandscape = configuration.orientation == ORIENTATION_LANDSCAPE;
+        int resourceId = resources.getIdentifier(isLandscape ? "navigation_bar_width" : "navigation_bar_height",
                 "dimen", "android");
         //获取NavigationBar的高度
         return resources.getDimensionPixelSize(resourceId);

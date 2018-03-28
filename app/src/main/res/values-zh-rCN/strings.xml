@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">卡布奇诺</string>
     <string name="shortcut_name">启动</string>
     <string name="clear">清除</string>
     <string name="launch_overlay">准备录制</string>

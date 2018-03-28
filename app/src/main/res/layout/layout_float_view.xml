@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/rect_half_circle_translute"
+    android:layoutDirection="ltr"
+    android:orientation="horizontal">
+
+    <Button
+        android:id="@+id/screen_record_switch"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="center_vertical"
+        android:background="@drawable/start"
+        android:contentDescription="@string/start"
+        android:gravity="center" />
+
+    <TextView
+        android:id="@+id/start_text"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:gravity="center"
+        android:maxLines="1"
+        android:minWidth="36dp"
+        android:paddingEnd="6.0dip"
+        android:paddingStart="6.0dip"
+        android:text="@string/screen_record_start"
+        android:textColor="@color/white"
+        android:textSize="12.0dip" />
+
+    <Button
+        android:id="@+id/screen_record_close"
+        android:layout_width="32dip"
+        android:layout_height="36dip"
+        android:layout_gravity="center_vertical"
+        android:background="@drawable/close"
+        android:gravity="center" />
+
+</LinearLayout>

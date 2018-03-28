@@ -47,6 +47,7 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import static android.content.Context.MEDIA_PROJECTION_SERVICE;
 import static android.content.Context.NOTIFICATION_SERVICE;
@@ -67,12 +68,11 @@ public final class RecordingSession {
     private final int mResultCode;
     private final Intent mIntentData;
     private final File mOutputDir;
-    private final DateFormat mFileFormat = new SimpleDateFormat("'ScreenRecord_'yyyy-MM-dd-HH-mm-ss'.mp4'");
+    private final DateFormat mFileFormat = new SimpleDateFormat("'ScreenRecord_'yyyyMMddHHmmss'.mp4'", Locale.ENGLISH);
     private final NotificationManager mNotificationManager;
     private final WindowManager mWindowManager;
     private final MediaProjectionManager mProjectionManager;
     private OverlayView mOverlayView;
-    private MediaProjection mMediaProjection;
     private boolean mIsRunning;
     private Notifications mNotifications;
     private ScreenRecorder mRecorder;
@@ -221,13 +221,13 @@ public final class RecordingSession {
             hideOverlay();
         }
 
-        mMediaProjection = mProjectionManager.getMediaProjection(mResultCode, mIntentData);
+        MediaProjection mediaProjection = mProjectionManager.getMediaProjection(mResultCode, mIntentData);
         VideoEncodeConfig video = createVideoConfig();
         AudioEncodeConfig audio = createAudioConfig(); // audio can be null
 
         String outputName = mFileFormat.format(new Date());
         File file = new File(mOutputDir, outputName);
-        mRecorder = newRecorder(mMediaProjection, video, audio, file);
+        mRecorder = newRecorder(mediaProjection, video, audio, file);
         mRecorder.start();
         mContext.registerReceiver(mStopActionReceiver, new IntentFilter(Notifications.ACTION_STOP));
 
@@ -235,7 +235,6 @@ public final class RecordingSession {
         mListener.onStart();
 
         Log.d(TAG, "Screen recording started.");
-
     }
 
     private void stopRecording() {
@@ -248,7 +247,6 @@ public final class RecordingSession {
                 .getBoolean(SettingsFragment.VIDEO_STOP_METHOD_KEY, true)) {
             hideOverlay();
         }
-        mMediaProjection.stop();
         stopRecorder();
 
         mListener.onStop();

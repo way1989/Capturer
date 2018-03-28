@@ -602,7 +602,6 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         try {
             mWindowManager.removeViewImmediate(mRootView);
         } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 

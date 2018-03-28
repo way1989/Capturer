@@ -32,10 +32,6 @@
             android:label="@string/permission_title"
             android:screenOrientation="portrait"/>
 
-        <service
-            android:name=".core.screenrecord.ScreenRecordService"
-            android:exported="false"/>
-
         <activity
             android:name=".core.LauncherActivity"
             android:excludeFromRecents="true"

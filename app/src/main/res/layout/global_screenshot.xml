@@ -33,22 +33,20 @@
 
     </com.way.capture.widget.swipe.SwipeVerticalLayout>
 
-
     <Button
         android:id="@+id/scroll_screenshot_btn"
-        style="@style/Widget.AppCompat.Button.Borderless.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"
+        android:background="@drawable/btn_default_material"
         android:layout_marginBottom="24dp"
         android:alpha="0"
         android:maxLines="1"
-        android:shadowColor="@android:color/black"
-        android:shadowRadius="8"
+        android:shadowColor="@android:color/white"
+        android:shadowRadius="1"
         android:text="@string/long_screenshot"
         android:textColor="@color/colorAccent"
         android:textSize="16sp"
         android:visibility="gone" />
-
 
 </FrameLayout>

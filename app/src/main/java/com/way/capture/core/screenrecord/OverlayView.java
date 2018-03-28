@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -18,7 +19,6 @@ import android.widget.TextView;
 import com.jakewharton.rxbinding2.view.RxView;
 import com.way.capture.R;
 import com.way.capture.fragment.SettingsFragment;
-import com.way.capture.utils.AppUtils;
 import com.way.capture.utils.ViewUtils;
 
 import java.util.concurrent.TimeUnit;
@@ -36,14 +36,14 @@ final class OverlayView extends FrameLayout {
     private static final String TAG = "OverlayView";
     private static final int START = 0;
     private static final int STOP = 1;
-    private static final long COUNTDOWN_DELAY = 4000L;
+    private static final long COUNTDOWN_DELAY = 3600L;
     private static final int COUNTDOWN_MAX = 3;
     private final Listener mListener;
 
     private TextView mRecordingTimeTextView;
     private Button mSwitchButton;
     private Button mCloseButton;
-    private long mRecordingStartTime;
+    private long mLastFiredTime;
 
     private OverlayView(Context context, Listener listener) {
         super(context);
@@ -78,24 +78,24 @@ final class OverlayView extends FrameLayout {
         RxView.clicks(mSwitchButton)
                 .throttleFirst(2, TimeUnit.SECONDS)
                 .subscribe(new Consumer<Object>() {
-            @Override
-            public void accept(Object o) throws Exception {
-                if ((int) mSwitchButton.getTag() == START) {
-                    mSwitchButton.setTag(STOP);
-                    mListener.onStop();
-                } else {
-                    checkCountDown();
-                }
-            }
-        });
+                    @Override
+                    public void accept(Object o) throws Exception {
+                        if ((int) mSwitchButton.getTag() == START) {
+                            mSwitchButton.setTag(STOP);
+                            mListener.onStop();
+                        } else {
+                            checkCountDown();
+                        }
+                    }
+                });
         RxView.clicks(mCloseButton)
                 .throttleFirst(2, TimeUnit.SECONDS)
                 .subscribe(new Consumer<Object>() {
-            @Override
-            public void accept(Object o) throws Exception {
-                mListener.onCancel();
-            }
-        });
+                    @Override
+                    public void accept(Object o) throws Exception {
+                        mListener.onCancel();
+                    }
+                });
     }
 
     void checkCountDown() {
@@ -134,26 +134,14 @@ final class OverlayView extends FrameLayout {
         mSwitchButton.setTag(START);
         mSwitchButton.setEnabled(true);
         mListener.onStart();
-        mRecordingStartTime = SystemClock.uptimeMillis();
-        updateRecordingTime();
     }
 
-    private void updateRecordingTime() {
-
-        long now = SystemClock.uptimeMillis();
-        long delta = now - mRecordingStartTime;
-
-        String text = AppUtils.getVideoRecordTime(delta, false);
-        final long targetNextUpdateDelay = 1000;
-        mRecordingTimeTextView.setText(text);
-
-        long actualNextUpdateDelay = targetNextUpdateDelay - (delta % targetNextUpdateDelay);
-        postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                updateRecordingTime();
-            }
-        }, actualNextUpdateDelay);
+    public void updateRecordingTime(long time) {
+        if (SystemClock.elapsedRealtime() - mLastFiredTime < 1000) {
+            return;
+        }
+        mRecordingTimeTextView.setText(DateUtils.formatElapsedTime(time / 1000));
+        mLastFiredTime = SystemClock.elapsedRealtime();
     }
 
 

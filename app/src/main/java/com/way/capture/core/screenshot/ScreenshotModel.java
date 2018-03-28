@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -109,7 +110,7 @@ public class ScreenshotModel implements ScreenshotContract.Model {
                     Context context = App.getContext();
                     Resources r = context.getResources();
                     final long imageTime = System.currentTimeMillis();
-                    final String imageDate = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(imageTime));
+                    final String imageDate = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(new Date(imageTime));
 
                     final String imageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, imageDate);
                     final File screenshotDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),

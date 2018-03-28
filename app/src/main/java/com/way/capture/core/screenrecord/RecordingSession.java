@@ -3,7 +3,6 @@ package com.way.capture.core.screenrecord;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -15,17 +14,14 @@ import android.media.CamcorderProfile;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
-import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -68,7 +64,7 @@ public final class RecordingSession {
     private final int mResultCode;
     private final Intent mIntentData;
     private final File mOutputDir;
-    private final DateFormat mFileFormat = new SimpleDateFormat("'ScreenRecord_'yyyyMMddHHmmss'.mp4'", Locale.ENGLISH);
+    private final DateFormat mFileFormat = new SimpleDateFormat("'ScreenRecord_'yyyyMMddHHmmss'.mp4'", Locale.getDefault());
     private final NotificationManager mNotificationManager;
     private final WindowManager mWindowManager;
     private final MediaProjectionManager mProjectionManager;
@@ -80,7 +76,7 @@ public final class RecordingSession {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Notifications.ACTION_STOP.equals(intent.getAction())) {
-                stopRecorder();
+                stopRecording();
             }
             Toast.makeText(context, "Recorder stopped...", Toast.LENGTH_LONG).show();
         }
@@ -177,7 +173,6 @@ public final class RecordingSession {
             Log.d(TAG, "Removing overlay view from window.");
             mWindowManager.removeView(mOverlayView);
             mOverlayView = null;
-
         }
     }
 
@@ -189,6 +184,7 @@ public final class RecordingSession {
     private RecordingInfo getRecordingInfo() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         WindowManager wm = (WindowManager) mContext.getSystemService(WINDOW_SERVICE);
+        if (wm == null) throw new NullPointerException("WindowManager is null...");
         wm.getDefaultDisplay().getRealMetrics(displayMetrics);
         int displayWidth = displayMetrics.widthPixels;
         int displayHeight = displayMetrics.heightPixels;
@@ -231,23 +227,33 @@ public final class RecordingSession {
         mRecorder.start();
         mContext.registerReceiver(mStopActionReceiver, new IntentFilter(Notifications.ACTION_STOP));
 
+        mNotificationManager.cancel(NOTIFICATION_ID);
         mIsRunning = true;
         mListener.onStart();
-
         Log.d(TAG, "Screen recording started.");
     }
 
     private void stopRecording() {
         Log.d(TAG, "Stopping screen recording...");
         if (!mIsRunning) {
-            throw new IllegalStateException("Not mIsRunning.");
+            return;
         }
         mIsRunning = false;
         if (PreferenceManager.getDefaultSharedPreferences(mContext)
                 .getBoolean(SettingsFragment.VIDEO_STOP_METHOD_KEY, true)) {
             hideOverlay();
         }
-        stopRecorder();
+
+        mNotifications.clear();
+        if (mRecorder != null) {
+            mRecorder.quit();
+        }
+        mRecorder = null;
+        try {
+            mContext.unregisterReceiver(mStopActionReceiver);
+        } catch (Exception e) {
+            //ignored
+        }
 
         mListener.onStop();
 
@@ -292,28 +298,7 @@ public final class RecordingSession {
 
         mNotificationManager.notify(NOTIFICATION_ID, builder.build());
 
-        if (bitmap != null) {
-            mListener.onEnd();
-            return;
-        }
-
-        new AsyncTask<Void, Void, Bitmap>() {
-            @Override
-            protected Bitmap doInBackground(Void... none) {
-                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-                retriever.setDataSource(mContext, uri);
-                return retriever.getFrameAtTime();
-            }
-
-            @Override
-            protected void onPostExecute(Bitmap bitmap) {
-                if (bitmap != null) {
-                    showNotification(uri, bitmap);
-                } else {
-                    mListener.onEnd();
-                }
-            }
-        }.execute();
+        mListener.onEnd();
     }
 
     void destroy() {
@@ -335,7 +320,7 @@ public final class RecordingSession {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        stopRecorder();
+                        stopRecording();
                     }
                 });
                 if (error != null) {
@@ -348,14 +333,13 @@ public final class RecordingSession {
                                 @Override
                                 public void onScanCompleted(String path, final Uri uri) {
                                     Log.d(TAG, "Media scanner completed.");
-                                    if (uri != null)
-                                        mHandler.post(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                RxBus.getInstance().post(new RxEvent.NewPathEvent(DataInfo.TYPE_SCREEN_RECORD, output.getAbsolutePath()));
-                                                showNotification(uri, null);
-                                            }
-                                        });
+                                    if (uri != null) {
+                                        RxBus.getInstance().post(new RxEvent.NewPathEvent(DataInfo.TYPE_SCREEN_RECORD, output.getAbsolutePath()));
+                                        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                                        retriever.setDataSource(mContext, uri);
+                                        showNotification(uri, retriever.getFrameAtTime());
+                                    }
+
                                 }
                             });
                 }
@@ -371,8 +355,14 @@ public final class RecordingSession {
                 if (startTime <= 0) {
                     startTime = presentationTimeUs;
                 }
-                long time = (presentationTimeUs - startTime) / 1000;
+                final long time = (presentationTimeUs - startTime) / 1000;
                 mNotifications.recording(time);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mOverlayView.updateRecordingTime(time);
+                    }
+                });
             }
         });
         return r;
@@ -410,19 +400,6 @@ public final class RecordingSession {
         MediaCodecInfo.CodecProfileLevel profileLevel = null;
         return new VideoEncodeConfig(width, height, bitrate,
                 framerate, iframe, codec, MediaFormat.MIMETYPE_VIDEO_AVC, profileLevel);
-    }
-
-    private void stopRecorder() {
-        mNotifications.clear();
-        if (mRecorder != null) {
-            mRecorder.quit();
-        }
-        mRecorder = null;
-        try {
-            mContext.unregisterReceiver(mStopActionReceiver);
-        } catch (Exception e) {
-            //ignored
-        }
     }
 
     public interface Listener {

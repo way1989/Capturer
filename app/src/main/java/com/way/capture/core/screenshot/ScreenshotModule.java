@@ -70,7 +70,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     static final int STYLE_SAVE_TO_EDIT = 2;
     private static final String TAG = "TakeScreenshotService";
     private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
-    private static final long PREVIEW_OUT_TIME = 3000L;// 超时自动保存
+    private static final long PREVIEW_OUT_TIME = 4000L;// 超时自动保存
     private static final long TAKE_SCREENSHOT_DELAY = 500L;
     private static final int TAKE_SCREENSHOT_MESSAGE = 0x121;
     private static final int TAKE_LONG_SCREENSHOT_MESSAGE = 0x122;
@@ -94,15 +94,10 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     //view
     private FrameLayout mRootView;
     private SwipeVerticalLayout mSwipeVerticalLayout;
-    private Button mEditBtn;
     private Button mLongScreenshotBtn;
-    private Button mShareBtn;
     private ImageView mBackgroundView;
     private ImageView mScreenshotView;
     private ImageView mScreenshotFlash;
-    private View mBtnControlView;
-    private View mSwipeUpToDeleteView;
-    private View mSwipeDownToSaveView;
     private View mLongScreenshotToast;
     private View mLongScreenshotCover;
     private ValueAnimator mScreenshotAnimation;
@@ -127,12 +122,8 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
                 case AUTO_SAVE_MESSAGE:
                     mSwipeVerticalLayout.setEnabled(false);
                     if (!mKeyguardManager.isKeyguardLocked() || !mKeyguardManager.isKeyguardSecure()) {
-                        mShareBtn.animate().alpha(0);
                         mLongScreenshotBtn.animate().alpha(0);
-                        mEditBtn.animate().alpha(0);
                     }
-                    mSwipeDownToSaveView.animate().alpha(0);
-                    mSwipeUpToDeleteView.animate().alpha(0);
                     playScreenshotDropOutAnimation();
                     break;
                 default:
@@ -178,24 +169,17 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     }
 
     private void initViews() {
-        mRootView = (FrameLayout) mLayoutInflater.inflate(R.layout.global_screenshot_root, null);
-        mSwipeVerticalLayout = (SwipeVerticalLayout) mRootView.findViewById(R.id.swipe_layout);
+        mRootView = (FrameLayout) mLayoutInflater.inflate(R.layout.global_screenshot, null);
+        mSwipeVerticalLayout = mRootView.findViewById(R.id.swipe_layout);
         mSwipeVerticalLayout.setEnabled(false);
-        mBtnControlView = mRootView.findViewById(R.id.btn_view);
-        mSwipeUpToDeleteView = mRootView.findViewById(R.id.swipe_to_delete);
-        mSwipeDownToSaveView = mRootView.findViewById(R.id.swipe_to_save);
         mSwipeVerticalLayout.setCallback(this);
         mSwipeVerticalLayout.setPressListener(this);
-        mEditBtn = (Button) mRootView.findViewById(R.id.edit_btn);
-        mLongScreenshotBtn = (Button) mRootView.findViewById(R.id.scroll_screenshot_btn);
-        mShareBtn = (Button) mRootView.findViewById(R.id.share_btn);
-        mEditBtn.setOnClickListener(this);
+        mLongScreenshotBtn = mRootView.findViewById(R.id.scroll_screenshot_btn);
         mLongScreenshotBtn.setOnClickListener(this);
-        mShareBtn.setOnClickListener(this);
 
-        mBackgroundView = (ImageView) mRootView.findViewById(R.id.global_screenshot_background);
-        mScreenshotView = (ImageView) mRootView.findViewById(R.id.global_screenshot);
-        mScreenshotFlash = (ImageView) mRootView.findViewById(R.id.global_screenshot_flash);
+        mBackgroundView = mRootView.findViewById(R.id.global_screenshot_background);
+        mScreenshotView = mRootView.findViewById(R.id.global_screenshot);
+        mScreenshotFlash = mRootView.findViewById(R.id.global_screenshot_flash);
     }
 
     @Override
@@ -220,11 +204,6 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         return Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
     }
 
-    private boolean hasNavigationBar() {
-        boolean hasMenukey = ViewConfiguration.get(mContext).hasPermanentMenuKey();
-        boolean hasBackkey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
-        return !hasMenukey && !hasBackkey;
-    }
 
     private int getNavigationBarWidth() {
         Resources resources = mContext.getResources();
@@ -246,7 +225,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     }
 
     private Bitmap removeNavigationBar(Bitmap bitmap) {
-        boolean hasNavigationBar = hasNavigationBar();
+        boolean hasNavigationBar = ViewUtils.isNavigationBarShow();
         if (!hasNavigationBar)
             return bitmap;
 
@@ -338,12 +317,6 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
             dismissLongScreenshotToast();
         }
 
-        if (!mKeyguardManager.isKeyguardLocked() || !mKeyguardManager.isKeyguardSecure()) {
-            mShareBtn.setVisibility(View.VISIBLE);
-            mShareBtn.animate().alpha(1f);
-            mEditBtn.setVisibility(View.VISIBLE);
-            mEditBtn.animate().alpha(1f);
-        }
         if (needCheckAction && !longScreenshot && mContext.getResources().getConfiguration().orientation
                 != Configuration.ORIENTATION_LANDSCAPE && !mKeyguardManager.isKeyguardLocked()) {
             mLongScreenshotBtn.setVisibility(View.VISIBLE);
@@ -444,18 +417,14 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
             mHandler.sendEmptyMessageDelayed(AUTO_SAVE_MESSAGE, PREVIEW_OUT_TIME);
         if (isDismiss) {
             if (!mKeyguardManager.isKeyguardLocked() || !mKeyguardManager.isKeyguardSecure()) {
-                mBtnControlView.animate().alpha(0);
+                mLongScreenshotBtn.animate().alpha(0);
             }
-            mSwipeUpToDeleteView.animate().alpha(1);
-            mSwipeDownToSaveView.animate().alpha(1);
             clearFloatAnim();
         } else {
 
             if (!mKeyguardManager.isKeyguardLocked() || !mKeyguardManager.isKeyguardSecure()) {
-                mBtnControlView.animate().alpha(1);
+                mLongScreenshotBtn.animate().alpha(1);
             }
-            mSwipeUpToDeleteView.animate().alpha(0);
-            mSwipeDownToSaveView.animate().alpha(0);
             startFloatAnim();
         }
     }
@@ -504,18 +473,10 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         mHandler.removeMessages(AUTO_SAVE_MESSAGE);
         mSwipeVerticalLayout.setEnabled(false);
         switch (v.getId()) {
-            case R.id.edit_btn:
-                mRootView.findViewById(R.id.loading).animate().alpha(1);
-                mPresenter.saveScreenshot(STYLE_SAVE_TO_EDIT);
-                break;
             case R.id.scroll_screenshot_btn:
                 showLongScreenshotToast();
                 removeScreenshotView();
                 takeLongScreenshot();
-                break;
-            case R.id.share_btn:
-                mRootView.findViewById(R.id.loading).animate().alpha(1);
-                mPresenter.saveScreenshot(STYLE_SAVE_TO_SHARE);
                 break;
             case R.id.toast_dialog_bg_container:
                 Log.i(TAG, "onClick... toast_dialog_bg_container");
@@ -551,8 +512,8 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     }
 
     private void enableDialogTouchFlag(boolean enable) {
-        TextView textView = (TextView) mLongScreenshotToast.findViewById(R.id.long_screenshot_text);
-        TextView title = (TextView) mLongScreenshotToast.findViewById(R.id.long_screenshot_title);
+        TextView textView = mLongScreenshotToast.findViewById(R.id.long_screenshot_text);
+        TextView title = mLongScreenshotToast.findViewById(R.id.long_screenshot_title);
         title.setText(R.string.long_screenshot_indicator_title);
         if (enable) {
             textView.setText(R.string.long_screenshot_indicator);

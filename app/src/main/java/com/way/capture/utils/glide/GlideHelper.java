@@ -97,9 +97,7 @@ public class GlideHelper {
         Glide.with(image.getContext())
                 .load(path)
                 .asBitmap()
-                .animate(ANIMATOR)
                 .centerCrop()
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(image);
     }
 }

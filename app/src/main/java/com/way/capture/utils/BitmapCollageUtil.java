@@ -7,6 +7,8 @@ import android.graphics.Rect;
 import android.util.Log;
 import android.util.Pair;
 
+import com.glidebitmappool.GlideBitmapPool;
+
 
 /**
  * Created by android on 16-3-8.
@@ -290,22 +292,20 @@ public class BitmapCollageUtil {
         if (height < firstBitmap.getHeight()) {
             return null;
         }
-        try {
-            final long drawStart = System.currentTimeMillis();
-            Bitmap result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
-            Canvas canvas = new Canvas(result);
-            canvas.drawBitmap(firstBitmap, new Rect(0, 0, width, pair.first),
-                    new Rect(0, 0, width, pair.first), null);
-            canvas.drawBitmap(secondBitmap, new Rect(0, pair.second, width, secondBitmap.getHeight()),
-                    new Rect(0, pair.first, width, height), null);
-            Log.d(TAG, "collageLongBitmap drawBitmap end... cost = " + (System.currentTimeMillis() - drawStart) + "ms");
-            return result;
-        } catch (Exception e) {
-            Log.d(TAG, "collageLongBitmap: ", e);
-        }
+        final long drawStart = System.currentTimeMillis();
+        Bitmap result = GlideBitmapPool.getBitmap(width, height, Bitmap.Config.ARGB_8888);
 
-        return null;
+        Canvas canvas = new Canvas(result);
+        canvas.drawBitmap(firstBitmap, new Rect(0, 0, width, pair.first),
+                new Rect(0, 0, width, pair.first), null);
+        canvas.drawBitmap(secondBitmap, new Rect(0, pair.second, width, secondBitmap.getHeight()),
+                new Rect(0, pair.first, width, height), null);
+        Log.d(TAG, "collageLongBitmap drawBitmap end... cost = " + (System.currentTimeMillis() - drawStart) + "ms");
+        GlideBitmapPool.putBitmap(firstBitmap);
+        GlideBitmapPool.putBitmap(secondBitmap);
+        return result;
+
     }
 
 }

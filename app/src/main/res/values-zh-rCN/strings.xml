@@ -94,7 +94,7 @@
     <string name="home">主界面</string>
     <string name="record_screenshot">录制屏幕</string>
     <string name="normal_screen_shot">普通截屏</string>
-    <string name="long_screenshot">滚动截屏</string>
+    <string name="long_screenshot">截取长图</string>
     <string name="free_screenshot">自由截屏</string>
     <string name="rect_screenshot">区域截屏</string>
     <string name="free_crop_toast">滑动选取需要截取的部分,点击按钮保存</string>

@@ -22,6 +22,8 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationUtils;
 
+import com.glidebitmappool.GlideBitmapPool;
+
 import java.util.ArrayList;
 
 public class FreeCropView extends ViewGroup {
@@ -85,7 +87,7 @@ public class FreeCropView extends ViewGroup {
         matrix.postScale(scale, scale);
 
         Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-        bitmap.recycle();
+        GlideBitmapPool.putBitmap(bitmap);
         return resizedBitmap;
     }
 
@@ -173,8 +175,7 @@ public class FreeCropView extends ViewGroup {
         canvas.drawBitmap(resizeBitmap, 0, 0, paint);
         Log.i("FreeCrop", "clipPath = " + clipStroke.boundingBox);
         canvas.save();
-        if (!resizeBitmap.isRecycled())
-            resizeBitmap.recycle();
+        GlideBitmapPool.putBitmap(resizeBitmap);
         int x = 0, y = 0, w = 0, h = 0;
         int l = (int) (clipStroke.boundingBox.left);
         int t = (int) (clipStroke.boundingBox.top);
@@ -185,8 +186,7 @@ public class FreeCropView extends ViewGroup {
         w = r - l;
         h = b - t;
         Bitmap cropped = Bitmap.createBitmap(bitmap, x, y, w, h, null, false);
-        if (!bitmap.isRecycled())
-            bitmap.recycle();
+        GlideBitmapPool.putBitmap(bitmap);
         return cropped;
     }
 

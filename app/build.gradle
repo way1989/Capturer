@@ -130,8 +130,8 @@ dependencies {
     implementation "com.jakewharton:butterknife:$rootProject.butterknifeVersion"
     annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.butterknifeVersion"
 
-    //bottom navigation bar
-    //compile 'it.sephiroth.android.library.bottomnavigation:bottom-navigation:2.0.0'
+    //bitmap pool
+    implementation 'com.amitshekhar.android:glide-bitmap-pool:0.0.1'
 
     //loading layout
     implementation 'com.lai.weavey:loadinglayout:1.3.1'

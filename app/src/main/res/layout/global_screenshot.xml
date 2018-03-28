@@ -1,62 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.way.capture.widget.swipe.SwipeVerticalLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                                  android:id="@+id/swipe_layout"
-                                                  android:layout_width="match_parent"
-                                                  android:layout_height="match_parent">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/global_screenshot_background"
+    <com.way.capture.widget.swipe.SwipeVerticalLayout
+        android:id="@+id/swipe_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@android:color/black"
-        android:visibility="gone"/>
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/swipe_to_delete"
+        <ImageView
+            android:id="@+id/global_screenshot_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@android:color/black"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/global_screenshot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:elevation="16dp"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/global_screenshot_flash"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@android:color/white"
+            android:visibility="gone" />
+
+    </com.way.capture.widget.swipe.SwipeVerticalLayout>
+
+
+    <Button
+        android:id="@+id/scroll_screenshot_btn"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="32dp"
+        android:layout_gravity="bottom|center"
+        android:layout_marginBottom="24dp"
         android:alpha="0"
-        android:drawableBottom="@drawable/swipe_to_delete"
-        android:drawablePadding="4dp"
-        android:fontFamily="Regular"
-        android:gravity="center"
-        android:text="@string/delete"
-        android:textAllCaps="true"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"/>
+        android:maxLines="1"
+        android:shadowColor="@android:color/black"
+        android:shadowRadius="8"
+        android:text="@string/long_screenshot"
+        android:textColor="@color/colorAccent"
+        android:textSize="16sp"
+        android:visibility="gone" />
 
-    <TextView
-        android:id="@+id/swipe_to_save"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|bottom"
-        android:layout_marginBottom="32dp"
-        android:alpha="0"
-        android:drawablePadding="4dp"
-        android:drawableTop="@drawable/swipe_to_save"
-        android:fontFamily="Regular"
-        android:gravity="center"
-        android:text='@string/save'
-        android:textAllCaps="true"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"/>
 
-    <ImageView
-        android:id="@+id/global_screenshot"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:adjustViewBounds="true"
-        android:background="@drawable/screenshot_panel"
-        android:visibility="gone"/>
-
-    <ImageView
-        android:id="@+id/global_screenshot_flash"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@android:color/white"
-        android:visibility="gone"/>
-
-</com.way.capture.widget.swipe.SwipeVerticalLayout>
+</FrameLayout>

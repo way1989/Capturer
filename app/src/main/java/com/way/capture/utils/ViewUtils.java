@@ -1,6 +1,8 @@
 package com.way.capture.utils;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Point;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -76,6 +78,26 @@ public final class ViewUtils {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         display.getRealMetrics(displayMetrics);
         return display.getRotation();
+    }
+
+    public static boolean isNavigationBarShow() {
+        Display display = ((WindowManager) App.getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        Point size = new Point();
+        Point realSize = new Point();
+        display.getSize(size);
+        display.getRealSize(realSize);
+        return realSize.y != size.y;
+    }
+
+    public static int getNavigationBarHeight() {
+        if (!isNavigationBarShow()) {
+            return 0;
+        }
+        Resources resources = App.getContext().getResources();
+        int resourceId = resources.getIdentifier("navigation_bar_height",
+                "dimen", "android");
+        //获取NavigationBar的高度
+        return resources.getDimensionPixelSize(resourceId);
     }
 
     public static int getFloatType() {

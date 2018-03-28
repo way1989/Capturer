@@ -21,6 +21,7 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.glidebitmappool.GlideBitmapPool;
 import com.way.capture.App;
 import com.way.capture.R;
 import com.way.capture.data.DataInfo;
@@ -106,18 +107,14 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
             @Override
             public void onNext(Bitmap bitmap) {
                 Log.i(TAG, "onNext...");
-//                        if(mScreenBitmap == null || mScreenBitmap.isRecycled()){
-//                            mView.showScreenshotError(new Throwable("bitmap is null..."));
-//                            return;
-//                        }
+
                 if (bitmap == null || bitmap.isRecycled()) {
                     mView.showScreenshotAnim(mScreenBitmap, true, false);
                 } else if (bitmap.getHeight() == mScreenBitmap.getHeight()
-                        || mScreenBitmap.getHeight() / ViewUtils.getHeight() > 9) {
+                        || mScreenBitmap.getHeight() > 10 * ViewUtils.getHeight()) {
                     mView.showScreenshotAnim(bitmap, true, false);
                 } else {
                     mView.onCollageFinish();
-                    mScreenBitmap.recycle();
                     mScreenBitmap = bitmap;
                 }
             }
@@ -165,15 +162,11 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
 
     @Override
     public void setBitmap(Bitmap bitmap) {
-        if (mScreenBitmap != null && !mScreenBitmap.isRecycled())
-            mScreenBitmap.recycle();
         mScreenBitmap = bitmap;
     }
 
     @Override
     public void release() {
-        if (mScreenBitmap != null && !mScreenBitmap.isRecycled())
-            mScreenBitmap.recycle();
         if (mCameraSound != null)
             mCameraSound.release();
         mScreenshotModel.release();
@@ -222,7 +215,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
         }
         final int previewHeight = r.getDimensionPixelSize(R.dimen.notification_max_height);
 
-        final Bitmap preview = Bitmap.createBitmap(previewWidth, previewHeight, mScreenBitmap.getConfig());
+        final Bitmap preview = GlideBitmapPool.getBitmap(previewWidth, previewHeight, Bitmap.Config.RGB_565);
         Canvas c = new Canvas(preview);
         Paint paint = new Paint();
         ColorMatrix desat = new ColorMatrix();
@@ -297,11 +290,6 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                 break;
             default:
                 break;
-        }
-
-        // Recycle the bitmap data
-        if (mScreenBitmap != null && !mScreenBitmap.isRecycled()) {
-            mScreenBitmap.recycle();
         }
     }
 

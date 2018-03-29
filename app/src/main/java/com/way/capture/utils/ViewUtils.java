@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.os.Build;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
@@ -101,10 +102,32 @@ public final class ViewUtils {
         Resources resources = App.getContext().getResources();
         Configuration configuration = resources.getConfiguration();
         final boolean isLandscape = configuration.orientation == ORIENTATION_LANDSCAPE;
-        int resourceId = resources.getIdentifier(isLandscape ? "navigation_bar_width" : "navigation_bar_height",
-                "dimen", "android");
+        int resourceId = resources.getIdentifier(isLandscape ? "navigation_bar_width"
+                : "navigation_bar_height", "dimen", "android");
         //获取NavigationBar的高度
         return resources.getDimensionPixelSize(resourceId);
+    }
+
+    public static int getStatusBarHeight() {
+        final Resources resources = App.getContext().getResources();
+        final int statusBarHeightId = resources.getIdentifier("status_bar_height", "dimen", "android");
+        return resources.getDimensionPixelSize(statusBarHeightId);
+    }
+
+    public static int dp2px(float dp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, App.getContext().getResources().getDisplayMetrics());
+    }
+
+    public static float px2dp(float px) {
+        return px / App.getContext().getResources().getDisplayMetrics().density;
+    }
+
+    public static float sp2px(float sp) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, App.getContext().getResources().getDisplayMetrics());
+    }
+
+    public static float px2sp(float px) {
+        return px / App.getContext().getResources().getDisplayMetrics().scaledDensity;
     }
 
     public static int getFloatType() {

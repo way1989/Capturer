@@ -53,10 +53,10 @@ public class BitmapCollageUtil {
         }
         mScreenWidth = screenWidth;//用于判断是否初始化过参数
 
-        TOP_NOT_COMPARE_HEIGHT = (int) (0.14f * screenHeight);//90dp
+        TOP_NOT_COMPARE_HEIGHT = ViewUtils.getStatusBarHeight() + ViewUtils.dp2px(56);//56dp + status bar height
 //        BOTTOM_NOT_COMPARE_HEIGHT = (int) (0.075f * screenHeight);//48dp
-        BORDER_NOT_COMPARE_WIDTH = (int) (0.05f * screenWidth);//18dp
-        MOVE_HEIGHT_MIN = (int) (0.008f * screenHeight);//5dp
+        BORDER_NOT_COMPARE_WIDTH = ViewUtils.dp2px(16);//16dp
+        MOVE_HEIGHT_MIN = ViewUtils.dp2px(5);//5dp
     }
 
     /**
@@ -284,6 +284,7 @@ public class BitmapCollageUtil {
                 + ", cost = " + (System.currentTimeMillis() - collageStart) + "ms");
 
         if (pair == null) {//failed, stop
+            Log.e(TAG, "collageLongBitmap: compare failed!!! pair == null");
             return null;
         }
 
@@ -291,6 +292,7 @@ public class BitmapCollageUtil {
         int height = pair.first + (secondBitmap.getHeight() - pair.second);
 
         if (height < firstBitmap.getHeight()) {
+            Log.e(TAG, "collageLongBitmap: compare failed!!! height too small");
             return null;
         }
 

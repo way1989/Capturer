@@ -27,7 +27,7 @@ import com.way.capture.base.BaseActivity;
 import com.way.capture.data.DataInfo;
 import com.way.capture.fragment.DetailsFragment;
 import com.way.capture.fragment.ScreenshotFragment;
-import com.way.capture.utils.AppUtils;
+import com.way.capture.utils.AppUtil;
 import com.way.capture.widget.DepthPageTransformer;
 
 import java.io.File;
@@ -148,7 +148,7 @@ public class DetailsActivity extends BaseActivity {
     }
 
     private void setupSystemUI() {
-        toolbar.animate().translationY(AppUtils.getStatusBarHeight(getResources())).setInterpolator(new DecelerateInterpolator())
+        toolbar.animate().translationY(AppUtil.getStatusBarHeight(getResources())).setInterpolator(new DecelerateInterpolator())
                 .setDuration(0).start();
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -175,7 +175,7 @@ public class DetailsActivity extends BaseActivity {
     private void showSystemUI() {
         runOnUiThread(new Runnable() {
             public void run() {
-                toolbar.animate().translationY(AppUtils.getStatusBarHeight(getResources())).setInterpolator(new DecelerateInterpolator())
+                toolbar.animate().translationY(AppUtil.getStatusBarHeight(getResources())).setInterpolator(new DecelerateInterpolator())
                         .setDuration(240);
                 getWindow().getDecorView().setSystemUiVisibility(
                         View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -238,10 +238,10 @@ public class DetailsActivity extends BaseActivity {
 
                 break;*/
             case R.id.image_info:
-                AppUtils.showDetails(this, path, mType);
+                AppUtil.showDetails(this, path, mType);
                 break;
             case R.id.image_share:
-                AppUtils.shareScreenshot(this, path, mType);
+                AppUtil.shareScreenshot(this, path, mType);
                 break;
         }
         return super.onOptionsItemSelected(item);

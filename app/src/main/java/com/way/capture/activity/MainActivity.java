@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
@@ -19,7 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.jakewharton.rxbinding2.view.RxView;
 import com.thefinestartist.finestwebview.FinestWebView;
 import com.way.capture.App;
 import com.way.capture.R;
@@ -28,17 +26,13 @@ import com.way.capture.base.BaseFragment;
 import com.way.capture.base.BaseScreenshotFragment;
 import com.way.capture.data.DataInfo;
 import com.way.capture.fragment.ScreenshotFragment;
-import com.way.capture.service.ShakeService;
-import com.way.capture.utils.AppUtils;
-import com.wooplr.spotlight.SpotlightView;
+import com.way.capture.utils.AppUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
-import io.reactivex.functions.Consumer;
 
 public class MainActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
@@ -55,14 +49,9 @@ public class MainActivity extends BaseActivity {
             startActivity(chooserIntent);
         }
     };
-    Runnable navigateFeedback = new Runnable() {
-        public void run() {
-            startActivity(new Intent(MainActivity.this, FeedbackActivity.class));
-        }
-    };
+
     Runnable navigateHelp = new Runnable() {
         public void run() {
-            //startActivity(new Intent(MainActivity.this, HelpActivity.class));
             new FinestWebView.Builder(MainActivity.this)
                     .titleDefault(getString(R.string.help))
                     .titleColorRes(R.color.finestWhite)
@@ -131,7 +120,7 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(AppUtils.APP_FIRST_RUN, true))
+        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(AppUtil.APP_FIRST_RUN, true))
             startActivity(new Intent(MainActivity.this, GuideActivity.class));
 
         setExitSharedElementCallback(mCallback);

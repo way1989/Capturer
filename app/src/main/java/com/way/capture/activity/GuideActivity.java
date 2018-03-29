@@ -19,7 +19,7 @@ import android.widget.LinearLayout;
 
 import com.way.capture.R;
 import com.way.capture.fragment.GuideFragment;
-import com.way.capture.utils.AppUtils;
+import com.way.capture.utils.AppUtil;
 
 public class GuideActivity extends AppCompatActivity {
     static final int NUM_PAGES = 4;
@@ -104,8 +104,6 @@ public class GuideActivity extends AppCompatActivity {
 
             }
         });
-        //SpringIndicator springIndicator = (SpringIndicator) findViewById(R.id.indicator);
-        //springIndicator.setViewPager(pager);
         buildCircles();
     }
 
@@ -150,7 +148,7 @@ public class GuideActivity extends AppCompatActivity {
     }
 
     private void endTutorial() {
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(AppUtils.APP_FIRST_RUN, false).apply();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(AppUtil.APP_FIRST_RUN, false).apply();
         finish();
         overridePendingTransition(R.anim.abc_fade_in, R.anim.abc_fade_out);
     }

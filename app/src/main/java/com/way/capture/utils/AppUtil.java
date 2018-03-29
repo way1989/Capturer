@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.Formatter;
 import java.util.Locale;
 
-public class AppUtils {
+public class AppUtil {
     public static final String BASE_URL = "http://7xrpr9.com1.z0.glb.clouddn.com/ffmpeg/%s/ffmpeg.zip";
     public static final String FFMPEG_FILE_NAME = "ffmpeg";
 
@@ -237,9 +237,9 @@ public class AppUtils {
 
                 return size + "\n" + length + "\n" + time + "\n" + location;
             case DataInfo.TYPE_SCREEN_RECORD:
-                Pair<Integer, Integer> pair = AppUtils.getVideoWidthHeight(path);
+                Pair<Integer, Integer> pair = AppUtil.getVideoWidthHeight(path);
                 String sizeVideo = activity.getString(R.string.image_info_size, pair.first, pair.second);
-                String duration = AppUtils.getVideoDuration(path);
+                String duration = AppUtil.getVideoDuration(path);
                 duration = activity.getString(R.string.image_info_duration, duration);
                 return sizeVideo + "\n" + duration + "\n" + length + "\n" + time + "\n" + location;
 

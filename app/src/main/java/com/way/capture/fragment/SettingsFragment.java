@@ -17,8 +17,8 @@ import android.preference.SwitchPreference;
 import com.thefinestartist.finestwebview.FinestWebView;
 import com.way.capture.R;
 import com.way.capture.service.ShakeService;
-import com.way.capture.utils.AppUtils;
-import com.way.capture.utils.ShellCmdUtils;
+import com.way.capture.utils.AppUtil;
+import com.way.capture.utils.ScrollUtils;
 //import com.way.firupgrade.FIRUtils;
 
 /**
@@ -52,11 +52,11 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         }
         ListPreference sizeListPreference = (ListPreference) findPreference(VIDEO_SIZE_KEY);
         sizeListPreference.setSummary(sizeListPreference.getEntry());
-        if (AppUtils.isMarshmallow()) {
+        if (AppUtil.isMarshmallow()) {
             PreferenceCategory preferenceScreen = (PreferenceCategory) findPreference("key_advance_category");
             preferenceScreen.removePreference(findPreference(SHOW_TOUCHES_KEY));
         }
-        if (!ShellCmdUtils.isDeviceRoot()) {
+        if (!ScrollUtils.isDeviceRoot()) {
             PreferenceCategory preferenceScreen = (PreferenceCategory) findPreference("key_advance_category");
             preferenceScreen.removePreference(findPreference(LONG_SCREENSHOT_AUTO));
         }

@@ -48,13 +48,16 @@ public class ScrollUtils {
     }
 
     public static boolean isDeviceRoot() {
+        OutputStream os = null;
         try {
             Process process = Runtime.getRuntime().exec("su");
             Log.i(TAG, "isDeviceRoot: process = " + process + ", process.getOutputStream() = " + process.getOutputStream());
-            if (process != null && process.getOutputStream() != null)
-                return true;
+            os = process.getOutputStream();
+            return os != null;
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+        } finally {
+            OsUtil.closeSilently(os);
         }
         return false;
     }

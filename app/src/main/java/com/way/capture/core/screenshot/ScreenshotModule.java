@@ -25,12 +25,10 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.KeyCharacterMap;
-import android.view.KeyEvent;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
@@ -46,7 +44,6 @@ import com.way.capture.R;
 import com.way.capture.core.BaseModule;
 import com.way.capture.fragment.SettingsFragment;
 import com.way.capture.service.ModuleService;
-import com.way.capture.utils.DensityUtil;
 import com.way.capture.utils.RxScreenshot;
 import com.way.capture.utils.ScrollUtils;
 import com.way.capture.utils.ViewUtils;
@@ -98,7 +95,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     private ImageView mBackgroundView;
     private ImageView mScreenshotView;
     private ImageView mScreenshotFlash;
-    private View mLongScreenshotToast;
+    private TextView mLongScreenshotToast;
     private View mLongScreenshotCover;
     private ValueAnimator mScreenshotAnimation;
     private ValueAnimator mExitScreenshotAnimation;
@@ -263,7 +260,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         }
         // Add the view for the animation
         if (longScreenshot) {
-            int heightPixels = DensityUtil.getDisplayHeight(mContext);
+            int heightPixels = ViewUtils.getHeight();;
             int count = bitmap.getHeight() / heightPixels;
             count = Math.max(1, Math.min(5, count));
             if (count > 1) bitmap = resizeBitmap(bitmap, 1.00f / count);
@@ -336,7 +333,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
 
     private void startFloatAnim() {
         if (mFloatAnim == null) {
-            mFloatAnim = ObjectAnimator.ofFloat(mScreenshotView, "translationY", 0f, DensityUtil.dip2px(mContext, 8), 0f);
+            mFloatAnim = ObjectAnimator.ofFloat(mScreenshotView, "translationY", 0f, ViewUtils.dp2px(8), 0f);
             mFloatAnim.setDuration(2000L);
             mFloatAnim.setInterpolator(new AccelerateDecelerateInterpolator());
             mFloatAnim.setRepeatCount(ValueAnimator.INFINITE);
@@ -474,11 +471,12 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         mSwipeVerticalLayout.setEnabled(false);
         switch (v.getId()) {
             case R.id.scroll_screenshot_btn:
+                mLongScreenshotBtn.setVisibility(View.GONE);
                 showLongScreenshotToast();
                 removeScreenshotView();
                 takeLongScreenshot();
                 break;
-            case R.id.toast_dialog_bg_container:
+            case R.id.long_screenshot_title:
                 Log.i(TAG, "onClick... toast_dialog_bg_container");
                 enableDialogTouchFlag(false);
                 mHandler.removeMessages(TAKE_LONG_SCREENSHOT_MESSAGE);
@@ -512,15 +510,13 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     }
 
     private void enableDialogTouchFlag(boolean enable) {
-        TextView textView = mLongScreenshotToast.findViewById(R.id.long_screenshot_text);
         TextView title = mLongScreenshotToast.findViewById(R.id.long_screenshot_title);
-        title.setText(R.string.long_screenshot_indicator_title);
         if (enable) {
-            textView.setText(R.string.long_screenshot_indicator);
+            title.setText(R.string.long_screenshot_indicator);
             mLongScreenshotCover.findViewById(R.id.long_screenshot_indicator_arrow).setVisibility(View.VISIBLE);
             mLongScreenshotCover.findViewById(R.id.long_screenshot_indicator).setVisibility(View.VISIBLE);
         } else {
-            textView.setText(R.string.long_screenshot_progressing);
+            title.setText(R.string.long_screenshot_progressing);
             mLongScreenshotCover.findViewById(R.id.long_screenshot_indicator).setVisibility(View.GONE);
             mLongScreenshotCover.findViewById(R.id.long_screenshot_indicator_arrow).setVisibility(View.GONE);
         }
@@ -564,14 +560,14 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
             mLongScreenshotCover.setOnClickListener(null);
         }
-        int screenShowWidth = DensityUtil.getDisplayWidth(mContext);
+        int screenShowWidth = ViewUtils.getWidth();
         layoutParams.width = screenShowWidth - 24;//leave some space for swipe
         layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED;
         mWindowManager.addView(mLongScreenshotCover, layoutParams);
     }
 
     private void addToast() {
-        mLongScreenshotToast = mLayoutInflater.inflate(R.layout.long_screenshot_toast, null);
+        mLongScreenshotToast = (TextView) mLayoutInflater.inflate(R.layout.long_screenshot_toast, null);
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 0, ViewUtils.getFloatType(),
                 WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
@@ -586,14 +582,16 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
-            mLongScreenshotToast.findViewById(R.id.toast_dialog_bg_container).setOnClickListener(this);
+            mLongScreenshotToast.setOnClickListener(this);
         }
-        layoutParams.y = 0;
+        //int actionBarHeight = TypedValue.complexToDimensionPixelSize(new TypedValue().data,
+          //      mContext.getResources().getDisplayMetrics());
+        layoutParams.y = ViewUtils.getStatusBarHeight();
         layoutParams.windowAnimations = R.style.VolumePanelAnimation;
         layoutParams.gravity = mContext.getResources().getInteger(
                 R.integer.standard_notification_panel_layout_gravity);
-        layoutParams.width = DensityUtil.getDisplayWidth(mContext);
-        layoutParams.height = DensityUtil.dip2px(mContext, 88);
+        layoutParams.width = ViewUtils.getWidth();
+        layoutParams.height = ViewUtils.dp2px(56);
         layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED;
         mWindowManager.addView(mLongScreenshotToast, layoutParams);
     }
@@ -683,8 +681,8 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     }
 
     private ValueAnimator createScreenshotDropOutAnimation() {
-        int w = DensityUtil.getDisplayWidth(mContext);
-        int h = DensityUtil.getDisplayHeight(mContext);
+        int w = ViewUtils.getWidth();
+        int h = ViewUtils.getHeight();
         ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
         anim.setStartDelay(SCREENSHOT_DROP_OUT_DELAY);
         anim.addListener(new AnimatorListenerAdapter() {
@@ -800,8 +798,8 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
 
     private void updateRectCropLayoutWidth() {
         if (mRectCropDialog != null) {
-            int screenShowWidth = DensityUtil.getDisplayWidth(mContext);
-            int screenShowHeight = DensityUtil.getDisplayHeight(mContext);
+            int screenShowWidth = ViewUtils.getWidth();
+            int screenShowHeight = ViewUtils.getHeight();
             final Resources res = mContext.getResources();
             final WindowManager.LayoutParams lp = mRectCropDialog.getWindow().getAttributes();
             lp.width = screenShowWidth;
@@ -879,12 +877,10 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
 
     private void updateFreeCropLayoutWidth() {
         if (mFreeCropDialog != null) {
-            int screenShowWidth = DensityUtil.getDisplayWidth(mContext);
-            int screenShowHeight = DensityUtil.getDisplayHeight(mContext);
             final Resources res = mContext.getResources();
             final WindowManager.LayoutParams lp = mFreeCropDialog.getWindow().getAttributes();
-            lp.width = screenShowWidth;
-            lp.height = screenShowHeight;
+            lp.width = ViewUtils.getWidth();
+            lp.height = ViewUtils.getHeight();
             lp.gravity = res.getInteger(
                     R.integer.standard_notification_panel_layout_gravity);
             mFreeCropDialog.getWindow().setAttributes(lp);

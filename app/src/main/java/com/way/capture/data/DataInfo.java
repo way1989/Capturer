@@ -9,7 +9,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.way.capture.App;
-import com.way.capture.utils.AppUtils;
+import com.way.capture.utils.AppUtil;
 
 import java.io.File;
 import java.io.Serializable;
@@ -57,11 +57,11 @@ public class DataInfo implements Serializable {
     public static ArrayList<String> getDataInfos(int type) {
         switch (type) {
             case TYPE_SCREEN_SHOT:
-                return getDatas(AppUtils.SCREENSHOT_FOLDER_PATH, PNG);
+                return getDatas(AppUtil.SCREENSHOT_FOLDER_PATH, PNG);
             case TYPE_SCREEN_GIF:
-                return getDatas(AppUtils.GIF_PRODUCTS_FOLDER_PATH, GIF);
+                return getDatas(AppUtil.GIF_PRODUCTS_FOLDER_PATH, GIF);
             case TYPE_SCREEN_RECORD:
-                return getDatas(AppUtils.VIDEOS_FOLDER_PATH, MP4);
+                return getDatas(AppUtil.VIDEOS_FOLDER_PATH, MP4);
             default:
                 break;
         }

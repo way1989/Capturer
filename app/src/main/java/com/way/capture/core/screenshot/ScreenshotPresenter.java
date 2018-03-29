@@ -111,7 +111,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                 if (bitmap == null || bitmap.isRecycled()) {
                     mView.showScreenshotAnim(mScreenBitmap, true, false);
                 } else if (bitmap.getHeight() == mScreenBitmap.getHeight()
-                        || mScreenBitmap.getHeight() > 10 * ViewUtils.getHeight()) {
+                        || mScreenBitmap.getHeight() > 7 * ViewUtils.getHeight()) {
                     mView.showScreenshotAnim(bitmap, true, false);
                 } else {
                     mView.onCollageFinish();

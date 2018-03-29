@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -63,6 +64,7 @@ final class OverlayView extends FrameLayout {
                 ViewUtils.getFloatType(), FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL | FLAG_LAYOUT_NO_LIMITS
                 | FLAG_LAYOUT_INSET_DECOR | FLAG_LAYOUT_IN_SCREEN, TRANSLUCENT);
         params.windowAnimations = R.style.VolumePanelAnimation;
+        params.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED;
         params.y = res.getDimensionPixelSize(R.dimen.overlay_height) * 2;
         params.gravity = Gravity.TOP | Gravity.CENTER;
         return params;
@@ -112,7 +114,7 @@ final class OverlayView extends FrameLayout {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
                     final int value = (int) animation.getAnimatedValue();
-                    Log.d(TAG, "onAnimationUpdate: value = " + value);
+                    //Log.d(TAG, "onAnimationUpdate: value = " + value);
                     mRecordingTimeTextView.setText("  " + value + "  ");
                 }
             });
@@ -128,6 +130,7 @@ final class OverlayView extends FrameLayout {
     }
 
     private void startRecording() {
+        mRecordingTimeTextView.setText("00:00");
         mCloseButton.setVisibility(View.GONE);
         mCloseButton.setEnabled(true);
         mSwitchButton.setBackgroundResource(R.drawable.stop);

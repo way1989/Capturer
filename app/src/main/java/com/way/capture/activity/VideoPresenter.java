@@ -9,7 +9,7 @@ import android.util.Log;
 import com.way.capture.App;
 import com.way.capture.R;
 import com.way.capture.data.DataInfo;
-import com.way.capture.utils.AppUtils;
+import com.way.capture.utils.AppUtil;
 import com.way.capture.utils.FilesOptHelper;
 import com.way.capture.utils.RxBus;
 import com.way.capture.utils.RxEvent;
@@ -173,12 +173,12 @@ public class VideoPresenter extends VideoContract.Presenter {
 
     @Override
     public void downloadFFmpegLibrary(String platform) {
-        final DownloadRequest request = new DownloadRequest(AppUtils.BASE_URL,
-                AppUtils.FFMPEG_FILE_NAME, App.getContext().getFilesDir().getAbsolutePath(),
-                String.format(AppUtils.BASE_URL, platform));
-        Log.d(TAG, "download url = " + String.format(AppUtils.BASE_URL, platform));
+        final DownloadRequest request = new DownloadRequest(AppUtil.BASE_URL,
+                AppUtil.FFMPEG_FILE_NAME, App.getContext().getFilesDir().getAbsolutePath(),
+                String.format(AppUtil.BASE_URL, platform));
+        Log.d(TAG, "download url = " + String.format(AppUtil.BASE_URL, platform));
         final DownloadManager downloadManager = DownloadManager.instance();
-        downloadManager.registerListener(AppUtils.BASE_URL, new IDownloadListener() {
+        downloadManager.registerListener(AppUtil.BASE_URL, new IDownloadListener() {
             @Override
             public void downloadWait(DownloadRequest downloadRequest) {
             }
@@ -198,7 +198,7 @@ public class VideoPresenter extends VideoContract.Presenter {
                 File file = new File(downloadRequest.getFilePath(), downloadRequest.getFileName());
                 try {
                     FilesOptHelper.getInstance().unCompressFile(file.getAbsolutePath(), downloadRequest.getFilePath());
-                    file = new File(downloadRequest.getFilePath(), AppUtils.FFMPEG_FILE_NAME);
+                    file = new File(downloadRequest.getFilePath(), AppUtil.FFMPEG_FILE_NAME);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

@@ -4,9 +4,9 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.way.capture.App;
-import com.way.capture.utils.AppUtils;
+import com.way.capture.utils.AppUtil;
 import com.way.capture.utils.FilesOptHelper;
-import com.way.capture.utils.GifUtils;
+import com.way.capture.utils.FfmpegUtil;
 import com.way.capture.utils.OsUtil;
 import com.way.capture.utils.RxSchedulers;
 
@@ -62,7 +62,7 @@ public class VideoModel implements VideoContract.Model {
                 break;
         }
 
-        int maxGifLength = GifUtils.MAX_GIF_LENGTH;
+        int maxGifLength = FfmpegUtil.MAX_GIF_LENGTH;
         mTrimStartTime = mTrimStartTime < 0 ? 0 : mTrimStartTime;
         mTrimEndTime = mTrimEndTime < 0 ? duration : mTrimEndTime;
         int start = mTrimStartTime / 1000;
@@ -70,7 +70,7 @@ public class VideoModel implements VideoContract.Model {
         if (gifLength > maxGifLength) {
             gifLength = start + maxGifLength;
         }
-        Pair<Integer, Integer> pair = AppUtils.getVideoWidthHeight(path);
+        Pair<Integer, Integer> pair = AppUtil.getVideoWidthHeight(path);
         int width = pair.first;
         int height = pair.second;
 
@@ -92,7 +92,7 @@ public class VideoModel implements VideoContract.Model {
         Log.d(TAG, "to gif start = " + start + ", length = " + gifLength + ", frame = " + frame
                 + ", width = " + width + ", height = " + height);
 
-        String[] command = GifUtils.getVideo2gifCommand(start, gifLength, frame, path,
+        String[] command = FfmpegUtil.getVideo2gifCommand(start, gifLength, frame, path,
                 outputFile, width, height);
         if (command.length != 0)
             return command;
@@ -100,7 +100,7 @@ public class VideoModel implements VideoContract.Model {
     }
 
     private boolean copyAndLoadLibrary() {
-        File targetFile = new File(App.getContext().getFilesDir().getAbsolutePath(), AppUtils.FFMPEG_FILE_NAME);
+        File targetFile = new File(App.getContext().getFilesDir().getAbsolutePath(), AppUtil.FFMPEG_FILE_NAME);
         InputStream is = null;
         FileOutputStream fos = null;
         try {
@@ -127,7 +127,7 @@ public class VideoModel implements VideoContract.Model {
 
     @Override
     public String getOutputFileName() {
-        File outputRoot = new File(AppUtils.GIF_PRODUCTS_FOLDER_PATH);
+        File outputRoot = new File(AppUtil.GIF_PRODUCTS_FOLDER_PATH);
         if (!outputRoot.exists()) {
             outputRoot.mkdir();
         }

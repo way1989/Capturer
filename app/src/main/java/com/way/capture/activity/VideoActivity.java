@@ -28,8 +28,8 @@ import android.widget.Toast;
 
 import com.way.capture.R;
 import com.way.capture.base.BaseActivity;
-import com.way.capture.utils.AppUtils;
-import com.way.capture.utils.GifUtils;
+import com.way.capture.utils.AppUtil;
+import com.way.capture.utils.FfmpegUtil;
 import com.way.capture.widget.FastVideoView;
 import com.way.capture.widget.trim.ControllerOverlay;
 import com.way.capture.widget.trim.TrimControllerOverlay;
@@ -239,7 +239,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
 
         mDragging = false;
         mVideoView.seekTo(time);
-        int maxLength = GifUtils.MAX_GIF_LENGTH * 1000;
+        int maxLength = FfmpegUtil.MAX_GIF_LENGTH * 1000;
         Log.d(TAG, "mTrimStartTime = " + mTrimStartTime / 1000 + ", trimStartTime = " + trimStartTime / 1000);
         mTrimEndTime = trimEndTime;//结束时间
         if (mTrimStartTime / 1000 != trimStartTime / 1000) {//拖动了起始位置
@@ -294,7 +294,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
         int duration = mVideoView.getDuration();
         if (duration > 0 && mTrimEndTime <= 0) {
             mTrimEndTime = duration;
-            int max = GifUtils.MAX_GIF_LENGTH * 1000;
+            int max = FfmpegUtil.MAX_GIF_LENGTH * 1000;
             if (mTrimEndTime - mTrimStartTime > max)
                 mTrimEndTime = mTrimStartTime + max;
         }
@@ -330,7 +330,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
     }
 
     private void setupSystemUI() {
-        mToolbar.animate().translationY(AppUtils.getStatusBarHeight(getResources())).setInterpolator(new DecelerateInterpolator())
+        mToolbar.animate().translationY(AppUtil.getStatusBarHeight(getResources())).setInterpolator(new DecelerateInterpolator())
                 .setDuration(0).start();
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -381,11 +381,11 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
                     View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-            mController.setPaddingRelative(0, 0, 0, AppUtils.getNavBarHeight(getApplicationContext()));
+            mController.setPaddingRelative(0, 0, 0, AppUtil.getNavBarHeight(getApplicationContext()));
         }
 
         // mController.show();
-        mToolbar.animate().translationY(AppUtils.getStatusBarHeight(getResources()))
+        mToolbar.animate().translationY(AppUtil.getStatusBarHeight(getResources()))
                 .setInterpolator(new DecelerateInterpolator()).setDuration(240);
         mIsFullscreen = false;
 
@@ -449,7 +449,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
         mProgressDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialogInterface) {
-                DownloadManager.instance().cancel(AppUtils.BASE_URL);
+                DownloadManager.instance().cancel(AppUtil.BASE_URL);
             }
         });
     }

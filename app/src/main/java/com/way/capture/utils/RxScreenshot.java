@@ -70,7 +70,7 @@ public class RxScreenshot extends Observable<Bitmap> {
 
         @Override
         public void dispose() {
-            Log.d(TAG, "dispose: stopLocation...");
+            Log.d(TAG, "dispose: screenshot finish...");
             if (unSubscribed.compareAndSet(false, true)) {
                 mImageReader.setOnImageAvailableListener(null, null);
                 mImageReader.close();

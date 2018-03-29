@@ -24,10 +24,10 @@ import com.way.capture.adapter.ScreenshotAdapter;
 import com.way.capture.base.BaseFragment;
 import com.way.capture.base.BaseScreenshotFragment;
 import com.way.capture.data.DataInfo;
-import com.way.capture.utils.AppUtils;
-import com.way.capture.utils.DensityUtil;
+import com.way.capture.utils.AppUtil;
 import com.way.capture.utils.RxBus;
 import com.way.capture.utils.RxEvent;
+import com.way.capture.utils.ViewUtils;
 import com.way.capture.widget.SpaceGridItemDecoration;
 import com.weavey.loading.lib.LoadingLayout;
 
@@ -161,7 +161,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
         super.initWidget(root);
 
         GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 4);
-        mRecyclerView.addItemDecoration(new SpaceGridItemDecoration(DensityUtil.dip2px(getContext(), 1)));
+        mRecyclerView.addItemDecoration(new SpaceGridItemDecoration(ViewUtils.dp2px(1)));
         mRecyclerView.setLayoutManager(layoutManager);
         mAdapter = new ScreenshotAdapter(getContext(), mType, this);
         mAdapter.setSelectionListener(this);
@@ -266,7 +266,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
                 for (int i = 0; i < selections.length; i++) {
                     paths[i] = mAdapter.getItem(i);
                 }
-                AppUtils.shareMultipleScreenshot(App.getContext(), paths, mType);
+                AppUtil.shareMultipleScreenshot(App.getContext(), paths, mType);
                 break;
         }
         mAdapter.clearSelected();

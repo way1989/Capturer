@@ -6,7 +6,6 @@ import android.animation.AnimatorSet;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnticipateInterpolator;
@@ -15,7 +14,7 @@ import android.view.animation.OvershootInterpolator;
 import com.ogaclejapan.arclayout.ArcLayout;
 import com.way.capture.R;
 import com.way.capture.core.screenrecord.CheatSheet;
-import com.way.capture.utils.AnimatorUtils;
+import com.way.capture.utils.AnimatorUtil;
 import com.way.capture.utils.ViewUtils;
 
 import java.util.ArrayList;
@@ -143,13 +142,13 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
         item.setScaleX(0f);
         item.setScaleY(0f);
 
-        Animator anim = AnimatorUtils.of(
+        Animator anim = AnimatorUtil.of(
                 item,
-                AnimatorUtils.ofTranslationX(x, 0f),
-                AnimatorUtils.ofTranslationY(y, 0f),
-                AnimatorUtils.ofAlpha(0f, 1f),
-                AnimatorUtils.ofScaleX(0f, 1f),
-                AnimatorUtils.ofScaleY(0f, 1f)
+                AnimatorUtil.ofTranslationX(x, 0f),
+                AnimatorUtil.ofTranslationY(y, 0f),
+                AnimatorUtil.ofAlpha(0f, 1f),
+                AnimatorUtil.ofScaleX(0f, 1f),
+                AnimatorUtil.ofScaleY(0f, 1f)
         );
         anim.setDuration(duration);
         return anim;
@@ -161,13 +160,13 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
         final float x = centerX - ViewUtils.getCenterX(item);
         final float y = centerY - ViewUtils.getCenterY(item);
 
-        Animator anim = AnimatorUtils.of(
+        Animator anim = AnimatorUtil.of(
                 item,
-                AnimatorUtils.ofTranslationX(0f, x),
-                AnimatorUtils.ofTranslationY(0f, y),
-                AnimatorUtils.ofAlpha(1f, 0f),
-                AnimatorUtils.ofScaleX(1f, 0f),
-                AnimatorUtils.ofScaleY(1f, 0f)
+                AnimatorUtil.ofTranslationX(0f, x),
+                AnimatorUtil.ofTranslationY(0f, y),
+                AnimatorUtil.ofAlpha(1f, 0f),
+                AnimatorUtil.ofScaleX(1f, 0f),
+                AnimatorUtil.ofScaleY(1f, 0f)
         );
         anim.setDuration(duration);
 

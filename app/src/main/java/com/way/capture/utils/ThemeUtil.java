@@ -16,7 +16,7 @@ import android.view.Window;
 /**
  * Created by way on 16/4/10.
  */
-public class ThemeUtils {
+public class ThemeUtil {
     public static void setStatusBarColor(Activity activity, @ColorInt int color) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

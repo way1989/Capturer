@@ -5,7 +5,7 @@ import android.util.Log;
 /**
  * Created by android on 16-2-3.
  */
-public class GifUtils {
+public class FfmpegUtil {
 
     public static final int MAX_GIF_LENGTH = 30;
 

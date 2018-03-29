@@ -30,8 +30,8 @@ import android.view.Surface;
 import android.view.View;
 
 import com.way.capture.R;
-import com.way.capture.utils.AppUtils;
-import com.way.capture.utils.DensityUtil;
+import com.way.capture.utils.AppUtil;
+import com.way.capture.utils.ViewUtils;
 
 // /end @}
 
@@ -120,7 +120,7 @@ public class TimeBar extends View {
 
     public TimeBar(Context context, Listener listener) {
         super(context);
-        mListener = AppUtils.checkNotNull(listener);
+        mListener = AppUtil.checkNotNull(listener);
         mContext = context;
         mShowTimes = true;
         mShowScrubber = true;
@@ -253,7 +253,7 @@ public class TimeBar extends View {
             Log.d("guanvideoplay", "timebar PaddingLeft =" + getPaddingLeft() + ", margin =" + margin + ", mTimeBounds.width() =" + mTimeBounds.width() + ", mScrubber.getWidth() =" + mScrubber.getWidth());
 // / begin for videoplay guanjw 20141022 @{
             if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) {
-                int size = DensityUtil.dip2px(mContext, 20);
+                int size = ViewUtils.dp2px(20);
                 Log.d("guanvideoplay", "rotation == Surface.ROTATION_90 ");
 
                 mProgressBar.set(
@@ -263,7 +263,7 @@ public class TimeBar extends View {
 
             } else {
                 Log.d("guanvideoplay", "rotation == Surface.ROTATION_360 ");
-                int size = DensityUtil.dip2px(mContext, 25);
+                int size = ViewUtils.dp2px(25);
 
 
                 mProgressBar.set(
@@ -299,7 +299,7 @@ public class TimeBar extends View {
             }
         }
         if (mShowTimes) {
-            int size = DensityUtil.dip2px(mContext, 12);
+            int size = ViewUtils.dp2px(12);
             canvas.drawText(
                     stringForTime(mCurrentTime),
                     mTimeBounds.width() / 2 + 4/*+ getPaddingLeft()*/,//del by guanjw 20141022

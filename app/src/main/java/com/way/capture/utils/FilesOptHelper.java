@@ -89,7 +89,7 @@ public class FilesOptHelper {
      * @param path
      * @return success
      */
-    private boolean doDeleteFiles(String path) throws Exception {
+    private boolean doDeleteFiles(String path) {
         synchronized (this) {
             Log.d(TAG, "doDeleteFiles(String path)");
             Log.d(TAG, "path --> " + path);

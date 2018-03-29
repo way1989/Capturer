@@ -23,7 +23,7 @@ import com.way.capture.activity.DetailsActivity;
 import com.way.capture.activity.VideoActivity;
 import com.way.capture.base.BaseFragment;
 import com.way.capture.data.DataInfo;
-import com.way.capture.utils.DensityUtil;
+import com.way.capture.utils.ViewUtils;
 import com.way.capture.utils.glide.GlideHelper;
 
 import java.io.File;
@@ -167,7 +167,7 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(path, options);
         int height = options.outHeight;
-        return height > 2 * DensityUtil.getDisplayHeight(getContext());
+        return height > 2 * ViewUtils.getHeight();
     }
 
     private void startPostEnterTransition() {

@@ -7,7 +7,7 @@ import android.animation.PropertyValuesHolder;
 import android.animation.TimeInterpolator;
 import android.view.View;
 
-public final class AnimatorUtils {
+public final class AnimatorUtil {
 
     public static final String ALPHA = "alpha";
     public static final String ROTATION = "rotation";
@@ -19,7 +19,7 @@ public final class AnimatorUtils {
     public static final String TRANSLATION_Y = "translationY";
     public static final String TRANSLATION_Z = "translationZ";
 
-    private AnimatorUtils() {
+    private AnimatorUtil() {
     }
 
     public static void reset(View target) {

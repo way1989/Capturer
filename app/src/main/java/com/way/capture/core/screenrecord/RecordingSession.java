@@ -29,6 +29,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.way.capture.R;
+import com.way.capture.core.DeleteScreenshot;
 import com.way.capture.core.screenrecord.record.AudioEncodeConfig;
 import com.way.capture.core.screenrecord.record.Notifications;
 import com.way.capture.core.screenrecord.record.ScreenRecorder;
@@ -52,9 +53,9 @@ import static android.content.Intent.ACTION_SEND;
 import static android.content.Intent.ACTION_VIEW;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.os.Environment.DIRECTORY_MOVIES;
+import static com.way.capture.core.screenshot.ScreenshotModule.SCREENSHOT_NOTIFICATION_ID;
 
 public final class RecordingSession {
-    private static final int NOTIFICATION_ID = 789;
     private static final String TAG = "RecordingSession";
     private static final String DISPLAY_NAME = "ScreenRecord";
     private static final String MIME_TYPE = "video/mp4";
@@ -227,7 +228,7 @@ public final class RecordingSession {
         mRecorder.start();
         mContext.registerReceiver(mStopActionReceiver, new IntentFilter(Notifications.ACTION_STOP));
 
-        mNotificationManager.cancel(NOTIFICATION_ID);
+        mNotificationManager.cancel(SCREENSHOT_NOTIFICATION_ID);
         mIsRunning = true;
         mListener.onStart();
         Log.d(TAG, "Screen recording started.");
@@ -270,8 +271,8 @@ public final class RecordingSession {
         shareIntent = Intent.createChooser(shareIntent, null);
         PendingIntent pendingShareIntent = PendingIntent.getActivity(mContext, 0, shareIntent, 0);
 
-        Intent deleteIntent = new Intent(mContext, DeleteRecordingBroadcastReceiver.class);
-        deleteIntent.setData(uri);
+        Intent deleteIntent = new Intent(mContext, DeleteScreenshot.class);
+        deleteIntent.putExtra(DeleteScreenshot.SCREENSHOT_URI, uri.toString());
         PendingIntent pendingDeleteIntent = PendingIntent.getBroadcast(mContext, 0, deleteIntent, 0);
 
         CharSequence title = mContext.getText(R.string.notification_captured_title);
@@ -296,7 +297,7 @@ public final class RecordingSession {
                             .bigPicture(bitmap));
         }
 
-        mNotificationManager.notify(NOTIFICATION_ID, builder.build());
+        mNotificationManager.notify(SCREENSHOT_NOTIFICATION_ID, builder.build());
 
         mListener.onEnd();
     }
@@ -316,33 +317,34 @@ public final class RecordingSession {
             long startTime = 0;
 
             @Override
-            public void onStop(Throwable error) {
+            public void onStop(final Throwable error) {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         stopRecording();
+                        if (error != null) {
+                            output.delete();
+                            //toast("Recorder error ! See logcat for more details");
+                            error.printStackTrace();
+                        } else {
+                            MediaScannerConnection.scanFile(mContext, new String[]{output.getAbsolutePath()}, null,
+                                    new MediaScannerConnection.OnScanCompletedListener() {
+                                        @Override
+                                        public void onScanCompleted(String path, final Uri uri) {
+                                            Log.d(TAG, "Media scanner completed.");
+                                            if (uri != null) {
+                                                RxBus.getInstance().post(new RxEvent.NewPathEvent(DataInfo.TYPE_SCREEN_RECORD, output.getAbsolutePath()));
+                                                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                                                retriever.setDataSource(mContext, uri);
+                                                showNotification(uri, retriever.getFrameAtTime());
+                                            }
+
+                                        }
+                                    });
+                        }
                     }
                 });
-                if (error != null) {
-                    output.delete();
-                    //toast("Recorder error ! See logcat for more details");
-                    error.printStackTrace();
-                } else {
-                    MediaScannerConnection.scanFile(mContext, new String[]{output.getAbsolutePath()}, null,
-                            new MediaScannerConnection.OnScanCompletedListener() {
-                                @Override
-                                public void onScanCompleted(String path, final Uri uri) {
-                                    Log.d(TAG, "Media scanner completed.");
-                                    if (uri != null) {
-                                        RxBus.getInstance().post(new RxEvent.NewPathEvent(DataInfo.TYPE_SCREEN_RECORD, output.getAbsolutePath()));
-                                        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-                                        retriever.setDataSource(mContext, uri);
-                                        showNotification(uri, retriever.getFrameAtTime());
-                                    }
 
-                                }
-                            });
-                }
             }
 
             @Override
@@ -360,7 +362,8 @@ public final class RecordingSession {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mOverlayView.updateRecordingTime(time);
+                        if (mOverlayView != null)
+                            mOverlayView.updateRecordingTime(time);
                     }
                 });
             }
@@ -394,9 +397,9 @@ public final class RecordingSession {
                 + recordingInfo.height + " @ " + recordingInfo.density);
         int width = recordingInfo.width;
         int height = recordingInfo.height;
-        int framerate = 24;
-        int iframe = 5;
-        int bitrate = 800 * 1000;
+        int framerate = 30;
+        int iframe = 30;
+        int bitrate = 8 * 1000 * 1000;
         MediaCodecInfo.CodecProfileLevel profileLevel = null;
         return new VideoEncodeConfig(width, height, bitrate,
                 framerate, iframe, codec, MediaFormat.MIMETYPE_VIDEO_AVC, profileLevel);
@@ -431,22 +434,4 @@ public final class RecordingSession {
         }
     }
 
-    public static final class DeleteRecordingBroadcastReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            NotificationManager notificationManager = (NotificationManager) context
-                    .getSystemService(NOTIFICATION_SERVICE);
-            notificationManager.cancel(NOTIFICATION_ID);
-            final Uri uri = intent.getData();
-            final ContentResolver contentResolver = context.getContentResolver();
-
-            int rowsDeleted = contentResolver.delete(uri, null, null);
-            if (rowsDeleted == 1) {
-                Log.i(TAG, "Deleted recording.");
-            } else {
-                Log.e(TAG, "Error deleting recording.");
-            }
-        }
-    }
 }

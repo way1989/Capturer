@@ -26,6 +26,9 @@ import com.way.capture.utils.ScrollUtils;
  */
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String VIDEO_SIZE_KEY = "key_video_size_percentage";
+    public static final String VIDEO_QUALITY_KEY = "key_video_quality";
+    public static final String VIDEO_FRAME_KEY = "key_video_frame";
+    public static final String VIDEO_AUDIO_KEY = "key_record_audio";
     public static final String VIDEO_STOP_METHOD_KEY = "key_video_stop_method";
     public static final String SHOW_COUNTDOWN_KEY = "key_three_second_countdown";
     public static final String SHOW_TOUCHES_KEY = "key_show_touches";

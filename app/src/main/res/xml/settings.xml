@@ -18,13 +18,33 @@
             android:summary="@string/boot_auto_summary"
             android:title="@string/boot_auto"/>
         <ListPreference
-            android:defaultValue="100"
+            android:defaultValue="75"
             android:entries="@array/video_size_percentage_entries"
             android:entryValues="@array/video_size_percentage_values"
             android:key="key_video_size_percentage"
             android:summary="@string/video_size_percentage_summary"
             android:title="@string/video_size_percentage"/>
+        <ListPreference
+            android:defaultValue="24"
+            android:entries="@array/video_frame_entries"
+            android:entryValues="@array/video_frame_values"
+            android:key="key_video_frame"
+            android:summary="@string/video_frame_summary"
+            android:title="@string/video_frame"/>
 
+        <ListPreference
+            android:defaultValue="4000000"
+            android:entries="@array/video_quality_entries"
+            android:entryValues="@array/video_quality_values"
+            android:key="key_video_quality"
+            android:summary="@string/video_quality_summary"
+            android:title="@string/video_quality"/>
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="key_record_audio"
+            android:summary="@string/video_record_audio_summary"
+            android:title="@string/video_record_audio"/>
         <SwitchPreference
             android:defaultValue="true"
             android:key="key_video_stop_method"

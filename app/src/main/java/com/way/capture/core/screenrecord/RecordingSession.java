@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.media.CamcorderProfile;
@@ -371,7 +372,8 @@ public final class RecordingSession {
     }
 
     private AudioEncodeConfig createAudioConfig() {
-        //if (true) return null;
+        if (!PreferenceManager.getDefaultSharedPreferences(mContext)
+                .getBoolean(SettingsFragment.VIDEO_AUDIO_KEY, true)) return null;
         String codec = "OMX.google.aac.encoder";
         if (codec == null) {
             return null;
@@ -396,9 +398,12 @@ public final class RecordingSession {
                 + recordingInfo.height + " @ " + recordingInfo.density);
         int width = recordingInfo.width;
         int height = recordingInfo.height;
-        int framerate = 30;
-        int iframe = 30;
-        int bitrate = 8 * 1000 * 1000;
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        int framerate = Integer.valueOf(preferences
+                .getString(SettingsFragment.VIDEO_FRAME_KEY, "24"));
+        int iframe = framerate;
+        int bitrate = Integer.valueOf(preferences
+                .getString(SettingsFragment.VIDEO_QUALITY_KEY, "4000000"));
         MediaCodecInfo.CodecProfileLevel profileLevel = null;
         return new VideoEncodeConfig(width, height, bitrate,
                 framerate, iframe, codec, MediaFormat.MIMETYPE_VIDEO_AVC, profileLevel);

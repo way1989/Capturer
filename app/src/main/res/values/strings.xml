@@ -204,4 +204,10 @@
 
     <string name="screen_record_start">Start</string>
     <string name="screenshot_null_toast">resultCode and data is null...</string>
+    <string name="video_frame">帧数</string>
+    <string name="video_frame_summary">每秒录制的帧数，越高画面越流畅</string>
+    <string name="video_quality">视频画质</string>
+    <string name="video_quality_summary">越高画质越好，生成的文件也越大</string>
+    <string name="video_record_audio">录制声音</string>
+    <string name="video_record_audio_summary">是否录制麦克风声音</string>
 </resources>

@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <array name="countdown">
-        <item>@string/countdown_three</item>
-        <item>@string/countdown_two</item>
-        <item>@string/countdown_one</item>
-    </array>
 
     <!-- Display settings.  The delay in inactivity before the screen is turned off. These are shown in a list dialog. -->
     <string-array name="video_size_percentage_entries">
-        <item>@string/float_record_super_hd_quality</item>
         <item>@string/float_record_hd_quality</item>
         <item>@string/float_record_normal_quality</item>
     </string-array>
@@ -16,23 +10,55 @@
     <!-- Do not translate. -->
     <string-array name="video_size_percentage_values" translatable="false">
         <!-- Do not translate. -->
-        <item>100</item>
-        <!-- Do not translate. -->
         <item>75</item>
-        <!-- Do not translate. -->
         <item>50</item>
-
     </string-array>
+
+    <!-- Display settings.  The delay in inactivity before the screen is turned off. These are shown in a list dialog. -->
+    <string-array name="video_frame_entries" translatable="false">
+        <item>15fps</item>
+        <item>24fps</item>
+        <item>30fps</item>
+    </string-array>
+
+    <!-- Do not translate. -->
+    <string-array name="video_frame_values" translatable="false">
+        <item>15</item>
+        <item>24</item>
+        <item>30</item>
+    </string-array>
+
+
+    <!-- Display settings.  The delay in inactivity before the screen is turned off. These are shown in a list dialog. -->
+    <string-array name="video_quality_entries" translatable="false">
+        <item>1Mbps</item>
+        <item>4Mbps</item>
+        <item>6Mbps</item>
+        <item>8Mbps</item>
+        <item>16Mbps</item>
+        <item>20Mbps</item>
+    </string-array>
+
+    <!-- Do not translate. -->
+    <string-array name="video_quality_values" translatable="false">
+        <item>1000000</item>
+        <item>4000000</item>
+        <item>6000000</item>
+        <item>8000000</item>
+        <item>16000000</item>
+        <item>20000000</item>
+    </string-array>
+
     <string-array name="video_stop_method_entries">
         <item>@string/video_stop_float</item>
         <item>@string/video_stop_notification</item>
     </string-array>
+
     <string-array name="video_stop_method_values" translatable="false">
-        <!-- Do not translate. -->
         <item>0</item>
-        <!-- Do not translate. -->
         <item>1</item>
     </string-array>
+
     <string-array name="gif_quality_items">
         <item>@string/gif_quality_high</item>
         <item>@string/gif_quality_normal</item>

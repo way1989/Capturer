@@ -68,7 +68,7 @@ public class MainActivity extends BaseActivity {
                     .titleColorRes(R.color.finestWhite)
                     .urlColorRes(R.color.finestWhite)
                     .iconDefaultColorRes(R.color.finestWhite)
-                    .show("https://way1989.github.io/2016/05/15/help/CapturerHelp/");
+                    .show("https://way1989.github.io/2016/05/15/help/CapturerHelp");
         }
     };
     Runnable navigateSettings = new Runnable() {
@@ -88,8 +88,6 @@ public class MainActivity extends BaseActivity {
     };
     @BindView(R.id.viewpager)
     ViewPager mViewPager;
-    @BindView(R.id.fab)
-    FloatingActionButton mFab;
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
     @BindView(R.id.tab_layout)
@@ -148,46 +146,11 @@ public class MainActivity extends BaseActivity {
         setupViewPager(mViewPager);
         mViewPager.setOffscreenPageLimit(2);
         mTabLayout.setupWithViewPager(mViewPager);
-        RxView.clicks(mFab).throttleFirst(2, TimeUnit.SECONDS).subscribe(new Consumer<Object>() {
-            @Override
-            public void accept(Object o) throws Exception {
-                startService(new Intent(MainActivity.this, ShakeService.class).setAction("com.way.action.SHOW_MENU"));
-            }
-        });
-        mFab.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                showIntro(mFab, TAG);
-            }
-        }, 500L);
     }
 
     @Override
     protected int getContentView() {
         return R.layout.activity_main;
-    }
-
-    private void showIntro(View view, String usageId) {
-        new SpotlightView.Builder(this)
-//                .introAnimationDuration(400)
-//                .enableRevalAnimation(true)
-//                .performClick(true)
-//                .fadeinTextDuration(400)
-//                //.setTypeface(FontUtil.get(this, "RemachineScript_Personal_Use"))
-//                .headingTvColor(Color.parseColor("#eb273f"))
-//                .headingTvSize(32)
-                .headingTvText(getString(R.string.float_action_button_guide_title))
-//                .subHeadingTvColor(Color.parseColor("#ffffff"))
-//                .subHeadingTvSize(16)
-                .subHeadingTvText(getString(R.string.float_action_button_guide_desc))
-//                .maskColor(Color.parseColor("#dc000000"))
-                .target(view)
-//                .lineAnimDuration(400)
-//                .lineAndArcColor(Color.parseColor("#eb273f"))
-//                .dismissOnTouch(true)
-//                .enableDismissAfterShown(true)
-                .usageId(usageId) //UNIQUE ID
-                .show();
     }
 
     @Override

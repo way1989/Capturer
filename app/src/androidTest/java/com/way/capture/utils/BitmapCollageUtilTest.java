@@ -55,9 +55,14 @@ public class BitmapCollageUtilTest {
 
         Bitmap oldBitmap = BitmapFactory.decodeStream(appContext.getResources().openRawResource(R.raw.first_1080));
         Bitmap newBitmap = BitmapFactory.decodeStream(appContext.getResources().openRawResource(R.raw.second_1080));
-        Bitmap bitmap = BitmapCollageUtil.getInstance().collageLongBitmap(oldBitmap, newBitmap);
+        Bitmap firstBitmap = BitmapCollageUtil.getInstance().collageLongBitmap(oldBitmap, newBitmap);
+
+        Bitmap oldBitmapNo = BitmapFactory.decodeStream(appContext.getResources().openRawResource(R.raw.first_1080_no));
+        Bitmap newBitmapNo = BitmapFactory.decodeStream(appContext.getResources().openRawResource(R.raw.second_1080_no));
+        Bitmap bitmap = BitmapCollageUtil.getInstance().collageLongBitmap(firstBitmap, oldBitmapNo);
 
         Log.d(TAG, "collageLongBitmap test collage bitmap onNext: bitmap = " + bitmap.getWidth() + "x" + bitmap.getHeight());
+        if (bitmap != null)
         saveData(bitmap, new File(appContext.getExternalCacheDir(), "1.png"));
         assertNotNull(bitmap);
     }

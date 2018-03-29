@@ -9,10 +9,7 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnticipateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 
 import com.ogaclejapan.arclayout.ArcLayout;
@@ -89,13 +86,6 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
     }
 
     private void showMenu() {
-        //中心button动画
-        mCenterItem.setScaleX(0f);
-        mCenterItem.setScaleY(0f);
-        mCenterItem.setAlpha(0f);
-        Animator animator = AnimatorUtils.of(mCenterItem, AnimatorUtils.ofAlpha(0f, 1f), AnimatorUtils.ofScaleX(0f, 1f), AnimatorUtils.ofScaleY(0f, 1f));
-        animator.setInterpolator(new DecelerateInterpolator());
-        animator.setDuration(100L);
 
         //周围button动画数组
         List<Animator> animList = new ArrayList<>();
@@ -107,14 +97,9 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
         final AnimatorSet animSet = new AnimatorSet();
         animSet.setInterpolator(new OvershootInterpolator());
         animSet.playTogether(animList);
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                animSet.start();//中心动画结束后，开始周围button动画
-            }
-        });
-        animator.start();//中心动画开始播放
+
+        animSet.start();//中心动画结束后，开始周围button动画
+
     }
 
     private void hideMenu() {
@@ -124,25 +109,8 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
         //周围button动画数组
         List<Animator> animList = new ArrayList<>();
         for (int i = mArcLayout.getChildCount() - 1; i >= 0; i--) {
-            animList.add(createHideItemAnimator(mArcLayout.getChildAt(i), (i + 1) * 80L));
+            animList.add(createHideItemAnimator(mArcLayout.getChildAt(i), (i + 1) * 100L));
         }
-        //中心button动画
-        final Animator animator = AnimatorUtils.of(mCenterItem, AnimatorUtils.ofAlpha(1f, 0f), AnimatorUtils.ofScaleX(1f, 0f), AnimatorUtils.ofScaleY(1f, 0f));
-        animator.setDuration(100L);
-        animator.setInterpolator(new AccelerateInterpolator());
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                isHideAnimPlaying = false;
-                superDismiss();//中心button动画结束，整个过程结束，dialog消失
-                if (mListener != null && mClickView != null) {
-                    ((Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE)).vibrate(30);
-                    mListener.onClick(mClickView);
-                    mClickView = null;
-                }
-            }
-        });
 
         //总动画
         AnimatorSet animSet = new AnimatorSet();
@@ -152,12 +120,15 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                animator.start();//周围button动画播完之后再播中心button动画
+                isHideAnimPlaying = false;
+                superDismiss();//中心button动画结束，整个过程结束，dialog消失
+                if (mListener != null && mClickView != null) {
+                    mListener.onClick(mClickView);
+                    mClickView = null;
+                }
             }
         });
         animSet.start();
-
-
     }
 
     private Animator createShowItemAnimator(View item, long duration) {

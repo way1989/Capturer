@@ -138,9 +138,10 @@ public class BitmapCollageUtil {
         for (int i = 0; i < BASE_LINE_MOVE_NUM; i++) {
             //从下往上找到不是纯色的一行作为参考基线
             final int baseLine = getNotPureLineHeight(firstBitmap, screenHeight, bottomSameHeight + i * baseLineReduceHeight);
+            Log.d(TAG, "compareTwoBitmap: getDividingLinePair count = " + (i +1) + ", baseLine = " + baseLine);
             Pair<Integer, Integer> pair = getDividingLinePair(firstBitmap, secondBitmap, baseLine);
             if (pair != null) {
-                Log.d(TAG, "compareTwoBitmap: succeed!!! compare count = " + i);
+                Log.d(TAG, "compareTwoBitmap: succeed!!! compare count = " + (i + 1));
                 return pair;
             }
         }
@@ -225,15 +226,15 @@ public class BitmapCollageUtil {
                 final int blueDifferent = Math.abs(oldBlue - newBlue);
                 //cost more time
                 //计算颜色空间的距离
-                final double distance = Math.sqrt(Math.pow(redDifferent, 2) + Math.pow(greenDifferent, 2) + Math.pow(blueDifferent, 2));
+                /*final double distance = Math.sqrt(Math.pow(redDifferent, 2) + Math.pow(greenDifferent, 2) + Math.pow(blueDifferent, 2));
                 if (distance > RGB_PIXEL_DISTANCE_MAX) {
                     differentCount++;
-                }
-                /*if (redDifferent > GRAY_PIXEL_RED_DIF_MAX
+                }*/
+                if (redDifferent > GRAY_PIXEL_RED_DIF_MAX
                         || greenDifferent > GRAY_PIXEL_GREEN_DIF_MAX
                         || blueDifferent > GRAY_PIXEL_BLUE_DIF_MAX) {
                     differentCount++;
-                }*/
+                }
                 //超过10个像素点颜色值不同，就认为两个像素数组不同
                 if (differentCount >= COLOR_LINE_DIF_NUM_MAX) {
                     return false;

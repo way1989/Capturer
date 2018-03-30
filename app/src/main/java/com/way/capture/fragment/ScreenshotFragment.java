@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,9 +14,10 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
-import com.afollestad.dragselectrecyclerview.DragSelectRecyclerView;
-import com.afollestad.dragselectrecyclerview.DragSelectRecyclerViewAdapter;
 import com.afollestad.materialcab.MaterialCab;
+import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.michaelflisar.dragselectrecyclerview.DragSelectTouchListener;
+import com.michaelflisar.dragselectrecyclerview.DragSelectionProcessor;
 import com.trello.rxlifecycle2.android.FragmentEvent;
 import com.way.capture.App;
 import com.way.capture.R;
@@ -29,8 +31,9 @@ import com.way.capture.utils.RxBus;
 import com.way.capture.utils.RxEvent;
 import com.way.capture.utils.ViewUtils;
 import com.way.capture.widget.SpaceGridItemDecoration;
-import com.weavey.loading.lib.LoadingLayout;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -38,21 +41,24 @@ import butterknife.BindView;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
+import me.bakumon.statuslayoutmanager.library.StatusLayoutManager;
 
 /**
  * Created by way on 16/4/10.
  */
-public class ScreenshotFragment extends BaseScreenshotFragment implements ScreenshotAdapter.OnItemClickListener,
-        DragSelectRecyclerViewAdapter.SelectionListener, MaterialCab.Callback, ScreenshotContract.View {
+public class ScreenshotFragment extends BaseScreenshotFragment implements
+        MaterialCab.Callback, ScreenshotContract.View {
     public static final String ARGS_TYPE = "type";
     public static final String EXTRA_DATAS = "extra_datas";
     public static final String EXTRA_STARTING_POSITION = "extra_starting_item_position";
     public static final String EXTRA_CURRENT_POSITION = "extra_current_item_position";
-    @BindView(R.id.loading_layout)
-    LoadingLayout mLoadingLayout;
+    private static final String TAG = "ScreenshotFragment";
     @BindView(R.id.recycler_view)
-    DragSelectRecyclerView mRecyclerView;
+    RecyclerView mRecyclerView;
     private ScreenshotAdapter mAdapter;
+    private DragSelectTouchListener mDragSelectTouchListener;
+    private DragSelectionProcessor mDragSelectionProcessor;
+    private StatusLayoutManager mStatusLayoutManager;
 
     private MaterialCab mCab;
     private boolean mIsDetailsActivityStarted;
@@ -70,7 +76,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mAdapter.restoreInstanceState(savedInstanceState);
+        // mAdapter.restoreInstanceState(savedInstanceState);
         mCab = MaterialCab.restoreState(savedInstanceState, (AppCompatActivity) getActivity(), this);
     }
 
@@ -84,14 +90,17 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         // Save selected indices
-        mAdapter.saveInstanceState(outState);
+        // mAdapter.saveInstanceState(outState);
         if (mCab != null) mCab.saveState(outState);
     }
 
     @Override
     public boolean onBackPressed() {
-        if (mAdapter.getSelectedCount() > 0) {
-            mAdapter.clearSelected();
+        if (mAdapter.getCountSelected() > 0) {
+            mAdapter.deselectAll();
+            if (mCab != null && mCab.isActive())
+                mCab.reset().finish();
+            mCab = null;
             return true;
         }
         return false;
@@ -163,10 +172,79 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
         GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 4);
         mRecyclerView.addItemDecoration(new SpaceGridItemDecoration(ViewUtils.dp2px(1)));
         mRecyclerView.setLayoutManager(layoutManager);
-        mAdapter = new ScreenshotAdapter(getContext(), mType, this);
-        mAdapter.setSelectionListener(this);
+        mAdapter = new ScreenshotAdapter(R.layout.item_screenshot, mType);
+
         mRecyclerView.setAdapter(mAdapter);
-        mLoadingLayout.setStatus(LoadingLayout.Loading);
+
+        mStatusLayoutManager = new StatusLayoutManager.Builder(mRecyclerView)
+                .setDefaultErrorClickViewVisible(false)
+                .build();
+        mStatusLayoutManager.showLoadingLayout();
+
+        mAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+                if (mCab != null && mCab.isActive()) {
+                    mAdapter.toggleSelection(position);
+                } else {
+                    ImageView imageView = view.findViewById(R.id.iv_image);
+                    if (!mIsDetailsActivityStarted) {
+                        mIsDetailsActivityStarted = true;
+                        Intent intent = new Intent(getActivity(), DetailsActivity.class);
+                        intent.putExtra(ARGS_TYPE, mType);
+                        ArrayList<String> list = new ArrayList<>();
+                        list.addAll(mAdapter.getData());
+                        intent.putStringArrayListExtra(EXTRA_DATAS, list);
+                        intent.putExtra(EXTRA_STARTING_POSITION, position);
+                        startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+                                imageView, imageView.getTransitionName()).toBundle());
+                    }
+                }
+            }
+        });
+        mAdapter.setOnItemLongClickListener(new BaseQuickAdapter.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(BaseQuickAdapter adapter, View view, int position) {
+                // if one item is long pressed, we start the drag selection like following:
+                // we just call this function and pass in the position of the first selected item
+                // the selection processor does take care to update the positions selection mode correctly
+                // and will correctly transform the touch events so that they can be directly applied to your adapter!!!
+                mDragSelectTouchListener.startDragSelection(position);
+                return false;
+            }
+        });
+        mDragSelectionProcessor = new DragSelectionProcessor(new DragSelectionProcessor.ISelectionHandler() {
+            @Override
+            public HashSet<Integer> getSelection() {
+                return mAdapter.getSelection();
+            }
+
+            @Override
+            public boolean isSelected(int index) {
+                return mAdapter.getSelection().contains(index);
+            }
+
+            @Override
+            public void updateSelection(int start, int end, boolean isSelected, boolean calledFromOnStart) {
+                mAdapter.selectRange(start, end, isSelected);
+                Log.d(TAG, "updateSelection: ");
+                if (getSelection().size() > 0) {
+                    if (mCab == null) {
+                        mCab = new MaterialCab((AppCompatActivity) getActivity(), R.id.cab_stub)
+                                .setMenu(R.menu.menu_screenshot_item)
+                                .setCloseDrawableRes(R.drawable.ic_clear)
+                                .start(ScreenshotFragment.this);
+                    }
+                    mCab.setTitleRes(R.string.cab_title_x, getSelection().size());
+                } else if (mCab != null && mCab.isActive()) {
+                    mCab.reset().finish();
+                    mCab = null;
+                }
+            }
+        }).withMode(DragSelectionProcessor.Mode.Simple);
+        mDragSelectTouchListener = new DragSelectTouchListener()
+                .withSelectListener(mDragSelectionProcessor);
+        mRecyclerView.addOnItemTouchListener(mDragSelectTouchListener);
     }
 
     @Override
@@ -203,56 +281,15 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
     }
 
     @Override
-    public void onItemClick(View v) {
-        int position = (Integer) v.getTag(R.id.tag_item);
-        if (mCab != null && mCab.isActive()) {
-            mAdapter.toggleSelected(position);
-        } else {
-            ImageView imageView = (ImageView) v.findViewById(R.id.iv_image);
-            if (!mIsDetailsActivityStarted) {
-                mIsDetailsActivityStarted = true;
-                Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                intent.putExtra(ARGS_TYPE, mType);
-                intent.putStringArrayListExtra(EXTRA_DATAS, mAdapter.getData());
-                intent.putExtra(EXTRA_STARTING_POSITION, position);
-                startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-                        imageView, imageView.getTransitionName()).toBundle());
-            }
-        }
-    }
-
-    @Override
-    public void onLongClick(int position) {
-        mRecyclerView.setDragSelectActive(true, position);
-    }
-
-    @Override
-    public void onDragSelectionChanged(int count) {
-        if (count > 0) {
-            if (mCab == null) {
-                mCab = new MaterialCab((AppCompatActivity) getActivity(), R.id.cab_stub)
-                        .setMenu(R.menu.menu_screenshot_item)
-                        .setCloseDrawableRes(R.drawable.ic_clear)
-                        .start(this);
-            }
-            mCab.setTitleRes(R.string.cab_title_x, count);
-        } else if (mCab != null && mCab.isActive()) {
-            mCab.reset().finish();
-            mCab = null;
-        }
-
-    }
-
-    @Override
     public boolean onCabCreated(MaterialCab cab, Menu menu) {
         return true;
     }
 
     @Override
     public boolean onCabItemClicked(MenuItem item) {
-        Integer[] selections = mAdapter.getSelectedIndices();
-        if (selections.length < 1) {
-            mAdapter.clearSelected();
+        HashSet<Integer> selections = mAdapter.getSelection();
+        if (selections.size() < 1) {
+            mAdapter.deselectAll();
             return true;
         }
         switch (item.getItemId()) {
@@ -262,43 +299,44 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
                 }
                 break;
             case R.id.image_share:
-                String[] paths = new String[selections.length];
-                for (int i = 0; i < selections.length; i++) {
+                String[] paths = new String[selections.size()];
+                for (int i = 0; i < selections.size(); i++) {
                     paths[i] = mAdapter.getItem(i);
                 }
                 AppUtil.shareMultipleScreenshot(App.getContext(), paths, mType);
                 break;
         }
-        mAdapter.clearSelected();
+        mAdapter.deselectAll();
         return true;
     }
 
     @Override
     public boolean onCabFinished(MaterialCab cab) {
-        mAdapter.clearSelected();
+        mAdapter.deselectAll();
+        mCab = null;
         return true;
     }
 
     @Override
     public void onLoadFinished(List<String> data) {
         if (!data.isEmpty()) {
-            mLoadingLayout.setStatus(LoadingLayout.Success);
-            mAdapter.setData(data);
+            mStatusLayoutManager.showSuccessLayout();
+            mAdapter.setNewData(data);
         } else {
             mAdapter.clearData();
-            mLoadingLayout.setStatus(LoadingLayout.Empty);
+            mStatusLayoutManager.showEmptyLayout();
         }
     }
 
     @Override
     public void onError(Throwable e) {
-        mLoadingLayout.setStatus(LoadingLayout.Error);
+        mStatusLayoutManager.showErrorLayout();
         if (mAdapter != null)
             mAdapter.clearData();
     }
 
     @Override
     public void showLoading() {
-        mLoadingLayout.setStatus(LoadingLayout.Loading);
+        mStatusLayoutManager.showLoadingLayout();
     }
 }

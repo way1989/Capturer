@@ -30,16 +30,33 @@ import java.util.Objects;
  * @version 2017/12/4
  */
 abstract class BaseEncoder implements Encoder {
-    static abstract class Callback implements Encoder.Callback {
-        void onInputBufferAvailable(BaseEncoder encoder, int index) {
+    private String mCodecName;
+    private MediaCodec mEncoder;
+    private Callback mCallback;
+    /**
+     * let media codec run async mode if mCallback != null
+     */
+    private MediaCodec.Callback mCodecCallback = new MediaCodec.Callback() {
+        @Override
+        public void onInputBufferAvailable(MediaCodec codec, int index) {
+            mCallback.onInputBufferAvailable(BaseEncoder.this, index);
         }
 
-        void onOutputFormatChanged(BaseEncoder encoder, MediaFormat format) {
+        @Override
+        public void onOutputBufferAvailable(MediaCodec codec, int index, MediaCodec.BufferInfo info) {
+            mCallback.onOutputBufferAvailable(BaseEncoder.this, index, info);
         }
 
-        void onOutputBufferAvailable(BaseEncoder encoder, int index, MediaCodec.BufferInfo info) {
+        @Override
+        public void onError(MediaCodec codec, MediaCodec.CodecException e) {
+            mCallback.onError(BaseEncoder.this, e);
         }
-    }
+
+        @Override
+        public void onOutputFormatChanged(MediaCodec codec, MediaFormat format) {
+            mCallback.onOutputFormatChanged(BaseEncoder.this, format);
+        }
+    };
 
     BaseEncoder() {
     }
@@ -177,33 +194,16 @@ abstract class BaseEncoder implements Encoder {
         }
     }
 
-    private String mCodecName;
-    private MediaCodec mEncoder;
-    private Callback mCallback;
-    /**
-     * let media codec run async mode if mCallback != null
-     */
-    private MediaCodec.Callback mCodecCallback = new MediaCodec.Callback() {
-        @Override
-        public void onInputBufferAvailable(MediaCodec codec, int index) {
-            mCallback.onInputBufferAvailable(BaseEncoder.this, index);
+    static abstract class Callback implements Encoder.Callback {
+        void onInputBufferAvailable(BaseEncoder encoder, int index) {
         }
 
-        @Override
-        public void onOutputBufferAvailable(MediaCodec codec, int index, MediaCodec.BufferInfo info) {
-            mCallback.onOutputBufferAvailable(BaseEncoder.this, index, info);
+        void onOutputFormatChanged(BaseEncoder encoder, MediaFormat format) {
         }
 
-        @Override
-        public void onError(MediaCodec codec, MediaCodec.CodecException e) {
-            mCallback.onError(BaseEncoder.this, e);
+        void onOutputBufferAvailable(BaseEncoder encoder, int index, MediaCodec.BufferInfo info) {
         }
-
-        @Override
-        public void onOutputFormatChanged(MediaCodec codec, MediaFormat format) {
-            mCallback.onOutputFormatChanged(BaseEncoder.this, format);
-        }
-    };
+    }
 
 
 }

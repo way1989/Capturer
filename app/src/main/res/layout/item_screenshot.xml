@@ -35,6 +35,7 @@
         android:contentDescription="@string/app_name"
         android:focusable="false"
         android:scaleType="centerInside"
+        android:visibility="gone"
         android:src="@drawable/ic_tweet_select_picture_selected"/>
 
     <ImageView

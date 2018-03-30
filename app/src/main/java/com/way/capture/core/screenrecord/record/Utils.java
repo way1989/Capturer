@@ -29,27 +29,10 @@ import java.util.List;
 class Utils {
 
 
-    interface Callback {
-        void onResult(MediaCodecInfo[] infos);
-    }
-
-    static final class EncoderFinder extends AsyncTask<String, Void, MediaCodecInfo[]> {
-        private Callback func;
-
-        EncoderFinder(Callback func) {
-            this.func = func;
-        }
-
-        @Override
-        protected MediaCodecInfo[] doInBackground(String... mimeTypes) {
-            return findEncodersByType(mimeTypes[0]);
-        }
-
-        @Override
-        protected void onPostExecute(MediaCodecInfo[] mediaCodecInfos) {
-            func.onResult(mediaCodecInfos);
-        }
-    }
+    static SparseArray<String> sAACProfiles = new SparseArray<>();
+    static SparseArray<String> sAVCProfiles = new SparseArray<>();
+    static SparseArray<String> sAVCLevels = new SparseArray<>();
+    static SparseArray<String> sColorFormats = new SparseArray<>();
 
     static void findEncodersByTypeAsync(String mimeType, Callback callback) {
         new EncoderFinder(callback).execute(mimeType);
@@ -79,12 +62,6 @@ class Utils {
 
         return infos.toArray(new MediaCodecInfo[infos.size()]);
     }
-
-
-    static SparseArray<String> sAACProfiles = new SparseArray<>();
-    static SparseArray<String> sAVCProfiles = new SparseArray<>();
-    static SparseArray<String> sAVCLevels = new SparseArray<>();
-
 
     /**
      * @param avcProfileLevel AVC CodecProfileLevel
@@ -200,9 +177,6 @@ class Utils {
         }
     }
 
-
-    static SparseArray<String> sColorFormats = new SparseArray<>();
-
     static String toHumanReadable(int colorFormat) {
         if (sColorFormats.size() == 0) {
             initColorFormatFields();
@@ -242,5 +216,27 @@ class Utils {
             }
         }
 
+    }
+
+    interface Callback {
+        void onResult(MediaCodecInfo[] infos);
+    }
+
+    static final class EncoderFinder extends AsyncTask<String, Void, MediaCodecInfo[]> {
+        private Callback func;
+
+        EncoderFinder(Callback func) {
+            this.func = func;
+        }
+
+        @Override
+        protected MediaCodecInfo[] doInBackground(String... mimeTypes) {
+            return findEncodersByType(mimeTypes[0]);
+        }
+
+        @Override
+        protected void onPostExecute(MediaCodecInfo[] mediaCodecInfos) {
+            func.onResult(mediaCodecInfos);
+        }
     }
 }

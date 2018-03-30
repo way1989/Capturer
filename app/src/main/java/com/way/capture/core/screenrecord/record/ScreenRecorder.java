@@ -40,11 +40,15 @@ import static android.media.MediaFormat.MIMETYPE_VIDEO_AVC;
  * @author Yrom
  */
 public class ScreenRecorder {
+    static final String VIDEO_AVC = MIMETYPE_VIDEO_AVC; // H.264 Advanced Video Coding
+    static final String AUDIO_AAC = MIMETYPE_AUDIO_AAC; // H.264 Advanced Audio Coding
     private static final String TAG = "ScreenRecorder";
     private static final boolean VERBOSE = false;
     private static final int INVALID_INDEX = -1;
-    static final String VIDEO_AVC = MIMETYPE_VIDEO_AVC; // H.264 Advanced Video Coding
-    static final String AUDIO_AAC = MIMETYPE_AUDIO_AAC; // H.264 Advanced Audio Coding
+    private static final int MSG_START = 0;
+    private static final int MSG_STOP = 1;
+    private static final int MSG_ERROR = 2;
+    private static final int STOP_WITH_EOS = 1;
     private int mWidth;
     private int mHeight;
     private int mDpi;
@@ -52,30 +56,27 @@ public class ScreenRecorder {
     private MediaProjection mMediaProjection;
     private VideoEncoder mVideoEncoder;
     private MicRecorder mAudioEncoder;
-
     private MediaFormat mVideoOutputFormat = null, mAudioOutputFormat = null;
     private int mVideoTrackIndex = INVALID_INDEX, mAudioTrackIndex = INVALID_INDEX;
     private MediaMuxer mMuxer;
     private boolean mMuxerStarted = false;
-
     private AtomicBoolean mForceQuit = new AtomicBoolean(false);
     private AtomicBoolean mIsRunning = new AtomicBoolean(false);
     private VirtualDisplay mVirtualDisplay;
+    private HandlerThread mWorker;
+    private CallbackHandler mHandler;
     private MediaProjection.Callback mProjectionCallback = new MediaProjection.Callback() {
         @Override
         public void onStop() {
             quit();
         }
     };
-
-    private HandlerThread mWorker;
-    private CallbackHandler mHandler;
-
     private Callback mCallback;
     private LinkedList<Integer> mPendingVideoEncoderBufferIndices = new LinkedList<>();
     private LinkedList<Integer> mPendingAudioEncoderBufferIndices = new LinkedList<>();
     private LinkedList<MediaCodec.BufferInfo> mPendingAudioEncoderBufferInfos = new LinkedList<>();
     private LinkedList<MediaCodec.BufferInfo> mPendingVideoEncoderBufferInfos = new LinkedList<>();
+    private long mVideoPtsOffset, mAudioPtsOffset;
 
     /**
      * @param dpi for {@link VirtualDisplay}
@@ -121,50 +122,6 @@ public class ScreenRecorder {
 
     public String getSavedPath() {
         return mDstPath;
-    }
-
-    public interface Callback {
-        void onStop(Throwable error);
-
-        void onStart();
-
-        void onRecording(long presentationTimeUs);
-    }
-
-    private static final int MSG_START = 0;
-    private static final int MSG_STOP = 1;
-    private static final int MSG_ERROR = 2;
-    private static final int STOP_WITH_EOS = 1;
-
-    private class CallbackHandler extends Handler {
-        CallbackHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_START:
-                    try {
-                        record();
-                        if (mCallback != null) {
-                            mCallback.onStart();
-                        }
-                        break;
-                    } catch (Exception e) {
-                        msg.obj = e;
-                    }
-                case MSG_STOP:
-                case MSG_ERROR:
-                    stopEncoders();
-                    if (msg.arg1 != STOP_WITH_EOS) signalEndOfStream();
-                    if (mCallback != null) {
-                        mCallback.onStop((Throwable) msg.obj);
-                    }
-                    release();
-                    break;
-            }
-        }
     }
 
     private void signalEndOfStream() {
@@ -230,7 +187,6 @@ public class ScreenRecorder {
         }
     }
 
-
     private void muxAudio(int index, MediaCodec.BufferInfo buffer) {
         if (!mIsRunning.get()) {
             Log.w(TAG, "muxAudio: Already stopped!");
@@ -289,8 +245,6 @@ public class ScreenRecorder {
                 Log.i(TAG, "Sent " + buffer.size + " bytes to MediaMuxer on track " + track);
         }
     }
-
-    private long mVideoPtsOffset, mAudioPtsOffset;
 
     private void resetAudioPts(MediaCodec.BufferInfo buffer) {
         if (mAudioPtsOffset == 0) {
@@ -503,6 +457,45 @@ public class ScreenRecorder {
         if (mMediaProjection != null) {
             Log.e(TAG, "release() not called!");
             release();
+        }
+    }
+
+    public interface Callback {
+        void onStop(Throwable error);
+
+        void onStart();
+
+        void onRecording(long presentationTimeUs);
+    }
+
+    private class CallbackHandler extends Handler {
+        CallbackHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_START:
+                    try {
+                        record();
+                        if (mCallback != null) {
+                            mCallback.onStart();
+                        }
+                        break;
+                    } catch (Exception e) {
+                        msg.obj = e;
+                    }
+                case MSG_STOP:
+                case MSG_ERROR:
+                    stopEncoders();
+                    if (msg.arg1 != STOP_WITH_EOS) signalEndOfStream();
+                    if (mCallback != null) {
+                        mCallback.onStop((Throwable) msg.obj);
+                    }
+                    release();
+                    break;
+            }
         }
     }
 

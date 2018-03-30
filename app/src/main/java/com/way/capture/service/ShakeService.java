@@ -221,7 +221,7 @@ public class ShakeService extends Service {
             Log.d(TAG, "showDialog: module is running...");
             return;
         }
-        if (isShowDialog() ||  mKeyguardManager.isKeyguardLocked()) {
+        if (isShowDialog() || mKeyguardManager.isKeyguardLocked()) {
             Log.d(TAG, "showDialog: menu is showing or Keyguard is Locked...");
             return;
         }

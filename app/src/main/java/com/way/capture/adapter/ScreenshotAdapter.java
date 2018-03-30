@@ -1,35 +1,29 @@
 package com.way.capture.adapter;
 
-import android.content.Context;
 import android.support.v4.view.ViewCompat;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.afollestad.dragselectrecyclerview.DragSelectRecyclerViewAdapter;
+import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.chad.library.adapter.base.BaseViewHolder;
 import com.way.capture.R;
 import com.way.capture.data.DataInfo;
 import com.way.capture.utils.glide.GlideHelper;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 
 /**
  * Created by android on 16-2-1.
  */
-public class ScreenshotAdapter extends DragSelectRecyclerViewAdapter<ScreenshotAdapter.ViewHolder> {
-    private LayoutInflater mInflater;
-    private ArrayList<String> mData = new ArrayList<>();
+public class ScreenshotAdapter extends BaseQuickAdapter<String, BaseViewHolder> {
     private int mType;
-    private OnItemClickListener mListener;
+    private HashSet<Integer> mSelected;
 
-    public ScreenshotAdapter(Context context, int type, OnItemClickListener listener) {
+    public ScreenshotAdapter(int layoutResId, int type) {
+        super(layoutResId);
         mType = type;
-        mListener = listener;
-        mInflater = LayoutInflater.from(context);
         setHasStableIds(true);
+        mSelected = new HashSet<>();
     }
 
     public void removeItem(int pos) {
@@ -47,32 +41,28 @@ public class ScreenshotAdapter extends DragSelectRecyclerViewAdapter<ScreenshotA
     }
 
     @Override
-    public ScreenshotAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        final View v = mInflater.inflate(R.layout.item_screenshot, parent, false);
-        return new ViewHolder(v);
-    }
-
-    @Override
-    public void onBindViewHolder(ScreenshotAdapter.ViewHolder holder, int position) {
-        super.onBindViewHolder(holder, position);
-        String info = mData.get(position);
-        GlideHelper.loadResourceBitmapCenterCrop(info, holder.image);
-        boolean isSelected = isIndexSelected(position);
-        holder.image.animate().scaleX(isSelected ? 0.8f : 1.0f).scaleY(isSelected ? 0.8f : 1.0f);
-        holder.selectImageView.setVisibility(isSelected ? View.VISIBLE : View.GONE);
-        holder.coverView.setVisibility(isSelected ? View.VISIBLE : View.GONE);
+    protected void convert(BaseViewHolder helper, String item) {
+        ImageView imageView = helper.getView(R.id.iv_image);
+        ImageView selectImageView = helper.getView(R.id.cb_selected);
+        View coverView = helper.getView(R.id.lay_mask);
+        ImageView videoIndicator = helper.getView(R.id.iv_is_gif);
+        GlideHelper.loadResourceBitmapCenterCrop(item, imageView);
+        boolean isSelected = mSelected.contains(helper.getAdapterPosition());
+        imageView.animate().scaleX(isSelected ? 0.8f : 1.0f).scaleY(isSelected ? 0.8f : 1.0f);
+        selectImageView.setVisibility(isSelected ? View.VISIBLE : View.GONE);
+        coverView.setVisibility(isSelected ? View.VISIBLE : View.GONE);
 
         switch (mType) {
             case DataInfo.TYPE_SCREEN_SHOT:
-                holder.videoIndicator.setVisibility(View.GONE);
+                videoIndicator.setVisibility(View.GONE);
                 break;
             case DataInfo.TYPE_SCREEN_GIF:
-                holder.videoIndicator.setVisibility(View.VISIBLE);
-                holder.videoIndicator.setImageResource(R.drawable.gif);
+                videoIndicator.setVisibility(View.VISIBLE);
+                videoIndicator.setImageResource(R.drawable.gif);
                 break;
             case DataInfo.TYPE_SCREEN_RECORD:
-                holder.videoIndicator.setVisibility(View.VISIBLE);
-                holder.videoIndicator.setImageResource(R.drawable.ic_gallery_play);
+                videoIndicator.setVisibility(View.VISIBLE);
+                videoIndicator.setImageResource(R.drawable.ic_gallery_play);
                 break;
             default:
                 break;
@@ -80,79 +70,56 @@ public class ScreenshotAdapter extends DragSelectRecyclerViewAdapter<ScreenshotA
 
         // 把每个图片视图设置不同的Transition名称, 防止在一个视图内有多个相同的名称, 在变换的时候造成混乱
         // Fragment支持多个View进行变换, 使用适配器时, 需要加以区分
-        ViewCompat.setTransitionName(holder.image, info);
-        holder.itemView.setTag(R.id.tag_item, position);
+        ViewCompat.setTransitionName(imageView, item);
+        helper.itemView.setTag(R.id.tag_item, helper.getAdapterPosition());
+    }
+    // ----------------------
+    // Selection
+    // ----------------------
+
+    public void toggleSelection(int pos) {
+        if (mSelected.contains(pos))
+            mSelected.remove(pos);
+        else
+            mSelected.add(pos);
+        notifyItemChanged(pos);
     }
 
-    @Override
-    public void onViewRecycled(ViewHolder holder) {
-        super.onViewRecycled(holder);
+    public void select(int pos, boolean selected) {
+        if (selected)
+            mSelected.add(pos);
+        else
+            mSelected.remove(pos);
+        notifyItemChanged(pos);
     }
 
-    @Override
-    public int getItemCount() {
-        return mData.size();
+    public void selectRange(int start, int end, boolean selected) {
+        for (int i = start; i <= end; i++) {
+            if (selected)
+                mSelected.add(i);
+            else
+                mSelected.remove(i);
+        }
+        notifyItemRangeChanged(start, end - start + 1);
     }
 
-    @Override
-    public long getItemId(int position) {
-        return mData.get(position).hashCode();
-    }
-
-    public ArrayList<String> getData() {
-        return mData;
-    }
-
-    public void setData(List<String> data) {
-        if (data == null || data.isEmpty())
-            return;
-        mData.clear();
-        mData.addAll(data);
+    public void deselectAll() {
+        // this is not beautiful...
+        mSelected.clear();
         notifyDataSetChanged();
     }
 
-    public void addData(String path) {
-        //mData.addData(path);
-        final List<String> tmps = new ArrayList<>(mData);
-        mData.clear();
-        mData.add(path);
-        mData.addAll(tmps);
+    public void selectAll() {
+        for (int i = 0; i < getData().size(); i++)
+            mSelected.add(i);
         notifyDataSetChanged();
     }
 
-    public interface OnItemClickListener {
-        void onItemClick(View v);
-
-        void onLongClick(int position);
+    public int getCountSelected() {
+        return mSelected.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
-        ImageView image;
-        ImageView videoIndicator;
-        ImageView selectImageView;
-        View coverView;
-
-        ViewHolder(View itemView) {
-            super(itemView);
-            itemView.setOnClickListener(this);
-            itemView.setOnLongClickListener(this);
-            image = (ImageView) itemView.findViewById(R.id.iv_image);
-            videoIndicator = (ImageView) itemView.findViewById(R.id.iv_is_gif);
-            selectImageView = (ImageView) itemView.findViewById(R.id.cb_selected);
-            coverView = itemView.findViewById(R.id.lay_mask);
-        }
-
-        @Override
-        public void onClick(View v) {
-            mListener.onItemClick(v);
-        }
-
-
-        @Override
-        public boolean onLongClick(View view) {
-            mListener.onLongClick(getAdapterPosition());
-            return true;
-        }
+    public HashSet<Integer> getSelection() {
+        return mSelected;
     }
-
 }

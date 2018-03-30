@@ -118,9 +118,7 @@ public class ShakeService extends Service {
             @Override
             public void onNext(Boolean shake) {
                 if (shake) {
-                    if (mCurrentModule == null || !mCurrentModule.isRunning()) {
-                        showDialog();
-                    }
+                    showDialog();
                 }
             }
 
@@ -144,9 +142,7 @@ public class ShakeService extends Service {
         if (!TextUtils.isEmpty(action)) {
             switch (action) {
                 case Action.ACTION_SHOW_MENU:
-                    if (mCurrentModule == null || !mCurrentModule.isRunning()) {
-                        showDialog();
-                    }
+                    showDialog();
                     break;
                 case Action.ACTION_SCREENSHOT:
                 case Action.ACTION_FREE_CROP:
@@ -221,7 +217,12 @@ public class ShakeService extends Service {
     }
 
     private void showDialog() {
+        if (mCurrentModule != null && mCurrentModule.isRunning()) {
+            Log.d(TAG, "showDialog: module is running...");
+            return;
+        }
         if (isShowDialog() ||  mKeyguardManager.isKeyguardLocked()) {
+            Log.d(TAG, "showDialog: menu is showing or Keyguard is Locked...");
             return;
         }
         if (mFloatMenuDialog == null)

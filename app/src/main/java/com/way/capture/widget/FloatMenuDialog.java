@@ -138,8 +138,7 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
                 item,
                 AnimatorUtil.ofTranslationX(x, 0f),
                 AnimatorUtil.ofTranslationY(y, 0f),
-                AnimatorUtil.ofAlpha(0f, 1f),
-                AnimatorUtil.rotation(0f, 720f)
+                AnimatorUtil.ofAlpha(0f, 1f)
         );
         anim.setDuration(duration);
         return anim;
@@ -155,8 +154,7 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
                 item,
                 AnimatorUtil.ofTranslationX(0f, x),
                 AnimatorUtil.ofTranslationY(0f, y),
-                AnimatorUtil.ofAlpha(1f, 0f),
-                AnimatorUtil.rotation(720f, 0f)
+                AnimatorUtil.ofAlpha(1f, 0f)
         );
         anim.setDuration(duration);
 

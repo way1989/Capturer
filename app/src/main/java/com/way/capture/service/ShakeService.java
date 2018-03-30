@@ -118,12 +118,9 @@ public class ShakeService extends Service {
             @Override
             public void onNext(Boolean shake) {
                 if (shake) {
-                    if (mCurrentModule == null || mCurrentModule.isRunning()
-                            || isShowDialog() || mKeyguardManager.isKeyguardLocked()) {
-                        return;
+                    if (mCurrentModule == null || !mCurrentModule.isRunning()) {
+                        showDialog();
                     }
-                    mVibrator.vibrate(300);
-                    showDialog();
                 }
             }
 
@@ -147,7 +144,9 @@ public class ShakeService extends Service {
         if (!TextUtils.isEmpty(action)) {
             switch (action) {
                 case Action.ACTION_SHOW_MENU:
-                    showDialog();
+                    if (mCurrentModule == null || !mCurrentModule.isRunning()) {
+                        showDialog();
+                    }
                     break;
                 case Action.ACTION_SCREENSHOT:
                 case Action.ACTION_FREE_CROP:
@@ -222,6 +221,9 @@ public class ShakeService extends Service {
     }
 
     private void showDialog() {
+        if (isShowDialog() ||  mKeyguardManager.isKeyguardLocked()) {
+            return;
+        }
         if (mFloatMenuDialog == null)
             mFloatMenuDialog = new FloatMenuDialog(this, R.style.Theme_Dialog);
         mFloatMenuDialog.setOnClickListener(new View.OnClickListener() {
@@ -231,6 +233,7 @@ public class ShakeService extends Service {
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(DELAY_ONCLICK_MESSAGE, v.getId(), -1), DELAY_TIME);
             }
         });
+        mVibrator.vibrate(300);
         mFloatMenuDialog.show();
     }
 

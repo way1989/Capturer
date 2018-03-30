@@ -769,7 +769,7 @@ public class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreD
          * アニメーション時間から求められる位置を計算します。
          *
          * @param timeRate 時間比率
-         * @return ベースとなる係数(0.0から1.0＋α)
+         * @return ベースとなる係数(0.0から1.0 ＋ α)
          */
         private static float calcAnimationPosition(float timeRate) {
             final float position;

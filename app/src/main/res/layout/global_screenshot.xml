@@ -6,14 +6,8 @@
     <com.way.capture.widget.swipe.SwipeVerticalLayout
         android:id="@+id/swipe_layout"
         android:layout_width="match_parent"
+        android:background="#CC000000"
         android:layout_height="match_parent">
-
-        <ImageView
-            android:id="@+id/global_screenshot_background"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:src="@android:color/black"
-            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/global_screenshot"

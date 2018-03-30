@@ -49,8 +49,8 @@ android {
             if (filePrivateProperties.exists()) {
                 signingConfig signingConfigs.release
             }
-            shrinkResources true
-            minifyEnabled true
+            shrinkResources false
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -79,7 +79,6 @@ dependencies {
     androidTestImplementation("com.android.support.test.espresso:espresso-core:$rootProject.espressoVersion", {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    //compile project(':firupgrade')
     implementation project(':downloadlibrary')
     implementation "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"
     implementation "com.android.support:design:$rootProject.supportLibraryVersion"

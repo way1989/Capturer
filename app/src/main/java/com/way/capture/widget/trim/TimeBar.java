@@ -167,10 +167,10 @@ public class TimeBar extends View {
         if (mTotalTime > 0) {
             mPlayedBar.right =
                     mPlayedBar.left + (int) ((mProgressBar.width() * (long) mCurrentTime) / mTotalTime);
-      /*
-       *  M: if duration is not accurate, here just adjust playedBar
-       *  we also show the accurate position text to final user.
-       */
+            /*
+             *  M: if duration is not accurate, here just adjust playedBar
+             *  we also show the accurate position text to final user.
+             */
             if (mPlayedBar.right > mProgressBar.right) {
                 mPlayedBar.right = mProgressBar.right;
             }
@@ -257,7 +257,7 @@ public class TimeBar extends View {
                 Log.d("guanvideoplay", "rotation == Surface.ROTATION_90 ");
 
                 mProgressBar.set(
-                  /*getPaddingLeft() +*/ margin/* + 100*/, progressY + OFFSET - size,
+                        /*getPaddingLeft() +*/ margin/* + 100*/, progressY + OFFSET - size,
                         w /*- getPaddingRight()*/ - margin/* - 100*/, progressY + 7 + OFFSET - size);
                 mScrubberTop = progressY - mScrubber.getHeight() / 2 + 3 + OFFSET - size;
 
@@ -267,7 +267,7 @@ public class TimeBar extends View {
 
 
                 mProgressBar.set(
-                  /*getPaddingLeft() +*/ margin, progressY + OFFSET - 40 - size,
+                        /*getPaddingLeft() +*/ margin, progressY + OFFSET - 40 - size,
                         w - /*getPaddingRight() -*/ margin, progressY + 7 + OFFSET - 40 - size);
 ////	   mPlayedBar2.layout(margin,b -50, 0,0);
                 mScrubberTop = progressY - mScrubber.getHeight() / 2 + 3 + OFFSET - 40 - size;

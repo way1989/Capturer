@@ -10,43 +10,52 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.Vibrator;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
+import com.way.capture.BuildConfig;
 import com.way.capture.R;
-import com.way.capture.activity.MainActivity;
+import com.way.capture.core.BaseModule;
 import com.way.capture.core.LauncherActivity;
+import com.way.capture.core.screenrecord.ScreenRecordModule;
+import com.way.capture.core.screenshot.ScreenshotModule;
+import com.way.capture.utils.AppUtil;
+import com.way.capture.utils.RxSchedulers;
 import com.way.capture.utils.RxScreenshot;
+import com.way.capture.utils.RxShake;
 import com.way.capture.widget.FloatMenuDialog;
+
+import java.lang.ref.WeakReference;
+
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
 
 
 /**
  * ChatHead Service
  */
-public class ShakeService extends Service implements View.OnClickListener, SensorEventListener {
-
+public class ShakeService extends Service {
     private static final String TAG = "ShakeService";
 
     private static final int NOTIFICATION_ID = 9083150;
-
-    private static final int SPEED_SHRESHOLD = 60;// 这个值越大需要越大的力气来摇晃手机
-    private static final int UPTATE_INTERVAL_TIME = 50;
+    private static final int DELAY_ONCLICK_MESSAGE = 0x120;
+    private static final long DELAY_TIME = 400L;
+    private static final String EXTRA_RESULT_CODE = "result-code";
+    private static final String EXTRA_DATA = "data";
     private Vibrator mVibrator;
     private KeyguardManager mKeyguardManager;
-    private SensorManager mSensorManager = null;
     private FloatMenuDialog mFloatMenuDialog;
-    private float mLastX;
-    private float mLastY;
-    private float mLastZ;
-    private long mLastUpdateTime;
+    private MainHandler mHandler;
+    private CompositeDisposable mSubscriptions;
+    private BaseModule mCurrentModule;
     /**
      * 监听是否点击了home键将客户端推到后台
      */
@@ -75,6 +84,14 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
         }
     };
 
+    public static Intent newIntent(Context context, String action, int resultCode, Intent data) {
+        Intent intent = new Intent(context, ShakeService.class);
+        intent.setAction(action);
+        intent.putExtra(EXTRA_RESULT_CODE, resultCode);
+        intent.putExtra(EXTRA_DATA, data);
+        return intent;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -82,14 +99,9 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
     }
 
     public void initData() {
+        mHandler = new MainHandler(Looper.getMainLooper(), this);
         mKeyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
         mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        mSensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
-        Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        if (sensor != null) {
-            mSensorManager.registerListener(this, sensor,
-                    SensorManager.SENSOR_DELAY_GAME);
-        }
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -100,37 +112,97 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
         //注册Home监听广播
         registerReceiver(mHomeKeyEventReceiver, new IntentFilter(
                 Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+        startForeground(NOTIFICATION_ID, createNotification());
+        mSubscriptions = new CompositeDisposable();
+        DisposableObserver<Boolean> observer = new DisposableObserver<Boolean>() {
+            @Override
+            public void onNext(Boolean shake) {
+                if (shake) {
+                    if (mCurrentModule == null || mCurrentModule.isRunning()
+                            || isShowDialog() || mKeyguardManager.isKeyguardLocked()) {
+                        return;
+                    }
+                    mVibrator.vibrate(300);
+                    showDialog();
+                }
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        };
+        new RxShake(getApplication()).compose(RxSchedulers.<Boolean>io_main()).subscribe(observer);
+        mSubscriptions.add(observer);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String action = intent == null ? null : intent.getAction();
-        if (TextUtils.equals(action, "com.way.action.SHOW_MENU")) {
-            showDialog();
+        final String action = intent == null ? null : intent.getAction();
+        if (!TextUtils.isEmpty(action)) {
+            switch (action) {
+                case Action.ACTION_SHOW_MENU:
+                    showDialog();
+                    break;
+                case Action.ACTION_SCREENSHOT:
+                case Action.ACTION_FREE_CROP:
+                case Action.ACTION_RECT_CROP:
+                case Action.ACTION_RECORD:
+                    if (mCurrentModule != null && mCurrentModule.isRunning()) {
+                        Log.d(TAG, "onStartCommand: module is running...");
+                        return START_NOT_STICKY;
+                    }
+                    if (!AppUtil.hasAvailableSpace()) {
+                        Toast.makeText(this, R.string.not_enough_storage, Toast.LENGTH_LONG).show();
+                        return START_NOT_STICKY;
+                    }
+                    int resultCode = intent.getIntExtra(EXTRA_RESULT_CODE, 0);
+                    Intent data = intent.getParcelableExtra(EXTRA_DATA);
+                    if (resultCode == 0 || data == null) {
+                        Toast.makeText(this, R.string.screenshot_null_toast, Toast.LENGTH_LONG).show();
+                        return START_NOT_STICKY;
+                    }
+                    if (TextUtils.equals(action, Action.ACTION_RECORD)) {
+                        mCurrentModule = new ScreenRecordModule();
+                    } else {
+                        mCurrentModule = new ScreenshotModule();
+                    }
+                    mCurrentModule.onStart(this, action, resultCode, data);
+                    break;
+                default:
+                    break;
+
+            }
         }
-
-        startForeground(NOTIFICATION_ID, createNotification());
-
         return START_NOT_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mSensorManager.unregisterListener(this);
         //注销Home键监听广播
         unregisterReceiver(mHomeKeyEventReceiver);
+        stopForeground(true);
+        mSubscriptions.clear();
+        if (mCurrentModule != null) {
+            mCurrentModule.onDestroy();
+        }
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     private Notification createNotification() {
         final Notification.Builder builder = new Notification.Builder(this);
         builder.setWhen(System.currentTimeMillis());
-        builder.setSmallIcon(R.drawable.ic_widgets);
+        builder.setSmallIcon(R.drawable.ic_screenshot_rect);
         builder.setContentTitle(getString(R.string.chathead_content_title));
         builder.setContentText(getString(R.string.chathead_content_text));
         builder.setOngoing(true);
@@ -141,77 +213,24 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
         }
 
         // PendingIntent
-        final Intent notifyIntent = new Intent(this, MainActivity.class);
-        PendingIntent notifyPendingIntent = PendingIntent.getActivity(this, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        final Intent notifyIntent = new Intent(this, ShakeService.class);
+        notifyIntent.setAction(Action.ACTION_SHOW_MENU);
+        PendingIntent notifyPendingIntent = PendingIntent.getService(this, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(notifyPendingIntent);
 
         return builder.build();
     }
 
-    @Override
-    public void onClick(final View v) {
-        switch (v.getId()) {
-            case R.id.menu_screnshot_center:
-                Intent i = new Intent(ShakeService.this, MainActivity.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-                startActivity(i);
-                break;
-            case R.id.menu_normal_screenshot:
-                LauncherActivity.startCaptureActivity(this, ModuleService.Action.ACTION_SCREENSHOT);
-                break;
-            case R.id.menu_screenrecord:
-                LauncherActivity.startCaptureActivity(this, ModuleService.Action.ACTION_RECORD);
-                break;
-            case R.id.menu_free_screenshot:
-                LauncherActivity.startCaptureActivity(this, ModuleService.Action.ACTION_FREE_CROP);
-                break;
-            case R.id.menu_rect_screenshot:
-                LauncherActivity.startCaptureActivity(this, ModuleService.Action.ACTION_RECT_CROP);
-                break;
-            default:
-                break;
-        }
-
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        long currentUpdateTime = System.currentTimeMillis();
-        long timeInterval = currentUpdateTime - mLastUpdateTime;
-        if (timeInterval < UPTATE_INTERVAL_TIME) {
-            return;
-        }
-        mLastUpdateTime = currentUpdateTime;
-
-        float x = event.values[0];
-        float y = event.values[1];
-        float z = event.values[2];
-
-        float deltaX = x - mLastX;
-        float deltaY = y - mLastY;
-        float deltaZ = z - mLastZ;
-
-        mLastX = x;
-        mLastY = y;
-        mLastZ = z;
-
-        double speed = (Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ
-                * deltaZ) / timeInterval) * 100;
-        if (speed >= SPEED_SHRESHOLD && !isShowDialog() && !mKeyguardManager.isKeyguardLocked()) {
-            mVibrator.vibrate(300);
-            showDialog();
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }
-
     private void showDialog() {
         if (mFloatMenuDialog == null)
             mFloatMenuDialog = new FloatMenuDialog(this, R.style.Theme_Dialog);
-        mFloatMenuDialog.setOnClickListener(this);
+        mFloatMenuDialog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mHandler.removeMessages(DELAY_ONCLICK_MESSAGE);
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(DELAY_ONCLICK_MESSAGE, v.getId(), -1), DELAY_TIME);
+            }
+        });
         mFloatMenuDialog.show();
     }
 
@@ -222,5 +241,48 @@ public class ShakeService extends Service implements View.OnClickListener, Senso
 
     public boolean isShowDialog() {
         return mFloatMenuDialog != null && mFloatMenuDialog.isShowing();
+    }
+
+    public static final class Action {
+        public static final String ACTION_SHOW_MENU = BuildConfig.APPLICATION_ID + ".ACTION.SHOW_MENU";
+        public static final String ACTION_SCREENSHOT = BuildConfig.APPLICATION_ID + ".ACTION.SCREENSHOT";
+        public static final String ACTION_RECORD = BuildConfig.APPLICATION_ID + ".ACTION.RECORD";
+        public static final String ACTION_FREE_CROP = BuildConfig.APPLICATION_ID + ".ACTION.FREE_CROP";
+        public static final String ACTION_RECT_CROP = BuildConfig.APPLICATION_ID + ".ACTION.RECT_CROP";
+    }
+
+    private static class MainHandler extends Handler {
+        private WeakReference<Context> mContextWeakReference;
+
+        MainHandler(Looper looper, Context context) {
+            super(looper);
+            mContextWeakReference = new WeakReference<>(context);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            final Context context = mContextWeakReference.get();
+            switch (msg.what) {
+                case DELAY_ONCLICK_MESSAGE:
+                    switch (msg.arg1) {
+                        case R.id.menu_normal_screenshot:
+                            LauncherActivity.startCaptureActivity(context, Action.ACTION_SCREENSHOT);
+                            break;
+                        case R.id.menu_screenrecord:
+                            LauncherActivity.startCaptureActivity(context, Action.ACTION_RECORD);
+                            break;
+                        case R.id.menu_free_screenshot:
+                            LauncherActivity.startCaptureActivity(context, Action.ACTION_FREE_CROP);
+                            break;
+                        case R.id.menu_rect_screenshot:
+                            LauncherActivity.startCaptureActivity(context, Action.ACTION_RECT_CROP);
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+            }
+        }
     }
 }

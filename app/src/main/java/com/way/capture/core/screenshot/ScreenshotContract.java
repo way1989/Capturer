@@ -30,10 +30,6 @@ public interface ScreenshotContract {
 
         void notify(Notification notification);
 
-        void editScreenshot(Uri uri);
-
-        void shareScreenshot(Uri uri);
-
         void finish();
     }
 
@@ -44,7 +40,7 @@ public interface ScreenshotContract {
 
         void takeLongScreenshot(boolean isAutoScroll);
 
-        void saveScreenshot(int style);
+        void saveScreenshot();
 
         void release();
 

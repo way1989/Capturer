@@ -138,7 +138,7 @@ public class BitmapCollageUtil {
         for (int i = 0; i < BASE_LINE_MOVE_NUM; i++) {
             //从下往上找到不是纯色的一行作为参考基线
             final int baseLine = getNotPureLineHeight(firstBitmap, screenHeight, bottomSameHeight + i * baseLineReduceHeight);
-            Log.d(TAG, "compareTwoBitmap: getDividingLinePair count = " + (i +1) + ", baseLine = " + baseLine);
+            Log.d(TAG, "compareTwoBitmap: getDividingLinePair count = " + (i + 1) + ", baseLine = " + baseLine);
             Pair<Integer, Integer> pair = getDividingLinePair(firstBitmap, secondBitmap, baseLine);
             if (pair != null) {
                 Log.d(TAG, "compareTwoBitmap: succeed!!! compare count = " + (i + 1));

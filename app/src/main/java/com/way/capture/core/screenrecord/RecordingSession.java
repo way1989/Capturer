@@ -4,7 +4,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -281,7 +280,7 @@ public final class RecordingSession {
         CharSequence delete = mContext.getText(R.string.notification_captured_delete);
         Notification.Builder builder = new Notification.Builder(mContext) //
                 .setContentTitle(title).setContentText(subtitle).setWhen(System.currentTimeMillis()).setShowWhen(true)
-                .setSmallIcon(R.drawable.ic_videocam)
+                .setSmallIcon(R.drawable.ic_screen_record)
                 .setColor(mContext.getResources().getColor(R.color.colorPrimary)).setContentIntent(pendingViewIntent)
                 .setAutoCancel(true).addAction(R.drawable.ic_menu_share, share, pendingShareIntent)
                 .addAction(R.drawable.ic_menu_delete, delete, pendingDeleteIntent);

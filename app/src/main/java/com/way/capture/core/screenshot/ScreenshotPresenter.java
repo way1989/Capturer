@@ -173,17 +173,15 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     }
 
     @Override
-    public void saveScreenshot(final int style) {
+    public void saveScreenshot() {
         final Notification.Builder notificationBuilder = initNotificationBuilder();
-        if (style == ScreenshotModule.STYLE_SAVE_ONLY) {
-            mView.notify(notificationBuilder.build());
-        }
+        mView.notify(notificationBuilder.build());
         mSubscriptions.clear();
         DisposableObserver<Uri> observer = new DisposableObserver<Uri>() {
             @Override
             public void onNext(Uri uri) {
                 Log.d(TAG, "saveScreenshot onNext...");
-                onSaveFinish(uri, notificationBuilder, style);
+                onSaveFinish(uri, notificationBuilder);
             }
 
             @Override
@@ -258,7 +256,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
         return notificationBuilder;
     }
 
-    private void onSaveFinish(Uri uri, Notification.Builder builder, int style) {
+    private void onSaveFinish(Uri uri, Notification.Builder builder) {
         String path = getRealPathFromURI(uri);
         if (!TextUtils.isEmpty(path))
             RxBus.getInstance().post(new RxEvent.NewPathEvent(DataInfo.TYPE_SCREEN_SHOT, path));
@@ -277,20 +275,10 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
 
         Notification n = builder.build();
         n.flags &= ~Notification.FLAG_NO_CLEAR;
-        switch (style) {
-            case ScreenshotModule.STYLE_SAVE_ONLY:
-                mView.notify(n);
-                mView.finish();
-                break;
-            case ScreenshotModule.STYLE_SAVE_TO_EDIT:
-                mView.editScreenshot(uri);
-                break;
-            case ScreenshotModule.STYLE_SAVE_TO_SHARE:
-                mView.shareScreenshot(uri);
-                break;
-            default:
-                break;
-        }
+
+        mView.notify(n);
+        mView.finish();
+
     }
 
 }

@@ -203,4 +203,5 @@
     <item name="app_gravity" format="integer" type="integer">80</item>
 
     <string name="screen_record_start">Start</string>
+    <string name="screenshot_null_toast">resultCode and data is null...</string>
 </resources>

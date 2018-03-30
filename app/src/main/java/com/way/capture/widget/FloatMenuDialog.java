@@ -28,7 +28,6 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
     private View mCenterItem;
     private View.OnClickListener mListener;
     private boolean isHideAnimPlaying;
-    private View mClickView;
 
     public FloatMenuDialog(Context context, int themeResId) {
         super(context, themeResId);
@@ -44,9 +43,8 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.float_dialog_menu);
-        mArcLayout = (ArcLayout) findViewById(R.id.arc_layout);
+        mArcLayout = findViewById(R.id.arc_layout);
         mCenterItem = findViewById(R.id.menu_screnshot_center);
-        CheatSheet.setup(mCenterItem);
         mArcLayout.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
@@ -56,7 +54,6 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
             }
         });
 
-        mCenterItem.setOnClickListener(this);
         for (int i = 0, size = mArcLayout.getChildCount(); i < size; i++) {
             View button = mArcLayout.getChildAt(i);
             CheatSheet.setup(button);
@@ -121,10 +118,7 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
                 super.onAnimationEnd(animation);
                 isHideAnimPlaying = false;
                 superDismiss();//中心button动画结束，整个过程结束，dialog消失
-                if (mListener != null && mClickView != null) {
-                    mListener.onClick(mClickView);
-                    mClickView = null;
-                }
+
             }
         });
         animSet.start();
@@ -139,16 +133,13 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
         item.setTranslationX(x);
         item.setTranslationY(y);
         item.setAlpha(0f);
-        item.setScaleX(0f);
-        item.setScaleY(0f);
 
         Animator anim = AnimatorUtil.of(
                 item,
                 AnimatorUtil.ofTranslationX(x, 0f),
                 AnimatorUtil.ofTranslationY(y, 0f),
                 AnimatorUtil.ofAlpha(0f, 1f),
-                AnimatorUtil.ofScaleX(0f, 1f),
-                AnimatorUtil.ofScaleY(0f, 1f)
+                AnimatorUtil.rotation(0f, 720f)
         );
         anim.setDuration(duration);
         return anim;
@@ -165,8 +156,7 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
                 AnimatorUtil.ofTranslationX(0f, x),
                 AnimatorUtil.ofTranslationY(0f, y),
                 AnimatorUtil.ofAlpha(1f, 0f),
-                AnimatorUtil.ofScaleX(1f, 0f),
-                AnimatorUtil.ofScaleY(1f, 0f)
+                AnimatorUtil.rotation(720f, 0f)
         );
         anim.setDuration(duration);
 
@@ -175,7 +165,9 @@ public class FloatMenuDialog extends Dialog implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        mClickView = v;
         dismiss();
+        if (mListener != null) {
+            mListener.onClick(v);
+        }
     }
 }

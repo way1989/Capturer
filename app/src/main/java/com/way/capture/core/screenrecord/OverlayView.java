@@ -9,7 +9,6 @@ import android.content.res.Resources;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;

@@ -96,10 +96,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.DayNight.NoActionBar"/>
 
-        <service
-            android:name=".service.ModuleService"
-            android:enabled="true"
-            android:exported="true"/>
     </application>
 
 </manifest>

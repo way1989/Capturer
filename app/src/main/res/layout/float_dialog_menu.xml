@@ -17,21 +17,21 @@
             style="@style/Item_Tumblr"
             android:background="@drawable/tumblr_orange_oval"
             android:contentDescription="@string/normal_screen_shot"
-            android:src="@drawable/ic_menu_camera"/>
+            android:src="@drawable/ic_screenshot"/>
 
         <ImageView
             android:id="@+id/menu_screenrecord"
             style="@style/Item_Tumblr"
             android:background="@drawable/tumblr_green_oval"
             android:contentDescription="@string/record_screenshot"
-            android:src="@drawable/ic_videocam"/>
+            android:src="@drawable/ic_screen_record"/>
 
         <ImageView
             android:id="@+id/menu_free_screenshot"
             style="@style/Item_Tumblr"
             android:background="@drawable/tumblr_blue_oval"
             android:contentDescription="@string/free_screenshot"
-            android:src="@drawable/ic_gesture_white"/>
+            android:src="@drawable/ic_screenshot_free"/>
 
         <ImageView
             android:id="@+id/menu_rect_screenshot"
@@ -45,9 +45,6 @@
         android:id="@+id/menu_screnshot_center"
         style="@style/Item_Tumblr"
         android:layout_gravity="center"
-        android:background="@drawable/tumblr_red_oval"
-        android:contentDescription="@string/home"
-        android:visibility="invisible"
-        android:src="@drawable/ic_screenshot_home"/>
+        android:visibility="invisible"/>
 
 </FrameLayout>

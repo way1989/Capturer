@@ -78,6 +78,14 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mVideoView != null) {
+            mVideoView.setOnCompletionListener(null);
+        }
+    }
+
+    @Override
     protected void initWidget() {
         super.initWidget();
         initToolbar();
@@ -131,11 +139,9 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
         final String path = getIntent().getStringExtra(ARG_IMAGE_PATH);
 
         mVideoView = (FastVideoView) findViewById(R.id.video_view);
-        if (mVideoView != null) {
             mVideoView.setOnCompletionListener(this);
             mVideoView.setTag(path);
             mVideoView.setVideoPath(path);
-        }
 //        controlDrawable =
 //                new MediaControlDrawable.Builder(this)
 //                        .setColor(Color.WHITE)

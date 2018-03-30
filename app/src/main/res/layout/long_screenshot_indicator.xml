@@ -1,27 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/long_screenshot_indicator_root"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center">
+    android:id="@+id/long_screenshot_indicator_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center">
 
-    <View
+    <com.way.capture.widget.ArrowView
         android:id="@+id/long_screenshot_indicator"
-        android:layout_width="1.5dp"
+        android:layout_width="wrap_content"
         android:layout_height="300dp"
         android:layout_centerInParent="true"
-        android:layout_gravity="center"
-        android:background="@color/colorAccent"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
-    <ImageView
-        android:id="@+id/long_screenshot_indicator_arrow"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/long_screenshot_indicator"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="-12dp"
-        android:src="@drawable/ic_screenshot_long_arrow"
-        android:tint="@color/colorAccent"
-        android:visibility="gone"/>
 </RelativeLayout>

@@ -659,8 +659,8 @@ public class FastVideoView extends TextureView implements MediaController.MediaP
     }
 
     /*
-    * release the media player in any state
-    */
+     * release the media player in any state
+     */
     private void release(boolean cleartargetstate) {
         if (mMediaPlayer != null) {
             mMediaPlayer.reset();

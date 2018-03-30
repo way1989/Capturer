@@ -30,9 +30,11 @@
 #-dontwarn com.github.hiteshsondhi88.libffmpeg.**
 #-keep com.github.hiteshsondhi88.libffmpeg.**{*;}
 -keep class android.support.**{*;}
-#-keep class com.way.captain.widget.**{*;}
-#-keep class com.getbase.floatingactionbutton.**{*;}
-#-keep class com.alexvasilkov.**{*;}
+-keep class com.way.capture.widget.**{*;}
+-keep class android.arch.lifecycle.**{*;}
+-keep class com.davemorrissey.labs.**{*;}
+-keep class com.afollestad.dragselectrecyclerview.**{*;}
+-keep class com.trello.rxlifecycle2.**{*;}
 
 
 #spotlight

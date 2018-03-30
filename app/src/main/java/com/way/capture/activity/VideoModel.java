@@ -5,8 +5,8 @@ import android.util.Pair;
 
 import com.way.capture.App;
 import com.way.capture.utils.AppUtil;
-import com.way.capture.utils.FilesOptHelper;
 import com.way.capture.utils.FfmpegUtil;
+import com.way.capture.utils.FilesOptHelper;
 import com.way.capture.utils.OsUtil;
 import com.way.capture.utils.RxSchedulers;
 

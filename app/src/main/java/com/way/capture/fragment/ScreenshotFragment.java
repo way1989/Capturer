@@ -232,7 +232,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements Screen
             if (mCab == null) {
                 mCab = new MaterialCab((AppCompatActivity) getActivity(), R.id.cab_stub)
                         .setMenu(R.menu.menu_screenshot_item)
-                        .setCloseDrawableRes(R.drawable.ic_clear_white_24dp)
+                        .setCloseDrawableRes(R.drawable.ic_clear)
                         .start(this);
             }
             mCab.setTitleRes(R.string.cab_title_x, count);

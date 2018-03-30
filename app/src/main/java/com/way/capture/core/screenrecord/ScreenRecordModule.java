@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.way.capture.core.BaseModule;
-import com.way.capture.service.ModuleService;
 
 /**
  * Created by android on 16-8-22.
@@ -14,6 +13,12 @@ public class ScreenRecordModule implements BaseModule, RecordingSession.Listener
     private static final String TAG = "ScreenRecordModule";
     private RecordingSession mRecordingSession;
     private Context mContext;
+    private boolean mIsRunning;
+
+    @Override
+    public boolean isRunning() {
+        return mIsRunning;
+    }
 
     @Override
     public void onStart(Context context, String action, int resultCode, Intent data) {
@@ -25,22 +30,22 @@ public class ScreenRecordModule implements BaseModule, RecordingSession.Listener
     @Override
     public void onDestroy() {
         mRecordingSession.destroy();
+        mIsRunning = false;
     }
 
     @Override
     public void onStart() {
-
+        mIsRunning = true;
     }
 
     @Override
     public void onStop() {
-
+        mIsRunning = false;
     }
 
     @Override
     public void onEnd() {
         Log.d(TAG, "Shutting down.");
-        ModuleService context = (ModuleService) mContext;
-        context.stopSelf();
+        mIsRunning = false;
     }
 }

@@ -10,6 +10,7 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.StatFs;
 import android.support.v7.app.AlertDialog;
 import android.util.Pair;
 import android.view.Display;
@@ -296,5 +297,13 @@ public class AppUtil {
         Intent chooserIntent = Intent.createChooser(sharingIntent, null);
         chooserIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(chooserIntent);
+    }
+
+
+    public static boolean hasAvailableSpace() {
+        StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
+        long bytesAvailable = stat.getBlockSizeLong() * stat.getAvailableBlocksLong();
+        long megAvailable = bytesAvailable / 1048576;
+        return megAvailable >= 100;
     }
 }

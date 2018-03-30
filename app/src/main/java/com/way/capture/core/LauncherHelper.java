@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.media.projection.MediaProjectionManager;
 import android.util.Log;
 
-import com.way.capture.service.ModuleService;
+import com.way.capture.service.ShakeService;
 
 final class LauncherHelper {
     private static final String TAG = "LauncherHelper";
@@ -31,7 +31,7 @@ final class LauncherHelper {
         }
         if (resultCode == Activity.RESULT_OK) {
             Log.d(TAG, "Acquired permission to screen capture. Starting service.");
-            activity.startService(ModuleService.newIntent(activity, action, resultCode, data));
+            activity.startService(ShakeService.newIntent(activity, action, resultCode, data));
         } else {
             Log.d(TAG, "Failed to acquire permission to screen capture.");
             return false;

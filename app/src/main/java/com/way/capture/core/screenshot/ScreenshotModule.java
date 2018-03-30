@@ -17,23 +17,19 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
-import android.graphics.PointF;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.Interpolator;
+import android.view.animation.OvershootInterpolator;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -43,8 +39,9 @@ import android.widget.Toast;
 import com.way.capture.R;
 import com.way.capture.core.BaseModule;
 import com.way.capture.fragment.SettingsFragment;
-import com.way.capture.service.ModuleService;
+import com.way.capture.service.ShakeService;
 import com.way.capture.utils.RxScreenshot;
+import com.way.capture.utils.ScreenshotAnimatorUtil;
 import com.way.capture.utils.ScrollUtils;
 import com.way.capture.utils.ViewUtils;
 import com.way.capture.widget.freecrop.FreeCropView;
@@ -52,35 +49,16 @@ import com.way.capture.widget.rectcrop.CropImageView;
 import com.way.capture.widget.swipe.SwipeHelper;
 import com.way.capture.widget.swipe.SwipeVerticalLayout;
 
-import java.text.DateFormat;
-import java.util.Date;
-
 /**
  * Created by android on 16-8-22.
  */
 public class ScreenshotModule implements BaseModule, ScreenshotContract.View, SwipeVerticalLayout.Callback,
         SwipeHelper.PressListener, View.OnClickListener {
     public static final int SCREENSHOT_NOTIFICATION_ID = 789;
-    //save style
-    static final int STYLE_SAVE_ONLY = 0;
-    static final int STYLE_SAVE_TO_SHARE = 1;
-    static final int STYLE_SAVE_TO_EDIT = 2;
-    private static final String TAG = "TakeScreenshotService";
-    private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
+    private static final String TAG = "ScreenshotModule";
     private static final long PREVIEW_OUT_TIME = 4000L;// 超时自动保存
-    private static final long TAKE_SCREENSHOT_DELAY = 500L;
-    private static final int TAKE_SCREENSHOT_MESSAGE = 0x121;
-    private static final int TAKE_LONG_SCREENSHOT_MESSAGE = 0x122;
     private static final int AUTO_SAVE_MESSAGE = 0x123;
-    //anim
-    private static final int SCREENSHOT_FLASH_TO_PEAK_DURATION = 130;
-    private static final int SCREENSHOT_DROP_IN_DURATION = 430;
-    private static final int SCREENSHOT_DROP_OUT_DELAY = 500;
-    private static final int SCREENSHOT_DROP_OUT_DURATION = 430;
-    private static final int SCREENSHOT_DROP_OUT_SCALE_DURATION = 370;
-    private static final float BACKGROUND_ALPHA = 0.8f;
-    private static final float SCREENSHOT_SCALE = 1f;
-    private static final float SCREENSHOT_DROP_IN_MIN_SCALE = SCREENSHOT_SCALE * 0.689f;
+
     private static final boolean IS_DEVICE_ROOT = ScrollUtils.isDeviceRoot();
     //system manager
     private NotificationManager mNotificationManager;
@@ -92,7 +70,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     private FrameLayout mRootView;
     private SwipeVerticalLayout mSwipeVerticalLayout;
     private Button mLongScreenshotBtn;
-    private ImageView mBackgroundView;
+
     private ImageView mScreenshotView;
     private ImageView mScreenshotFlash;
     private TextView mLongScreenshotToast;
@@ -107,15 +85,6 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case TAKE_SCREENSHOT_MESSAGE:
-                    Log.i(TAG, "takeScreenshot...");
-                    //cancel the notification
-                    mNotificationManager.cancel(SCREENSHOT_NOTIFICATION_ID);
-                    mPresenter.takeScreenshot();
-                    break;
-                case TAKE_LONG_SCREENSHOT_MESSAGE:
-                    mPresenter.takeLongScreenshot(mIsAutoLongScreenshot);
-                    break;
                 case AUTO_SAVE_MESSAGE:
                     mSwipeVerticalLayout.setEnabled(false);
                     if (!mKeyguardManager.isKeyguardLocked() || !mKeyguardManager.isKeyguardSecure()) {
@@ -131,6 +100,12 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     private ObjectAnimator mFloatAnim;
     private Dialog mRectCropDialog;
     private Dialog mFreeCropDialog;
+    private boolean mIsRunning;
+
+    @Override
+    public boolean isRunning() {
+        return mIsRunning;
+    }
 
     @Override
     public void onStart(Context context, String action, int resultCode, Intent data) {
@@ -145,8 +120,12 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
                 .getBoolean(SettingsFragment.LONG_SCREENSHOT_AUTO, true);
         //init presenter
         mPresenter = new ScreenshotPresenter(this, resultCode, data);
-        mHandler.removeMessages(TAKE_SCREENSHOT_MESSAGE);
-        mHandler.sendEmptyMessageDelayed(TAKE_SCREENSHOT_MESSAGE, TAKE_SCREENSHOT_DELAY);
+
+        //cancel the notification
+        mNotificationManager.cancel(SCREENSHOT_NOTIFICATION_ID);
+        Log.i(TAG, "takeScreenshot...");
+        mPresenter.takeScreenshot();
+        mIsRunning = true;
     }
 
     private void initSystemManager(Context context) {
@@ -174,7 +153,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         mLongScreenshotBtn = mRootView.findViewById(R.id.scroll_screenshot_btn);
         mLongScreenshotBtn.setOnClickListener(this);
 
-        mBackgroundView = mRootView.findViewById(R.id.global_screenshot_background);
+//        mBackgroundView = mRootView.findViewById(R.id.global_screenshot_background);
         mScreenshotView = mRootView.findViewById(R.id.global_screenshot);
         mScreenshotFlash = mRootView.findViewById(R.id.global_screenshot_flash);
     }
@@ -186,6 +165,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         removeScreenshotView();
         dismissLongScreenshotToast();
         mPresenter.release();
+        mIsRunning = false;
     }
 
     private Bitmap resizeBitmap(Bitmap bitmap, float scale) {
@@ -250,17 +230,17 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     public void showScreenshotAnim(Bitmap bitmap, final boolean longScreenshot, final boolean needCheckAction) {
         if (needCheckAction) {
             switch (mAction) {
-                case ModuleService.Action.ACTION_FREE_CROP:
+                case ShakeService.Action.ACTION_FREE_CROP:
                     showFreeCropLayout(removeNavigationBar(bitmap));
                     return;
-                case ModuleService.Action.ACTION_RECT_CROP:
+                case ShakeService.Action.ACTION_RECT_CROP:
                     showRectCropLayout(removeNavigationBar(bitmap));
                     return;
             }
         }
         // Add the view for the animation
         if (longScreenshot) {
-            int heightPixels = ViewUtils.getHeight();;
+            int heightPixels = ViewUtils.getHeight();
             int count = bitmap.getHeight() / heightPixels;
             count = Math.max(1, Math.min(5, count));
             if (count > 1) bitmap = resizeBitmap(bitmap, 1.00f / count);
@@ -283,7 +263,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         }
 
         mWindowManager.addView(mRootView, mWindowLayoutParams);
-        mScreenshotAnimation = createScreenshotDropInAnimation();
+        mScreenshotAnimation = ScreenshotAnimatorUtil.createScreenshotDropInAnimation(mScreenshotView, mScreenshotFlash);
 
         mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -335,7 +315,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         if (mFloatAnim == null) {
             mFloatAnim = ObjectAnimator.ofFloat(mScreenshotView, "translationY", 0f, ViewUtils.dp2px(8), 0f);
             mFloatAnim.setDuration(2000L);
-            mFloatAnim.setInterpolator(new AccelerateDecelerateInterpolator());
+            mFloatAnim.setInterpolator(new OvershootInterpolator());
             mFloatAnim.setRepeatCount(ValueAnimator.INFINITE);
             mFloatAnim.setRepeatMode(ValueAnimator.REVERSE);
         }
@@ -351,11 +331,6 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     public void showScreenshotError(Throwable e) {
         Toast.makeText(mContext, R.string.screenshot_failed_title, Toast.LENGTH_SHORT).show();
         notifyScreenshotError(mContext, mNotificationManager);
-        stopSelf();
-    }
-
-    private void stopSelf() {
-        mContext.stopService(new Intent(mContext, ModuleService.class));
     }
 
     @Override
@@ -369,43 +344,8 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     }
 
     @Override
-    public void editScreenshot(Uri uri) {
-        try {
-            if (!mKeyguardManager.isKeyguardLocked()) {
-                Intent editIntent = new Intent(Intent.ACTION_VIEW);
-                editIntent.setDataAndType(uri, "image/png");
-                editIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                mContext.startActivity(editIntent);
-            }
-        } catch (Exception e) {
-            Log.i(TAG, "STYLE_SAVE_TO_EDIT e = " + e);
-        }
-        stopSelf();
-    }
-
-    @Override
-    public void shareScreenshot(Uri uri) {
-        try {
-            if (!mKeyguardManager.isKeyguardLocked()) {
-                String subjectDate = DateFormat.getDateTimeInstance().format(new Date(System.currentTimeMillis()));
-                String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
-                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-                sharingIntent.setType("image/png");
-                sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
-                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-                Intent chooserIntent = Intent.createChooser(sharingIntent, null);
-                chooserIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                mContext.startActivity(chooserIntent);
-            }
-        } catch (Exception e) {
-            Log.i(TAG, "STYLE_SAVE_TO_SHARE e = " + e);
-        }
-        stopSelf();
-    }
-
-    @Override
     public void finish() {
-        stopSelf();
+
     }
 
     private void playAlphaAnim(boolean isDismiss) {
@@ -430,19 +370,19 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     public void onChildDismissed(View v, int direction) {
         mSwipeVerticalLayout.setEnabled(false);
         mHandler.removeMessages(AUTO_SAVE_MESSAGE);
+        removeScreenshotView();
         switch (direction) {
             case SwipeHelper.SWIPE_TO_TOP:
                 Log.i(TAG, TAG + " onChildDismissed... SWIPE_TO_TOP");
-                stopSelf();
                 break;
             case SwipeHelper.SWIPE_TO_BOTTOM:
                 Log.i(TAG, TAG + " onChildDismissed... SWIPE_TO_BOTTOM");
-                mPresenter.saveScreenshot(STYLE_SAVE_ONLY);
-                removeScreenshotView();
+                mPresenter.saveScreenshot();
                 break;
             default:
                 break;
         }
+        mIsRunning = false;
     }
 
     @Override
@@ -479,8 +419,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
             case R.id.long_screenshot_title:
                 Log.i(TAG, "onClick... toast_dialog_bg_container");
                 enableDialogTouchFlag(false);
-                mHandler.removeMessages(TAKE_LONG_SCREENSHOT_MESSAGE);
-                mHandler.sendEmptyMessage(TAKE_LONG_SCREENSHOT_MESSAGE);
+                mPresenter.takeLongScreenshot(mIsAutoLongScreenshot);
                 break;
             case R.id.long_screenshot_indicator_root:
                 stopLongScreenshot();
@@ -492,8 +431,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
 
     private void takeLongScreenshot() {
         if (mIsAutoLongScreenshot) {
-            mHandler.removeMessages(TAKE_LONG_SCREENSHOT_MESSAGE);
-            mHandler.sendEmptyMessage(TAKE_LONG_SCREENSHOT_MESSAGE);
+            mPresenter.takeLongScreenshot(mIsAutoLongScreenshot);
         } else {
             enableDialogTouchFlag(true);
         }
@@ -513,12 +451,10 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         TextView title = mLongScreenshotToast.findViewById(R.id.long_screenshot_title);
         if (enable) {
             title.setText(R.string.long_screenshot_indicator);
-            mLongScreenshotCover.findViewById(R.id.long_screenshot_indicator_arrow).setVisibility(View.VISIBLE);
             mLongScreenshotCover.findViewById(R.id.long_screenshot_indicator).setVisibility(View.VISIBLE);
         } else {
             title.setText(R.string.long_screenshot_progressing);
             mLongScreenshotCover.findViewById(R.id.long_screenshot_indicator).setVisibility(View.GONE);
-            mLongScreenshotCover.findViewById(R.id.long_screenshot_indicator_arrow).setVisibility(View.GONE);
         }
     }
 
@@ -567,7 +503,9 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     }
 
     private void addToast() {
+        final int statusBarHeight = ViewUtils.getStatusBarHeight();
         mLongScreenshotToast = (TextView) mLayoutInflater.inflate(R.layout.long_screenshot_toast, null);
+        mLongScreenshotToast.setPadding(ViewUtils.dp2px(8), ViewUtils.getStatusBarHeight(), ViewUtils.dp2px(8), 0);
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 0, ViewUtils.getFloatType(),
                 WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
@@ -584,14 +522,12 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
             mLongScreenshotToast.setOnClickListener(this);
         }
-        //int actionBarHeight = TypedValue.complexToDimensionPixelSize(new TypedValue().data,
-          //      mContext.getResources().getDisplayMetrics());
-        layoutParams.y = ViewUtils.getStatusBarHeight();
+        layoutParams.y = 0;
         layoutParams.windowAnimations = R.style.VolumePanelAnimation;
         layoutParams.gravity = mContext.getResources().getInteger(
                 R.integer.standard_notification_panel_layout_gravity);
         layoutParams.width = ViewUtils.getWidth();
-        layoutParams.height = ViewUtils.dp2px(56);
+        layoutParams.height = ViewUtils.dp2px(56) + statusBarHeight;
         layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED;
         mWindowManager.addView(mLongScreenshotToast, layoutParams);
     }
@@ -608,123 +544,16 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
             mExitScreenshotAnimation.end();
             mExitScreenshotAnimation.removeAllListeners();
         }
-        mExitScreenshotAnimation = createScreenshotDropOutAnimation();
+        mExitScreenshotAnimation = ScreenshotAnimatorUtil.createScreenshotDropOutAnimation(mScreenshotView);
         mExitScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                mPresenter.saveScreenshot(STYLE_SAVE_ONLY);
+                mPresenter.saveScreenshot();
                 removeScreenshotView();
+                mIsRunning = false;
             }
         });
         mExitScreenshotAnimation.start();
-    }
-
-    private ValueAnimator createScreenshotDropInAnimation() {
-        final float flashPeakDurationPct = ((float) (SCREENSHOT_FLASH_TO_PEAK_DURATION) / SCREENSHOT_DROP_IN_DURATION);
-        final float flashDurationPct = 2f * flashPeakDurationPct;
-        final Interpolator flashAlphaInterpolator = new Interpolator() {
-            @Override
-            public float getInterpolation(float x) {
-                // Flash the flash view in and out quickly
-                if (x <= flashDurationPct) {
-                    return (float) Math.sin(Math.PI * (x / flashDurationPct));
-                }
-                return 0;
-            }
-        };
-        final Interpolator scaleInterpolator = new Interpolator() {
-            @Override
-            public float getInterpolation(float x) {
-                // We start scaling when the flash is at it's peak
-                if (x < flashPeakDurationPct) {
-                    return 0;
-                }
-                return (x - flashDurationPct) / (1f - flashDurationPct);
-            }
-        };
-        ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
-        anim.setDuration(SCREENSHOT_DROP_IN_DURATION);
-        anim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                mBackgroundView.setAlpha(0f);
-                mBackgroundView.setVisibility(View.VISIBLE);
-                mScreenshotView.setAlpha(0f);
-                mScreenshotView.setTranslationX(0f);
-                mScreenshotView.setTranslationY(0f);
-                mScreenshotView.setScaleX(SCREENSHOT_SCALE);
-                mScreenshotView.setScaleY(SCREENSHOT_SCALE);
-                mScreenshotView.setVisibility(View.VISIBLE);
-                mScreenshotFlash.setAlpha(0f);
-                mScreenshotFlash.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mScreenshotFlash.setVisibility(View.GONE);
-            }
-        });
-        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float t = (Float) animation.getAnimatedValue();
-                float scaleT = (SCREENSHOT_SCALE)
-                        - scaleInterpolator.getInterpolation(t) * (SCREENSHOT_SCALE - SCREENSHOT_DROP_IN_MIN_SCALE);
-                mBackgroundView.setAlpha(scaleInterpolator.getInterpolation(t) * BACKGROUND_ALPHA);
-                mScreenshotView.setAlpha(t);
-                mScreenshotView.setScaleX(scaleT);
-                mScreenshotView.setScaleY(scaleT);
-                mScreenshotFlash.setAlpha(flashAlphaInterpolator.getInterpolation(t));
-            }
-        });
-        return anim;
-    }
-
-    private ValueAnimator createScreenshotDropOutAnimation() {
-        int w = ViewUtils.getWidth();
-        int h = ViewUtils.getHeight();
-        ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
-        anim.setStartDelay(SCREENSHOT_DROP_OUT_DELAY);
-        anim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mBackgroundView.setVisibility(View.GONE);
-                mScreenshotView.setVisibility(View.GONE);
-                mScreenshotView.setLayerType(View.LAYER_TYPE_NONE, null);
-            }
-        });
-
-        // In the case where there is a status bar, animate to the origin of
-        // the bar (top-left)
-        final float scaleDurationPct = (float) SCREENSHOT_DROP_OUT_SCALE_DURATION / SCREENSHOT_DROP_OUT_DURATION;
-        final Interpolator scaleInterpolator = new Interpolator() {
-            @Override
-            public float getInterpolation(float x) {
-                if (x < scaleDurationPct) {
-                    // Decelerate, and scale the input accordingly
-                    return (float) (1f - Math.pow(1f - (x / scaleDurationPct), 2f));
-                }
-                return 1f;
-            }
-        };
-
-        // Determine the bounds of how to scale
-        float halfScreenWidth = w / 2f;
-        float halfScreenHeight = h;
-        final PointF finalPos = new PointF(-halfScreenWidth, halfScreenHeight);
-
-        // Animate the screenshot to the status bar
-        anim.setDuration(SCREENSHOT_DROP_OUT_DURATION);
-        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float t = (Float) animation.getAnimatedValue();
-                mBackgroundView.setAlpha((1f - t) * BACKGROUND_ALPHA);
-                mScreenshotView.setAlpha(1f - scaleInterpolator.getInterpolation(t));
-                mScreenshotView.setTranslationY(t * finalPos.y);
-            }
-        });
-        return anim;
     }
 
     private void notifyScreenshotError(Context context, NotificationManager nManager) {

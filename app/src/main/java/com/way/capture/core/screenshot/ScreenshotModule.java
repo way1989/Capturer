@@ -29,7 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.OvershootInterpolator;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -81,6 +81,10 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     private String mAction;
     private ScreenshotContract.Presenter mPresenter;
     private boolean mIsAutoLongScreenshot;
+    private ObjectAnimator mFloatAnim;
+    private Dialog mRectCropDialog;
+    private Dialog mFreeCropDialog;
+    private boolean mIsRunning;
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -97,10 +101,6 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
             }
         }
     };
-    private ObjectAnimator mFloatAnim;
-    private Dialog mRectCropDialog;
-    private Dialog mFreeCropDialog;
-    private boolean mIsRunning;
 
     @Override
     public boolean isRunning() {
@@ -315,7 +315,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         if (mFloatAnim == null) {
             mFloatAnim = ObjectAnimator.ofFloat(mScreenshotView, "translationY", 0f, ViewUtils.dp2px(8), 0f);
             mFloatAnim.setDuration(2000L);
-            mFloatAnim.setInterpolator(new OvershootInterpolator());
+            mFloatAnim.setInterpolator(new AccelerateDecelerateInterpolator());
             mFloatAnim.setRepeatCount(ValueAnimator.INFINITE);
             mFloatAnim.setRepeatMode(ValueAnimator.REVERSE);
         }

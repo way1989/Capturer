@@ -83,7 +83,7 @@ final class OverlayView extends FrameLayout {
                     public void accept(Object o) throws Exception {
                         if ((int) mSwitchButton.getTag() == START) {
                             mSwitchButton.setTag(STOP);
-                            mListener.onStop();
+                            mListener.onStopClick();
                         } else {
                             checkCountDown();
                         }
@@ -94,7 +94,7 @@ final class OverlayView extends FrameLayout {
                 .subscribe(new Consumer<Object>() {
                     @Override
                     public void accept(Object o) throws Exception {
-                        mListener.onCancel();
+                        mListener.onCancelClick();
                     }
                 });
     }
@@ -135,7 +135,7 @@ final class OverlayView extends FrameLayout {
         mSwitchButton.setBackgroundResource(R.drawable.stop);
         mSwitchButton.setTag(START);
         mSwitchButton.setEnabled(true);
-        mListener.onStart();
+        mListener.onStartClick();
     }
 
     public void updateRecordingTime(long time) {
@@ -152,19 +152,19 @@ final class OverlayView extends FrameLayout {
          * Called when cancel is clicked. This view is unusable once this
          * callback is invoked.
          */
-        void onCancel();
+        void onCancelClick();
 
         /**
          * Called when start is clicked and it is appropriate to start
          * recording. This view will hide itself completely before invoking this
          * callback.
          */
-        void onStart();
+        void onStartClick();
 
         /**
          * Called when stop is clicked. This view is unusable once this callback
          * is invoked.
          */
-        void onStop();
+        void onStopClick();
     }
 }

@@ -81,6 +81,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
     protected void onDestroy() {
         super.onDestroy();
         if (mVideoView != null) {
+            mVideoView.setSurfaceTextureListener(null);
             mVideoView.setOnCompletionListener(null);
         }
     }
@@ -138,7 +139,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
     private void initPlayControlerView() {
         final String path = getIntent().getStringExtra(ARG_IMAGE_PATH);
 
-        mVideoView = (FastVideoView) findViewById(R.id.video_view);
+        mVideoView = findViewById(R.id.video_view);
         mVideoView.setOnCompletionListener(this);
         mVideoView.setTag(path);
         mVideoView.setVideoPath(path);

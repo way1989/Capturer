@@ -37,6 +37,7 @@ import java.util.Map;
 
 
 public class DetailsActivity extends BaseActivity {
+    private static final String TAG = "DetailsActivity";
     private static final String STATE_CURRENT_PAGE_POSITION = "state_current_page_position";
     private DetailsFragment mCurrentDetailsFragment;
     private int mCurrentPosition;
@@ -65,7 +66,7 @@ public class DetailsActivity extends BaseActivity {
             }
         }
     };
-    private ArrayList<String> mDatas;
+    private ArrayList<DataInfo> mDatas;
     private int mType;
     private Toolbar toolbar;
     private boolean fullscreenmode;
@@ -74,7 +75,7 @@ public class DetailsActivity extends BaseActivity {
     public void onCreate(Bundle savedInstanceState) {
         Intent intent = getIntent();
         mType = intent.getIntExtra(ScreenshotFragment.ARGS_TYPE, DataInfo.TYPE_SCREEN_SHOT);
-        mDatas = getIntent().getStringArrayListExtra(ScreenshotFragment.EXTRA_DATAS);
+        mDatas = (ArrayList<DataInfo>) getIntent().getSerializableExtra(ScreenshotFragment.EXTRA_DATAS);
         mStartingPosition = getIntent().getIntExtra(ScreenshotFragment.EXTRA_STARTING_POSITION, 0);
         if (savedInstanceState != null) {
             mCurrentPosition = savedInstanceState.getInt(STATE_CURRENT_PAGE_POSITION, 0);
@@ -123,10 +124,10 @@ public class DetailsActivity extends BaseActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar == null)
             return;
-        String path = mDatas.get(mCurrentPosition);
+        String path = mDatas.get(mCurrentPosition).path;
         if (path.contains(File.separator) && path.contains(".")) {
             String title = path.substring(path.lastIndexOf(File.separatorChar) + 1, path.lastIndexOf('.'));
-            Log.i("liweiping", "title = " + title);
+            Log.i(TAG, "title = " + title);
             actionBar.setTitle(title);
         }
     }
@@ -228,7 +229,7 @@ public class DetailsActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        String path = mDatas.get(mCurrentPosition);
+        String path = mDatas.get(mCurrentPosition).path;
 
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -264,7 +265,7 @@ public class DetailsActivity extends BaseActivity {
 
         @Override
         public Fragment getItem(int position) {
-            return DetailsFragment.newInstance(mType, mDatas.get(position));
+            return DetailsFragment.newInstance(mType, mDatas.get(position).path);
         }
 
         @Override

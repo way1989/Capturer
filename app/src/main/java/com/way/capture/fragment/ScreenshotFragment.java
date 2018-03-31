@@ -7,6 +7,8 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -57,7 +59,6 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
     RecyclerView mRecyclerView;
     private ScreenshotAdapter mAdapter;
     private DragSelectTouchListener mDragSelectTouchListener;
-    private DragSelectionProcessor mDragSelectionProcessor;
     private StatusLayoutManager mStatusLayoutManager;
 
     private MaterialCab mCab;
@@ -98,9 +99,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
     public boolean onBackPressed() {
         if (mAdapter.getCountSelected() > 0) {
             mAdapter.deselectAll();
-            if (mCab != null && mCab.isActive())
-                mCab.reset().finish();
-            mCab = null;
+            exitCab();
             return true;
         }
         return false;
@@ -132,7 +131,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
 
     @Override
     public void changeSharedElements(List<String> names, Map<String, View> sharedElements, int position) {
-        String newTransitionName = mAdapter.getItem(position);
+        String newTransitionName = mAdapter.getItem(position).path;
         View newSharedElement = mRecyclerView.findViewHolderForAdapterPosition(position).itemView.findViewById(R.id.iv_image);
         Log.i(TAG, "changeSharedElements newSharedElement = " + newSharedElement);
         if (newSharedElement != null) {
@@ -169,7 +168,9 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
     protected void initWidget(View root) {
         super.initWidget(root);
 
-        GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 4);
+        final StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(4,
+                StaggeredGridLayoutManager.VERTICAL);
+//        GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 4);
         mRecyclerView.addItemDecoration(new SpaceGridItemDecoration(ViewUtils.dp2px(1)));
         mRecyclerView.setLayoutManager(layoutManager);
         mAdapter = new ScreenshotAdapter(R.layout.item_screenshot, mType);
@@ -194,8 +195,8 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
                         mIsDetailsActivityStarted = true;
                         Intent intent = new Intent(getActivity(), DetailsActivity.class);
                         intent.putExtra(ARGS_TYPE, mType);
-                        ArrayList<String> lists = new ArrayList<>(mAdapter.getData());
-                        intent.putStringArrayListExtra(EXTRA_DATAS, lists);
+                        ArrayList<DataInfo> lists = new ArrayList<>(mAdapter.getData());
+                        intent.putExtra(EXTRA_DATAS, lists);
                         intent.putExtra(EXTRA_STARTING_POSITION, position);
                         startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(getActivity(),
                                 imageView, imageView.getTransitionName()).toBundle());
@@ -214,7 +215,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
                 return false;
             }
         });
-        mDragSelectionProcessor = new DragSelectionProcessor(new DragSelectionProcessor.ISelectionHandler() {
+        DragSelectionProcessor dragSelectionProcessor = new DragSelectionProcessor(new DragSelectionProcessor.ISelectionHandler() {
             @Override
             public HashSet<Integer> getSelection() {
                 return mAdapter.getSelection();
@@ -238,21 +239,20 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
                                 .start(ScreenshotFragment.this);
                     }
                     mCab.setTitleRes(R.string.cab_title_x, getSelection().size());
-                } else if (mCab != null && mCab.isActive()) {
-                    mCab.reset().finish();
-                    mCab = null;
+                } else {
+                    exitCab();
                 }
             }
         }).withMode(DragSelectionProcessor.Mode.Simple);
         mDragSelectTouchListener = new DragSelectTouchListener()
-                .withSelectListener(mDragSelectionProcessor);
+                .withSelectListener(dragSelectionProcessor);
         mRecyclerView.addOnItemTouchListener(mDragSelectTouchListener);
     }
 
     @Override
     protected void initData() {
         super.initData();
-        RxBus.getInstance().toObservable(RxEvent.NewPathEvent.class)
+       /* RxBus.getInstance().toObservable(RxEvent.NewPathEvent.class)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .compose(this.<RxEvent.NewPathEvent>bindUntilEvent(FragmentEvent.DESTROY))
@@ -262,10 +262,10 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
                         final int type = newPathEvent.type;
                         final String path = newPathEvent.path;
                         if (type == mType) {
-                            mAdapter.addData(path);
+                            //mAdapter.addData(path);
                         }
                     }
-                });
+                });*/
         loadData();
     }
 
@@ -290,37 +290,41 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
     @Override
     public boolean onCabItemClicked(MenuItem item) {
         HashSet<Integer> selections = mAdapter.getSelection();
-        if (selections.size() < 1) {
-            mAdapter.deselectAll();
-            return true;
-        }
         switch (item.getItemId()) {
             case R.id.image_delete:
                 for (int index : selections) {
                     mAdapter.removeItem(index);
                 }
+                exitCab();
                 break;
             case R.id.image_share:
                 String[] paths = new String[selections.size()];
                 for (int i = 0; i < selections.size(); i++) {
-                    paths[i] = mAdapter.getItem(i);
+                    paths[i] = mAdapter.getItem(i).path;
                 }
                 AppUtil.shareMultipleScreenshot(App.getContext(), paths, mType);
                 break;
-            case R.id.image_clear_all:
-                mAdapter.deselectAll();
-                if (mCab != null && mCab.isActive()) {
-                    mCab.reset().finish();
-                    mCab = null;
+            case R.id.image_select_all:
+                if (!item.isChecked()) {
+                    mAdapter.selectAll();
+                    mCab.setTitleRes(R.string.cab_title_x, mAdapter.getSelection().size());
+                    item.setTitle(R.string.clear_all);
+                    item.setChecked(true);
+                } else {
+                    mAdapter.deselectAll();
+                    exitCab();
+                    item.setChecked(false);
                 }
                 break;
-//            case R.id.image_select_all:
-//                mAdapter.selectAll();
-//                mCab.setTitleRes(R.string.cab_title_x, mAdapter.getSelection().size());
-//                break;
         }
-        mAdapter.deselectAll();
         return true;
+    }
+
+    private void exitCab() {
+        if (mCab != null && mCab.isActive()) {
+            mCab.reset().finish();
+        }
+        mCab = null;
     }
 
     @Override
@@ -331,7 +335,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
     }
 
     @Override
-    public void onLoadFinished(List<String> data) {
+    public void onLoadFinished(List<DataInfo> data) {
         if (!data.isEmpty()) {
             mStatusLayoutManager.showSuccessLayout();
             mAdapter.setNewData(data);

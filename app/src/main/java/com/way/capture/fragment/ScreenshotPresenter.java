@@ -2,6 +2,7 @@ package com.way.capture.fragment;
 
 import android.support.annotation.NonNull;
 
+import com.way.capture.data.DataInfo;
 import com.way.capture.utils.RxSchedulers;
 
 import java.util.List;
@@ -28,9 +29,9 @@ public class ScreenshotPresenter extends ScreenshotContract.Presenter {
     @Override
     public void getData(int type) {
         mSubscriptions.clear();
-        DisposableObserver<List<String>> observer = new DisposableObserver<List<String>>() {
+        DisposableObserver<List<DataInfo>> observer = new DisposableObserver<List<DataInfo>>() {
             @Override
-            public void onNext(List<String> data) {
+            public void onNext(List<DataInfo> data) {
                 mView.onLoadFinished(data);
             }
 
@@ -44,7 +45,7 @@ public class ScreenshotPresenter extends ScreenshotContract.Presenter {
 
             }
         };
-        mModel.getData(type).compose(RxSchedulers.<List<String>>io_main()).subscribe(observer);
+        mModel.getData(type).compose(RxSchedulers.<List<DataInfo>>io_main()).subscribe(observer);
 
         mSubscriptions.add(observer);
     }

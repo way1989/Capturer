@@ -1,6 +1,7 @@
 package com.way.capture.adapter;
 
 import android.support.v4.view.ViewCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -9,13 +10,14 @@ import com.chad.library.adapter.base.BaseViewHolder;
 import com.way.capture.R;
 import com.way.capture.data.DataInfo;
 import com.way.capture.utils.glide.GlideHelper;
+import com.way.capture.widget.RatioImageView;
 
 import java.util.HashSet;
 
 /**
  * Created by android on 16-2-1.
  */
-public class ScreenshotAdapter extends BaseQuickAdapter<String, BaseViewHolder> {
+public class ScreenshotAdapter extends BaseQuickAdapter<DataInfo, BaseViewHolder> {
     private int mType;
     private HashSet<Integer> mSelected;
 
@@ -36,17 +38,18 @@ public class ScreenshotAdapter extends BaseQuickAdapter<String, BaseViewHolder> 
         notifyDataSetChanged();
     }
 
-    public String getItem(int pos) {
+    public DataInfo getItem(int pos) {
         return mData.get(pos);
     }
 
     @Override
-    protected void convert(BaseViewHolder helper, String item) {
+    protected void convert(BaseViewHolder helper, DataInfo item) {
         ImageView imageView = helper.getView(R.id.iv_image);
+
         ImageView selectImageView = helper.getView(R.id.cb_selected);
         View coverView = helper.getView(R.id.lay_mask);
         ImageView videoIndicator = helper.getView(R.id.iv_is_gif);
-        GlideHelper.loadResourceBitmapCenterCrop(item, imageView);
+        GlideHelper.loadResourceBitmapCenterCrop(item.path, imageView);
         boolean isSelected = mSelected.contains(helper.getAdapterPosition());
         imageView.animate().scaleX(isSelected ? 0.8f : 1.0f).scaleY(isSelected ? 0.8f : 1.0f);
         selectImageView.setVisibility(isSelected ? View.VISIBLE : View.GONE);
@@ -70,7 +73,7 @@ public class ScreenshotAdapter extends BaseQuickAdapter<String, BaseViewHolder> 
 
         // 把每个图片视图设置不同的Transition名称, 防止在一个视图内有多个相同的名称, 在变换的时候造成混乱
         // Fragment支持多个View进行变换, 使用适配器时, 需要加以区分
-        ViewCompat.setTransitionName(imageView, item);
+        ViewCompat.setTransitionName(imageView, item.path);
         helper.itemView.setTag(R.id.tag_item, helper.getAdapterPosition());
     }
     // ----------------------
@@ -110,7 +113,7 @@ public class ScreenshotAdapter extends BaseQuickAdapter<String, BaseViewHolder> 
     }
 
     public void selectAll() {
-        for (int i = 0; i < getData().size(); i++)
+        for (int i = 0; i < getItemCount(); i++)
             mSelected.add(i);
         notifyDataSetChanged();
     }

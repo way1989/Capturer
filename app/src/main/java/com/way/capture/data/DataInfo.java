@@ -14,8 +14,6 @@ import com.way.capture.utils.AppUtil;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 /**
  * Created by way on 16/2/1.
@@ -29,83 +27,40 @@ public class DataInfo implements Serializable {
     private static final int COLUMN_PATH = 1;
     private static final int COLUMN_SIZE = 2;
     private static final int COLUMN_DATE = 3;
+    private static final int COLUMN_WIDTH = 4;
+    private static final int COLUMN_HEIGHT = 5;
+    private static final int COLUMN_TITLE = 6;
     private static final String PNG = ".png";
     private static final String GIF = ".gif";
     private static final String MP4 = ".mp4";
 
     private static final String[] PROJECTIONS = new String[]{
             MediaStore.Files.FileColumns._ID, MediaStore.Files.FileColumns.DATA,
-            MediaStore.Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_MODIFIED
+            MediaStore.Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_MODIFIED,
+            MediaStore.Files.FileColumns.WIDTH, MediaStore.Files.FileColumns.HEIGHT,
+            MediaStore.Files.FileColumns.TITLE
     };
 
-    public boolean selected;
     public long dateModified;
     public long size;
     public long id;
     public String path;
+    public String title;
+    public int width;
+    public int height;
 
     public DataInfo(Cursor c) {
         id = c.getLong(COLUMN_ID);
         path = c.getString(COLUMN_PATH);
-        //fileName = Util.getNameFromFilepath(path);
         size = c.getLong(COLUMN_SIZE);
         dateModified = c.getLong(COLUMN_DATE);
-        selected = false;
+        width = c.getInt(COLUMN_WIDTH);
+        height = c.getInt(COLUMN_HEIGHT);
+        title = c.getString(COLUMN_TITLE);
     }
 
-    @Nullable
-    public static ArrayList<String> getDataInfos(int type) {
-        switch (type) {
-            case TYPE_SCREEN_SHOT:
-                return getDatas(AppUtil.SCREENSHOT_FOLDER_PATH, PNG);
-            case TYPE_SCREEN_GIF:
-                return getDatas(AppUtil.GIF_PRODUCTS_FOLDER_PATH, GIF);
-            case TYPE_SCREEN_RECORD:
-                return getDatas(AppUtil.VIDEOS_FOLDER_PATH, MP4);
-            default:
-                break;
-        }
-        return null;
-    }
-
-    /*
-     * 获取目录下所有文件
-     */
-    @Nullable
-    public static ArrayList<String> getFiles(String dir, String fileType) {
-        if (TextUtils.isEmpty(dir))
-            return null;
-
-        File realFile = new File(dir);
-        if (!realFile.isDirectory())
-            return null;
-
-        ArrayList<File> files = new ArrayList<>();
-        File[] subfiles = realFile.listFiles();
-        for (File file : subfiles) {
-            if (file.isDirectory())
-                continue;
-            if (file.length() < 1)
-                continue;
-            String name = file.getName();
-            if (name.endsWith(fileType.toLowerCase())) {
-                files.add(file);
-            }
-        }
-        Collections.sort(files, new Comparator<File>() {
-            @Override
-            public int compare(File lhs, File rhs) {
-                return ((Long) rhs.lastModified()).compareTo(lhs.lastModified());
-            }
-        });
-        ArrayList<String> results = new ArrayList<>();
-        for (File file : files)
-            results.add(file.getAbsolutePath());
-        return results;
-    }
-
-    private static ArrayList<String> getDatas(String dir, String fileType) {
-        ArrayList<String> dataInfos = new ArrayList<>();
+    private static ArrayList<DataInfo> getDatas(String dir, String fileType) {
+        ArrayList<DataInfo> dataInfos = new ArrayList<>();
         if (TextUtils.isEmpty(dir))
             return dataInfos;
 
@@ -131,21 +86,33 @@ public class DataInfo implements Serializable {
 
         cursor.moveToPosition(-1);
         while (cursor.moveToNext()) {
-            //DataInfo musicItem = new DataInfo(cursor);
-            //dataInfos.add(musicItem);
-            String path = cursor.getString(COLUMN_PATH);
-            dataInfos.add(path);
+            DataInfo dataInfo = new DataInfo(cursor);
+            dataInfos.add(dataInfo);
         }
         Log.i(TAG, "cursor.size = " + cursor.getCount());
         cursor.close();
         return dataInfos;
     }
 
-    public static Uri getContentUriByCategory(String cat) {
+    @Nullable
+    public static ArrayList<DataInfo> getDataInfos(int type) {
+        switch (type) {
+            case TYPE_SCREEN_SHOT:
+                return getDatas(AppUtil.SCREENSHOT_FOLDER_PATH, PNG);
+            case TYPE_SCREEN_GIF:
+                return getDatas(AppUtil.GIF_PRODUCTS_FOLDER_PATH, GIF);
+            case TYPE_SCREEN_RECORD:
+                return getDatas(AppUtil.VIDEOS_FOLDER_PATH, MP4);
+            default:
+                break;
+        }
+        return null;
+    }
+
+    private static Uri getContentUriByCategory(String cat) {
         Uri uri;
         String volumeName = "external";
         switch (cat) {
-
             case MP4:
                 uri = MediaStore.Video.Media.getContentUri(volumeName);
                 break;

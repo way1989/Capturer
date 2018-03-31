@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <item
         android:id="@+id/image_delete"
         android:icon="@drawable/ic_menu_delete"
         android:orderInCategory="100"
         android:title="@string/screenshot_delete_action"
         app:showAsAction="ifRoom" />
+
     <item
         android:id="@+id/image_share"
         android:icon="@drawable/ic_menu_share"
@@ -14,15 +16,10 @@
         android:title="@string/share"
         app:showAsAction="ifRoom" />
 
-  <!--  <item
+    <item
         android:id="@+id/image_select_all"
         android:orderInCategory="100"
         android:title="@string/select_all"
-        app:showAsAction="never" />-->
-
-    <item
-        android:id="@+id/image_clear_all"
-        android:orderInCategory="100"
-        android:title="@string/clear_all"
         app:showAsAction="never" />
+
 </menu>

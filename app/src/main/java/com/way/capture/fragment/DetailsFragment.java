@@ -15,6 +15,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.davemorrissey.labs.subscaleview.ImageSource;
@@ -89,7 +91,7 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
                     mHeightQualityBtn.setVisibility(View.VISIBLE);
                 break;
             case DataInfo.TYPE_SCREEN_GIF:
-                Glide.clear(mDetailImage);
+//                Glide.clear(mDetailImage);
                 GlideHelper.loadResourceBitmap(mPath, mDetailImage);
                 mVideoIndicator.setVisibility(View.VISIBLE);
                 break;
@@ -132,16 +134,16 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
         mHeightQualityBtn.setVisibility(isLongImage ? View.VISIBLE : View.GONE);
         mVideoIndicator.setVisibility(mType == DataInfo.TYPE_SCREEN_SHOT ? View.GONE : View.VISIBLE);
 
-        GlideHelper.loadResourceBitmap(mPath, mDetailImage, new RequestListener<String, Bitmap>() {
+        GlideHelper.loadResourceBitmap(mPath, mDetailImage, new RequestListener<Bitmap>() {
             @Override
-            public boolean onException(Exception e, String model, Target<Bitmap> target, boolean isFirstResource) {
+            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
                 mCircleLoading.setVisibility(View.GONE);
                 startPostEnterTransition();
                 return false;
             }
 
             @Override
-            public boolean onResourceReady(Bitmap resource, String model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
+            public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
                 mCircleLoading.setVisibility(View.GONE);
                 startPostEnterTransition();
                 return false;
@@ -205,7 +207,7 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
                     @Override
                     public void run() {
                         mDetailImage.setVisibility(View.GONE);
-                        Glide.clear(mDetailImage);
+                        //Glide.clear(mDetailImage);
                     }
                 });
                 break;

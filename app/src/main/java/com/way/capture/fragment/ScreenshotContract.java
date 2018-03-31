@@ -3,6 +3,7 @@ package com.way.capture.fragment;
 import com.way.capture.base.BaseModel;
 import com.way.capture.base.BasePresenter;
 import com.way.capture.base.BaseView;
+import com.way.capture.data.DataInfo;
 
 import java.util.List;
 
@@ -15,11 +16,11 @@ import io.reactivex.Observable;
 
 public class ScreenshotContract {
     interface Model extends BaseModel {
-        Observable<List<String>> getData(int type);
+        Observable<List<DataInfo>> getData(int type);
     }
 
     interface View extends BaseView {
-        void onLoadFinished(List<String> data);
+        void onLoadFinished(List<DataInfo> data);
 
         void onError(Throwable e);
 

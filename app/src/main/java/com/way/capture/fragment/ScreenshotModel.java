@@ -16,10 +16,10 @@ import io.reactivex.ObservableOnSubscribe;
 public class ScreenshotModel implements ScreenshotContract.Model {
 
     @Override
-    public Observable<List<String>> getData(final int type) {
-        return Observable.create(new ObservableOnSubscribe<List<String>>() {
+    public Observable<List<DataInfo>> getData(final int type) {
+        return Observable.create(new ObservableOnSubscribe<List<DataInfo>>() {
             @Override
-            public void subscribe(ObservableEmitter<List<String>> e) throws Exception {
+            public void subscribe(ObservableEmitter<List<DataInfo>> e) {
                 e.onNext(DataInfo.getDataInfos(type));
                 e.onComplete();
             }

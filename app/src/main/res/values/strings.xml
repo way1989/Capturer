@@ -18,7 +18,7 @@
     <string name="preferences">Preferences</string>
     <string name="countdown">Three second countdown</string>
     <string name="recents_hide">Hide from recent apps</string>
-    <string name="video_size_percentage">Video size</string>
+    <string name="video_size_percentage">Resolution</string>
     <string name="notification_captured_title">Screen recording captured.</string>
     <string name="notification_captured_subtitle">Touch to view your screen recording.</string>
     <string name="notification_captured_share">Share</string>
@@ -50,7 +50,7 @@
     <string name="chathead_content_title">Capturer is running</string>
     <string name="chathead_content_text">Please shake your device…</string>
     <string name="shipped_ffmpeg_version" translatable="false">n2.4.2</string>
-    <string name="video_size_percentage_summary">select the size of screen record</string>
+    <string name="video_size_percentage_summary">Videos with higher resolution look sharper</string>
     <string name="countdown_summary">wait three seconds when begin take a screen record</string>
     <string name="show_touches_summary">show a touch indicator when take a screen record</string>
     <string name="use_atouch">Shake</string>
@@ -204,10 +204,10 @@
 
     <string name="screen_record_start">Start</string>
     <string name="screenshot_null_toast">resultCode and data is null...</string>
-    <string name="video_frame">帧数</string>
-    <string name="video_frame_summary">每秒录制的帧数，越高画面越流畅</string>
-    <string name="video_quality">视频画质</string>
-    <string name="video_quality_summary">越高画质越好，生成的文件也越大</string>
-    <string name="video_record_audio">录制声音</string>
-    <string name="video_record_audio_summary">是否录制麦克风声音</string>
+    <string name="video_frame">Frame rate</string>
+    <string name="video_frame_summary">Higher frame rates reduce motion blur</string>
+    <string name="video_quality">Video quality</string>
+    <string name="video_quality_summary">Higher quality means bigger file size</string>
+    <string name="video_record_audio">Sound</string>
+    <string name="video_record_audio_summary">System sounds or microphone</string>
 </resources>

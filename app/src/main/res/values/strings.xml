@@ -202,6 +202,8 @@
     <string name="cab_title_x">Selection (%1$d)</string>
     <item name="app_gravity" format="integer" type="integer">80</item>
 
+    <string name="select_all">Select all</string>
+    <string name="clear_all">Deselect all</string>
     <string name="screen_record_start">Start</string>
     <string name="screenshot_null_toast">resultCode and data is null...</string>
     <string name="video_frame">Frame rate</string>

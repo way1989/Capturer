@@ -158,9 +158,6 @@ public class MainActivity extends BaseActivity {
             case R.id.action_help:
                 new FinestWebView.Builder(MainActivity.this)
                         .titleDefault(getString(R.string.help))
-                        .titleColorRes(R.color.finestWhite)
-                        .urlColorRes(R.color.finestWhite)
-                        .iconDefaultColorRes(R.color.finestWhite)
                         .show("https://way1989.github.io/2016/05/15/help/CapturerHelp");
                 return true;
             case R.id.action_share:

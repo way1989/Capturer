@@ -2,6 +2,7 @@ package com.way.capture.fragment;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
+import com.github.chrisbanes.photoview.PhotoView;
 import com.way.capture.R;
 import com.way.capture.activity.DetailsActivity;
 import com.way.capture.activity.VideoActivity;
@@ -43,14 +45,13 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
     @BindView(R.id.detail_image_height_quality)
     SubsamplingScaleImageView mDetailImageHeightQuality;
     @BindView(R.id.detail_image)
-    ImageView mDetailImage;
+    PhotoView mDetailImage;
     @BindView(R.id.video_indicator)
     ImageView mVideoIndicator;
     @BindView(R.id.height_quality_btn)
     Button mHeightQualityBtn;
     private int mType;
     private String mPath;
-//    private PhotoViewAttacher mPhotoViewAttacher;
 
     public static DetailsFragment newInstance(int type, String path) {
         Bundle args = new Bundle();
@@ -116,11 +117,9 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-//        mPhotoViewAttacher.cleanup();
     }
 
     private void loadImage() {
-//        mPhotoViewAttacher = new PhotoViewAttacher(mDetailImage);
         mDetailImage.setTransitionName(mPath);
         mDetailImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,17 +127,6 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
                 ((DetailsActivity) getActivity()).toggleSystemUI();
             }
         });
-//        mPhotoViewAttacher.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
-//            @Override
-//            public void onPhotoTap(View view, float x, float y) {
-//                ((DetailsActivity) getActivity()).toggleSystemUI();
-//            }
-//
-//            @Override
-//            public void onOutsidePhotoTap() {
-//                ((DetailsActivity) getActivity()).toggleSystemUI();
-//            }
-//        });
 
         boolean isLongImage = isLongImage(mPath);
         mHeightQualityBtn.setVisibility(isLongImage ? View.VISIBLE : View.GONE);
@@ -156,7 +144,6 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
             public boolean onResourceReady(Bitmap resource, String model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
                 mCircleLoading.setVisibility(View.GONE);
                 startPostEnterTransition();
-                //mPhotoViewAttacher.update();
                 return false;
             }
         });
@@ -213,6 +200,7 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
                 mDetailImage.setTransitionName("");
                 mDetailImageHeightQuality.setTransitionName(mPath);
                 mDetailImageHeightQuality.setImage(ImageSource.uri(Uri.fromFile(new File(mPath))));
+                mDetailImageHeightQuality.setScaleAndCenter(1.0f, new PointF(0, 0));
                 mDetailImageHeightQuality.post(new Runnable() {
                     @Override
                     public void run() {

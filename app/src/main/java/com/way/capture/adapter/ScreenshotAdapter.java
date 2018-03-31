@@ -58,11 +58,11 @@ public class ScreenshotAdapter extends BaseQuickAdapter<String, BaseViewHolder> 
                 break;
             case DataInfo.TYPE_SCREEN_GIF:
                 videoIndicator.setVisibility(View.VISIBLE);
-                videoIndicator.setImageResource(R.drawable.gif);
+                videoIndicator.setImageResource(R.drawable.ic_gif);
                 break;
             case DataInfo.TYPE_SCREEN_RECORD:
                 videoIndicator.setVisibility(View.VISIBLE);
-                videoIndicator.setImageResource(R.drawable.ic_gallery_play);
+                videoIndicator.setImageResource(R.drawable.ic_play);
                 break;
             default:
                 break;

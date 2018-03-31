@@ -88,22 +88,23 @@ dependencies {
     //google Glide
     implementation 'com.github.bumptech.glide:glide:3.8.0'
     //compile 'com.alexvasilkov:gesture-views:2.1.1'
-    implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.6.0'
+    implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.10.0'
     implementation 'com.ogaclejapan.arclayout:library:1.0.1@aar'
 
     //webview
     implementation 'com.thefinestartist:finestwebview:1.2.7'
 
     //intro
-    implementation 'com.github.wooplr:Spotlight:1.2.2'
+    //implementation 'com.github.wooplr:Spotlight:1.2.2'
     //bugly
     implementation 'com.tencent.bugly:crashreport:latest.release' //其中latest.release指代最新版本号，也可以指定明确的版本号，例如2.1.5
     //photo view
+    implementation 'com.github.chrisbanes:PhotoView:2.1.3'
     //compile 'com.commit451:PhotoView:1.2.5'
     //leakcanary
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.1'
-    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
-    testImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'
+    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+    testImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 
     //rxjava
     implementation 'io.reactivex.rxjava2:rxjava:2.1.6'

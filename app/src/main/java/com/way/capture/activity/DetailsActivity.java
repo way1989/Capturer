@@ -110,7 +110,7 @@ public class DetailsActivity extends BaseActivity {
     }
 
     private void initToolbar() {
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -132,7 +132,7 @@ public class DetailsActivity extends BaseActivity {
     }
 
     private void initViewPager() {
-        ViewPager pager = (ViewPager) findViewById(R.id.pager);
+        ViewPager pager = findViewById(R.id.pager);
         if (pager != null) {
             pager.setAdapter(new DetailsFragmentPagerAdapter(getSupportFragmentManager()));
             pager.setCurrentItem(mCurrentPosition);

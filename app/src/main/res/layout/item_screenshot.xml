@@ -36,7 +36,8 @@
         android:focusable="false"
         android:scaleType="centerInside"
         android:visibility="gone"
-        android:src="@drawable/ic_tweet_select_picture_selected"/>
+        android:tint="@color/colorAccentExtra"
+        android:src="@drawable/ic_check_circle"/>
 
     <ImageView
         android:id="@+id/iv_is_gif"
@@ -46,7 +47,8 @@
         android:contentDescription="@string/app_name"
         android:padding="2dp"
         android:scaleType="centerInside"
-        android:src="@drawable/ic_gallery_play"
+        android:background="@drawable/rect_half_circle_transparent"
+        android:src="@drawable/ic_play"
         android:visibility="gone"/>
 
 </com.way.capture.widget.SquareLayout>

@@ -187,4 +187,6 @@
 
     <string name="screen_record_start">开始</string>
     <string name="screenshot_null_toast">请求截屏失败...</string>
+    <string name="select_all">选择全部</string>
+    <string name="clear_all">取消全选</string>
 </resources>

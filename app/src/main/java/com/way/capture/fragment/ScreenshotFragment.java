@@ -77,7 +77,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // mAdapter.restoreInstanceState(savedInstanceState);
-        mCab = MaterialCab.restoreState(savedInstanceState, (AppCompatActivity) getActivity(), this);
+        //mCab = MaterialCab.restoreState(savedInstanceState, (AppCompatActivity) getActivity(), this);
     }
 
     @Override
@@ -91,7 +91,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
         super.onSaveInstanceState(outState);
         // Save selected indices
         // mAdapter.saveInstanceState(outState);
-        if (mCab != null) mCab.saveState(outState);
+        //if (mCab != null) mCab.saveState(outState);
     }
 
     @Override
@@ -111,7 +111,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
         if (mRecyclerView == null) return;
         int startingPosition = bundle.getInt(EXTRA_STARTING_POSITION);
         int currentPosition = bundle.getInt(EXTRA_CURRENT_POSITION);
-        Log.i("way", "onActivityReenter startingPosition = " + startingPosition + ", currentPosition = " + currentPosition);
+        Log.i(TAG, "onActivityReenter startingPosition = " + startingPosition + ", currentPosition = " + currentPosition);
 
         if (startingPosition != currentPosition) {
             mRecyclerView.scrollToPosition(currentPosition);
@@ -123,7 +123,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
                 mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
                 // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
                 mRecyclerView.requestLayout();
-                Log.i("way", "onActivityReenter startPostponedEnterTransition...");
+                Log.i(TAG, "onActivityReenter startPostponedEnterTransition...");
                 getActivity().startPostponedEnterTransition();
                 return true;
             }
@@ -134,7 +134,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
     public void changeSharedElements(List<String> names, Map<String, View> sharedElements, int position) {
         String newTransitionName = mAdapter.getItem(position);
         View newSharedElement = mRecyclerView.findViewHolderForAdapterPosition(position).itemView.findViewById(R.id.iv_image);
-        Log.i("way", "changeSharedElements newSharedElement = " + newSharedElement);
+        Log.i(TAG, "changeSharedElements newSharedElement = " + newSharedElement);
         if (newSharedElement != null) {
             names.clear();
             names.add(newTransitionName);
@@ -194,9 +194,8 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
                         mIsDetailsActivityStarted = true;
                         Intent intent = new Intent(getActivity(), DetailsActivity.class);
                         intent.putExtra(ARGS_TYPE, mType);
-                        ArrayList<String> list = new ArrayList<>();
-                        list.addAll(mAdapter.getData());
-                        intent.putStringArrayListExtra(EXTRA_DATAS, list);
+                        ArrayList<String> lists = new ArrayList<>(mAdapter.getData());
+                        intent.putStringArrayListExtra(EXTRA_DATAS, lists);
                         intent.putExtra(EXTRA_STARTING_POSITION, position);
                         startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(getActivity(),
                                 imageView, imageView.getTransitionName()).toBundle());
@@ -259,7 +258,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
                 .compose(this.<RxEvent.NewPathEvent>bindUntilEvent(FragmentEvent.DESTROY))
                 .subscribe(new Consumer<RxEvent.NewPathEvent>() {
                     @Override
-                    public void accept(RxEvent.NewPathEvent newPathEvent) throws Exception {
+                    public void accept(RxEvent.NewPathEvent newPathEvent) {
                         final int type = newPathEvent.type;
                         final String path = newPathEvent.path;
                         if (type == mType) {
@@ -308,6 +307,17 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
                 }
                 AppUtil.shareMultipleScreenshot(App.getContext(), paths, mType);
                 break;
+            case R.id.image_clear_all:
+                mAdapter.deselectAll();
+                if (mCab != null && mCab.isActive()) {
+                    mCab.reset().finish();
+                    mCab = null;
+                }
+                break;
+//            case R.id.image_select_all:
+//                mAdapter.selectAll();
+//                mCab.setTitleRes(R.string.cab_title_x, mAdapter.getSelection().size());
+//                break;
         }
         mAdapter.deselectAll();
         return true;

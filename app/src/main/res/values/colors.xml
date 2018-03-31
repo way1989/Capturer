@@ -1,8 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <!-- theme -->
+    <color name="colorPrimary">#fafafa</color>
+    <color name="colorPrimaryDark">#f1f1f1</color>
+    <color name="colorAccent">@color/colorTextTitle</color>
+
+    <!-- UI. -->
+    <color name="colorRoot">@color/colorPrimary</color>
+    <color name="colorLine">#f1f1f1</color>
+
+    <!-- text color -->
+    <color name="colorTextTitle">#424242</color>
+    <color name="colorTextSubtitle">#9e9e9e</color>
+    <color name="colorTextContent">#757575</color>
+
+    <!--custom ui color-->
+    <color name="colorAccentExtra">#2196F3</color>
 
     <color name="gray_normal">#ff757575</color>
     <color name="gray_pressed">#ff616161</color>
@@ -49,4 +62,5 @@
     <color name="darker_transparent">#C1000000</color>
     <color name="black_alpha_80">#50000000</color>
     <color name="black_alpha_128">#80000000</color>
+
 </resources>

@@ -39,7 +39,7 @@
             android:excludeFromRecents="true"
             android:exported="true"
             android:taskAffinity=""
-            android:theme="@style/Theme.Telecine.Transparent"/>
+            android:theme="@style/ThemeTransparent"/>
 
         <receiver
             android:name=".core.DeleteScreenshot"

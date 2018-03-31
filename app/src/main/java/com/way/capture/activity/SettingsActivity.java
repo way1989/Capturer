@@ -6,6 +6,7 @@ import android.view.MenuItem;
 import com.way.capture.R;
 import com.way.capture.base.BaseActivity;
 import com.way.capture.fragment.SettingsFragment;
+import com.way.capture.utils.ViewUtils;
 
 /**
  * Created by android on 16-2-4.
@@ -14,6 +15,7 @@ public class SettingsActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ViewUtils.setStatusBarStyle(this, false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction().replace(R.id.settings_fragment, new SettingsFragment()).commit();

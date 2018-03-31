@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme.DayNight" parent="Theme.AppCompat.DayNight.DarkActionBar">
+    <style name="AppTheme.DayNight" parent="Theme.AppCompat.DayNight">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -16,25 +16,13 @@
 
     <style name="AppTheme.DayNight.Dialog" parent="Theme.AppCompat.DayNight.Dialog"></style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
-        <item name="android:textColorPrimary">@color/abc_primary_text_material_dark</item>
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.ActionBar">
     </style>
 
-    <style name="Theme.Telecine" parent="android:Theme.Material.Light.DarkActionBar">
-        <item name="android:colorPrimary">@color/colorPrimary</item>
-        <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="android:colorAccent">@color/colorAccent</item>
-        <item name="android:actionBarStyle">@style/Widget.Telecine.ActionBar</item>
-    </style>
-
-    <style name="Theme.Telecine.Transparent" parent="android:Theme.Translucent.NoTitleBar">
+    <style name="ThemeTransparent" parent="android:Theme.Translucent.NoTitleBar">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowIsFloating">true</item>
-    </style>
-
-    <style name="Widget.Telecine.ActionBar" parent="android:Widget.Material.ActionBar.Solid">
-        <item name="android:title">@string/app_name</item>
     </style>
 
     <style name="PromoScreenButtonStyle">

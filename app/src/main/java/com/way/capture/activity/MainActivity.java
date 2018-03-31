@@ -27,6 +27,7 @@ import com.way.capture.base.BaseScreenshotFragment;
 import com.way.capture.data.DataInfo;
 import com.way.capture.fragment.ScreenshotFragment;
 import com.way.capture.utils.AppUtil;
+import com.way.capture.utils.ViewUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,45 +37,6 @@ import butterknife.BindView;
 
 public class MainActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
-    Runnable navigateShare = new Runnable() {
-        public void run() {
-            String url = "http://fir.im/capturer";
-            url = getString(R.string.share_app, url);
-            Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-            sharingIntent.setType("text/plain");
-            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name));
-            sharingIntent.putExtra(Intent.EXTRA_TEXT, url);
-            sharingIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            Intent chooserIntent = Intent.createChooser(sharingIntent, null);
-            startActivity(chooserIntent);
-        }
-    };
-
-    Runnable navigateHelp = new Runnable() {
-        public void run() {
-            new FinestWebView.Builder(MainActivity.this)
-                    .titleDefault(getString(R.string.help))
-                    .titleColorRes(R.color.finestWhite)
-                    .urlColorRes(R.color.finestWhite)
-                    .iconDefaultColorRes(R.color.finestWhite)
-                    .show("https://way1989.github.io/2016/05/15/help/CapturerHelp");
-        }
-    };
-    Runnable navigateSettings = new Runnable() {
-        public void run() {
-            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
-        }
-    };
-    Runnable navigateChangeMode = new Runnable() {
-        public void run() {
-            int uiMode = getResources().getConfiguration().uiMode;
-            boolean isCurrentNightMode = (uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
-            Log.i("way", "isCurrentNightMode = " + isCurrentNightMode);
-            getDelegate().setLocalNightMode(isCurrentNightMode ? AppCompatDelegate.MODE_NIGHT_NO : AppCompatDelegate.MODE_NIGHT_YES);
-            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean(App.KEY_NIGHT_MODE, !isCurrentNightMode).apply();
-            recreate();
-        }
-    };
     @BindView(R.id.viewpager)
     ViewPager mViewPager;
     @BindView(R.id.toolbar)
@@ -87,7 +49,7 @@ public class MainActivity extends BaseActivity {
     private final SharedElementCallback mCallback = new SharedElementCallback() {
         @Override
         public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-            Log.i("way", "SharedElementCallback-->onMapSharedElements mTmpReenterState = " + mTmpReenterState);
+            Log.i(TAG, "SharedElementCallback-->onMapSharedElements mTmpReenterState = " + mTmpReenterState);
             if (mTmpReenterState != null) {
                 int startingPosition = mTmpReenterState.getInt(ScreenshotFragment.EXTRA_STARTING_POSITION);
                 int currentPosition = mTmpReenterState.getInt(ScreenshotFragment.EXTRA_CURRENT_POSITION);
@@ -119,7 +81,7 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        ViewUtils.setStatusBarStyle(this, false);
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(AppUtil.APP_FIRST_RUN, true))
             startActivity(new Intent(MainActivity.this, GuideActivity.class));
 
@@ -185,13 +147,35 @@ public class MainActivity extends BaseActivity {
         int id = item.getItemId();
         switch (id) {
             case R.id.action_night_mode:
-                navigateChangeMode.run();
+                int uiMode = getResources().getConfiguration().uiMode;
+                boolean isCurrentNightMode = (uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+                Log.i(TAG, "isCurrentNightMode = " + isCurrentNightMode);
+                getDelegate().setLocalNightMode(isCurrentNightMode ? AppCompatDelegate.MODE_NIGHT_NO : AppCompatDelegate.MODE_NIGHT_YES);
+                PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean(App.KEY_NIGHT_MODE, !isCurrentNightMode).apply();
+                ViewUtils.setStatusBarStyle(this, false);
+                recreate();
                 return true;
             case R.id.action_help:
-                navigateHelp.run();
+                new FinestWebView.Builder(MainActivity.this)
+                        .titleDefault(getString(R.string.help))
+                        .titleColorRes(R.color.finestWhite)
+                        .urlColorRes(R.color.finestWhite)
+                        .iconDefaultColorRes(R.color.finestWhite)
+                        .show("https://way1989.github.io/2016/05/15/help/CapturerHelp");
                 return true;
+            case R.id.action_share:
+                String url = "http://fir.im/capturer";
+                url = getString(R.string.share_app, url);
+                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                sharingIntent.setType("text/plain");
+                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name));
+                sharingIntent.putExtra(Intent.EXTRA_TEXT, url);
+                sharingIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                Intent chooserIntent = Intent.createChooser(sharingIntent, null);
+                startActivity(chooserIntent);
+                break;
             case R.id.action_settings:
-                navigateSettings.run();
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                 return true;
             default:
                 break;

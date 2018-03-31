@@ -23,6 +23,8 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationUtils;
 
 import com.glidebitmappool.GlideBitmapPool;
+import com.way.capture.R;
+import com.way.capture.utils.ViewUtils;
 
 import java.util.ArrayList;
 
@@ -44,8 +46,8 @@ public class FreeCropView extends ViewGroup {
     private boolean mIsGesturing = false;
     private boolean mIsListeningForGestures;
     private int mCurrentColor;
-    private int mCertainGestureColor = Color.parseColor("#ff00b2a9");
-    private float mGestureStrokeWidth = 5.0f;
+    private int mCertainGestureColor;
+    private float mGestureStrokeWidth;
     private int mInvalidateExtraBorder = 10;
     private float mGestureStrokeLengthThreshold = 50.0f;
     // fading out effect
@@ -94,7 +96,8 @@ public class FreeCropView extends ViewGroup {
     private void init() {
         mImageRect = new Rect();
         setWillNotDraw(false);
-
+        mGestureStrokeWidth = ViewUtils.dp2px(2);
+        mCertainGestureColor = getResources().getColor(R.color.colorAccentExtra);
         final Paint gesturePaint = mGesturePaint;
         gesturePaint.setAntiAlias(GESTURE_RENDERING_ANTIALIAS);
         gesturePaint.setColor(mCertainGestureColor);
@@ -160,7 +163,7 @@ public class FreeCropView extends ViewGroup {
         if (mPath == null || mPath.isEmpty())
             return mBaseBitmap;
         Bitmap resizeBitmap = resizeBitmap(mBaseBitmap, mScale);
-        Bitmap bitmap = Bitmap.createBitmap(resizeBitmap.getWidth(), resizeBitmap.getHeight(), Config.ARGB_8888);
+        Bitmap bitmap = GlideBitmapPool.getBitmap(resizeBitmap.getWidth(), resizeBitmap.getHeight(), Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         //canvas.drawColor(0xFFFFFFFF);// 设置画布为透明背景
         // PaintFlagsDrawFilter dfd = new
@@ -251,7 +254,7 @@ public class FreeCropView extends ViewGroup {
             canvas.clipPath(drawStroke.getPath(), Region.Op.DIFFERENCE);
             canvas.drawColor(0x88000000);
             mGesturePaint.setStrokeWidth(mGestureStrokeWidth);
-            mGesturePaint.setColor(Color.parseColor("#88ffffff"));
+            mGesturePaint.setColor(mCertainGestureColor);
             canvas.drawPath(mPath, mGesturePaint);// 画手势轨迹
             canvas.restore();
 
@@ -260,7 +263,7 @@ public class FreeCropView extends ViewGroup {
             mGesturePaint.setColor(Color.WHITE);
             canvas.drawPath(mPath, mGesturePaint);
             mGesturePaint.setStrokeWidth(mGestureStrokeWidth);
-            mGesturePaint.setColor(Color.parseColor("#ff00b2a9"));
+            mGesturePaint.setColor(mCertainGestureColor);
             canvas.drawPath(mPath, mGesturePaint);// 画手势轨迹
         }
     }

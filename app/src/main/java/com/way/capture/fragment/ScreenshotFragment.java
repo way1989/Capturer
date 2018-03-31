@@ -177,7 +177,9 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
         mRecyclerView.setAdapter(mAdapter);
 
         mStatusLayoutManager = new StatusLayoutManager.Builder(mRecyclerView)
+                .setDefaultEmptyClickViewVisible(false)
                 .setDefaultErrorClickViewVisible(false)
+                .setDefaultLayoutsBackgroundColor(getResources().getColor(R.color.colorPrimary))
                 .build();
         mStatusLayoutManager.showLoadingLayout();
 
@@ -231,6 +233,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
                 if (getSelection().size() > 0) {
                     if (mCab == null) {
                         mCab = new MaterialCab((AppCompatActivity) getActivity(), R.id.cab_stub)
+                                .setBackgroundColor(getResources().getColor(R.color.colorAccentExtra))
                                 .setMenu(R.menu.menu_screenshot_item)
                                 .setCloseDrawableRes(R.drawable.ic_clear)
                                 .start(ScreenshotFragment.this);
@@ -335,8 +338,4 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
             mAdapter.clearData();
     }
 
-    @Override
-    public void showLoading() {
-        mStatusLayoutManager.showLoadingLayout();
-    }
 }

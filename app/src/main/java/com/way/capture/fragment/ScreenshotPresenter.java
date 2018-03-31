@@ -27,7 +27,6 @@ public class ScreenshotPresenter extends ScreenshotContract.Presenter {
 
     @Override
     public void getData(int type) {
-        mView.showLoading();
         mSubscriptions.clear();
         DisposableObserver<List<String>> observer = new DisposableObserver<List<String>>() {
             @Override

@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/long_screenshot_title"
     android:layout_width="match_parent"
-    android:layout_height="?android:attr/actionBarSize"
+    android:layout_height="wrap_content"
     android:background="@color/colorPrimary"
     android:ellipsize="end"
-    android:fontFamily="sans-serif-thin"
     android:gravity="center"
     android:maxLines="1"
-    android:paddingEnd="8dp"
-    android:paddingStart="8dp"
     android:text="@string/long_screenshot_indicator"
     android:textAppearance="?android:attr/textAppearanceMedium"
-    android:textColor="@android:color/white"
-    android:translationZ="8dp"/>
+    android:textColor="@color/colorTextTitle"
+    android:translationZ="8dp" />
 

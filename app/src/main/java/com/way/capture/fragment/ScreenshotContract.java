@@ -23,7 +23,6 @@ public class ScreenshotContract {
 
         void onError(Throwable e);
 
-        void showLoading();
     }
 
     abstract static class Presenter extends BasePresenter<View> {

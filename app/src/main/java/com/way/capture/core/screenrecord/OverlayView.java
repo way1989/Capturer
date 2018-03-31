@@ -12,7 +12,6 @@ import android.text.format.DateUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -34,15 +33,13 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 
 final class OverlayView extends FrameLayout {
     private static final String TAG = "OverlayView";
-    private static final int START = 0;
-    private static final int STOP = 1;
     private static final long COUNTDOWN_DELAY = 3600L;
     private static final int COUNTDOWN_MAX = 3;
     private final Listener mListener;
 
     private TextView mRecordingTimeTextView;
-    private Button mSwitchButton;
-    private Button mCloseButton;
+    private View mSwitchButton;
+    private View mCloseButton;
     private long mLastFiredTime;
 
     private OverlayView(Context context, Listener listener) {
@@ -73,7 +70,7 @@ final class OverlayView extends FrameLayout {
         inflate(context, R.layout.layout_float_view, this);
 
         mSwitchButton = findViewById(R.id.screen_record_switch);
-        mSwitchButton.setTag(STOP);
+        mSwitchButton.setSelected(false);
         mCloseButton = findViewById(R.id.screen_record_close);
         mRecordingTimeTextView = findViewById(R.id.start_text);
         RxView.clicks(mSwitchButton)
@@ -81,12 +78,12 @@ final class OverlayView extends FrameLayout {
                 .subscribe(new Consumer<Object>() {
                     @Override
                     public void accept(Object o) throws Exception {
-                        if ((int) mSwitchButton.getTag() == START) {
-                            mSwitchButton.setTag(STOP);
+                        if (mSwitchButton.isSelected()) {
                             mListener.onStopClick();
                         } else {
                             checkCountDown();
                         }
+                        mSwitchButton.setSelected(!mSwitchButton.isSelected());
                     }
                 });
         RxView.clicks(mCloseButton)
@@ -133,7 +130,6 @@ final class OverlayView extends FrameLayout {
         mCloseButton.setVisibility(View.GONE);
         mCloseButton.setEnabled(true);
         mSwitchButton.setBackgroundResource(R.drawable.stop);
-        mSwitchButton.setTag(START);
         mSwitchButton.setEnabled(true);
         mListener.onStartClick();
     }

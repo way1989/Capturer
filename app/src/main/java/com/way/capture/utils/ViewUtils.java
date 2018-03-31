@@ -1,10 +1,14 @@
 package com.way.capture.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Build;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Display;
@@ -128,6 +132,50 @@ public final class ViewUtils {
 
     public static float px2sp(float px) {
         return px / App.getContext().getResources().getDisplayMetrics().scaledDensity;
+    }
+
+    public static boolean isLandscape(Context context) {
+        return context.getResources().getConfiguration()
+                .orientation == Configuration.ORIENTATION_LANDSCAPE;
+    }
+
+    public static void setStatusBarStyle(@NonNull Activity activity, boolean onlyDarkStatusBar) {
+        int flags = activity.getWindow().getDecorView().getSystemUiVisibility();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            if (onlyDarkStatusBar || PreferenceManager.getDefaultSharedPreferences(activity).getBoolean(App.KEY_NIGHT_MODE, false)) {
+                flags ^= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            }
+        }
+        activity.getWindow().getDecorView().setSystemUiVisibility(flags);
+    }
+
+    public static void setNavigationBarStyle(@NonNull Activity activity,
+                                             boolean onlyDarkNavigationBar, boolean translucent) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !isLandscape(activity)) {
+            int flags = activity.getWindow().getDecorView().getSystemUiVisibility();
+            if (translucent) {
+                flags |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+            }
+            flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+            if (!onlyDarkNavigationBar && PreferenceManager.getDefaultSharedPreferences(activity).getBoolean(App.KEY_NIGHT_MODE, false)) {
+                if (translucent) {
+                    activity.getWindow().setNavigationBarColor(
+                            Color.argb((int) (0.03 * 255), 0, 0, 0));
+                } else {
+                    activity.getWindow().setNavigationBarColor(Color.rgb(241, 241, 241));
+                }
+            } else {
+                flags ^= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                if (translucent) {
+                    activity.getWindow().setNavigationBarColor(
+                            Color.argb((int) (0.2 * 255), 0, 0, 0));
+                } else {
+                    activity.getWindow().setNavigationBarColor(Color.rgb(26, 26, 26));
+                }
+            }
+            activity.getWindow().getDecorView().setSystemUiVisibility(flags);
+        }
     }
 
     public static int getFloatType() {

@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- theme -->
+    <color name="colorPrimary">#212121</color>
+    <color name="colorPrimaryDark">#1a1a1a</color>
+    <color name="colorAccent">@color/colorTextTitle</color>
 
-    <color name="colorPrimary">#ff263238</color>
-    <color name="colorPrimaryDark">#ff21272b</color>
-    <color name="colorAccent">#2196F3</color>
+    <!-- UI. -->
+    <color name="colorRoot">@color/colorPrimary</color>
+    <color name="colorLine">#292929</color>
 
+    <!-- text color -->
+    <color name="colorTextTitle">#fafafa</color>
+    <color name="colorTextSubtitle">#bdbdbd</color>
+    <color name="colorTextContent">#f5f5f5</color>
 
-    <color name="colorNavStart">#3F51B5</color>
-    <color name="colorNavCenter">#283593</color>
-    <color name="colorNavEnd">#1a237e</color>
+    <color name="colorAccentExtra">#2196F3</color>
 </resources>

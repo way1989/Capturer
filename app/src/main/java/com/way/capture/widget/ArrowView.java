@@ -44,7 +44,7 @@ public class ArrowView extends View {
         paint = new Paint();
         arrowPaint = new Paint();
         arrowPaint.setAntiAlias(true);
-        int color = getResources().getColor(R.color.colorAccent);
+        int color = getResources().getColor(R.color.colorAccentExtra);
         arrowPaint.setColor(color);
         arrowPaint.setStrokeWidth(strokeWidth);
         arrowPaint.setStyle(Paint.Style.FILL);//箭头是个实心三角形，所以用fill

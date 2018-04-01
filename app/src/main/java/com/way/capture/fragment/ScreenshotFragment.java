@@ -5,10 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,7 +18,6 @@ import com.afollestad.materialcab.MaterialCab;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.michaelflisar.dragselectrecyclerview.DragSelectTouchListener;
 import com.michaelflisar.dragselectrecyclerview.DragSelectionProcessor;
-import com.trello.rxlifecycle2.android.FragmentEvent;
 import com.way.capture.App;
 import com.way.capture.R;
 import com.way.capture.activity.DetailsActivity;
@@ -29,8 +26,6 @@ import com.way.capture.base.BaseFragment;
 import com.way.capture.base.BaseScreenshotFragment;
 import com.way.capture.data.DataInfo;
 import com.way.capture.utils.AppUtil;
-import com.way.capture.utils.RxBus;
-import com.way.capture.utils.RxEvent;
 import com.way.capture.utils.ViewUtils;
 import com.way.capture.widget.SpaceGridItemDecoration;
 
@@ -40,9 +35,6 @@ import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
 import me.bakumon.statuslayoutmanager.library.StatusLayoutManager;
 
 /**

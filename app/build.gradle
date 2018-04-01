@@ -131,7 +131,7 @@ dependencies {
     annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.butterknifeVersion"
 
     //bitmap pool
-    implementation 'com.amitshekhar.android:glide-bitmap-pool:0.0.1'
+    //implementation 'com.amitshekhar.android:glide-bitmap-pool:0.0.1'
 
     //loading layout
     implementation 'com.github.Bakumon:StatusLayoutManager:1.0.1'

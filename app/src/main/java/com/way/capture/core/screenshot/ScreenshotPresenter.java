@@ -21,7 +21,6 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.glidebitmappool.GlideBitmapPool;
 import com.way.capture.App;
 import com.way.capture.R;
 import com.way.capture.data.DataInfo;
@@ -34,6 +33,8 @@ import com.way.capture.utils.ViewUtils;
 
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
+
+//import com.glidebitmappool.GlideBitmapPool;
 
 
 /**
@@ -111,7 +112,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
                 if (bitmap == null || bitmap.isRecycled()) {
                     mView.showScreenshotAnim(mScreenBitmap, true, false);
                 } else if (bitmap.getHeight() == mScreenBitmap.getHeight()
-                        || mScreenBitmap.getHeight() > 7 * ViewUtils.getHeight()) {
+                        || mScreenBitmap.getHeight() > 10 * ViewUtils.getHeight()) {
                     mView.showScreenshotAnim(bitmap, true, false);
                 } else {
                     mView.onCollageFinish();
@@ -174,7 +175,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
 
     @Override
     public void saveScreenshot() {
-        final Notification.Builder notificationBuilder = initNotificationBuilder();
+        final Notification.Builder notificationBuilder = initNotificationBuilder(mScreenBitmap);
         mView.notify(notificationBuilder.build());
         mSubscriptions.clear();
         DisposableObserver<Uri> observer = new DisposableObserver<Uri>() {
@@ -201,11 +202,11 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
     }
 
     @NonNull
-    private Notification.Builder initNotificationBuilder() {
+    private Notification.Builder initNotificationBuilder(Bitmap screenBitmap) {
         final Resources r = mContext.getResources();
 
-        final int imageWidth = mScreenBitmap.getWidth();
-        final int imageHeight = mScreenBitmap.getHeight();
+        final int imageWidth = screenBitmap.getWidth();
+        final int imageHeight = screenBitmap.getHeight();
         final int iconSize = r.getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
         int previewWidth = r.getDimensionPixelSize(R.dimen.notification_panel_width);
         if (previewWidth <= 0) {
@@ -213,7 +214,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
         }
         final int previewHeight = r.getDimensionPixelSize(R.dimen.notification_max_height);
 
-        final Bitmap preview = GlideBitmapPool.getBitmap(previewWidth, previewHeight, Bitmap.Config.RGB_565);
+        final Bitmap preview = Bitmap.createBitmap(previewWidth, previewHeight, Bitmap.Config.RGB_565);
         Canvas c = new Canvas(preview);
         Paint paint = new Paint();
         ColorMatrix desat = new ColorMatrix();
@@ -221,7 +222,7 @@ public class ScreenshotPresenter implements ScreenshotContract.Presenter {
         paint.setColorFilter(new ColorMatrixColorFilter(desat));
         Matrix matrix = new Matrix();
         matrix.postTranslate((previewWidth - imageWidth) / 2, (previewHeight - imageHeight) / 2);
-        c.drawBitmap(mScreenBitmap, matrix, paint);
+        c.drawBitmap(screenBitmap, matrix, paint);
         c.drawColor(0x40FFFFFF);
         c.setBitmap(null);
 

@@ -22,7 +22,6 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationUtils;
 
-import com.glidebitmappool.GlideBitmapPool;
 import com.way.capture.R;
 import com.way.capture.utils.ViewUtils;
 
@@ -89,7 +88,6 @@ public class FreeCropView extends ViewGroup {
         matrix.postScale(scale, scale);
 
         Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-        GlideBitmapPool.putBitmap(bitmap);
         return resizedBitmap;
     }
 
@@ -163,7 +161,7 @@ public class FreeCropView extends ViewGroup {
         if (mPath == null || mPath.isEmpty())
             return mBaseBitmap;
         Bitmap resizeBitmap = resizeBitmap(mBaseBitmap, mScale);
-        Bitmap bitmap = GlideBitmapPool.getBitmap(resizeBitmap.getWidth(), resizeBitmap.getHeight(), Config.ARGB_8888);
+        Bitmap bitmap = Bitmap.createBitmap(resizeBitmap.getWidth(), resizeBitmap.getHeight(), Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         //canvas.drawColor(0xFFFFFFFF);// 设置画布为透明背景
         // PaintFlagsDrawFilter dfd = new
@@ -178,7 +176,6 @@ public class FreeCropView extends ViewGroup {
         canvas.drawBitmap(resizeBitmap, 0, 0, paint);
         Log.i("FreeCrop", "clipPath = " + clipStroke.boundingBox);
         canvas.save();
-        GlideBitmapPool.putBitmap(resizeBitmap);
         int x = 0, y = 0, w = 0, h = 0;
         int l = (int) (clipStroke.boundingBox.left);
         int t = (int) (clipStroke.boundingBox.top);
@@ -188,9 +185,7 @@ public class FreeCropView extends ViewGroup {
         y = t;
         w = r - l;
         h = b - t;
-        Bitmap cropped = Bitmap.createBitmap(bitmap, x, y, w, h, null, false);
-        GlideBitmapPool.putBitmap(bitmap);
-        return cropped;
+        return Bitmap.createBitmap(bitmap, x, y, w, h, null, false);
     }
 
     public void setFreeCropBitmap(Bitmap bitmap) {

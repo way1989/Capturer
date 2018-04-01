@@ -84,9 +84,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             case "about_author":
                 new FinestWebView.Builder(getActivity())
                         .titleDefault(getString(R.string.settings_self_title))
-                        .titleColorRes(R.color.finestWhite)
-                        .urlColorRes(R.color.finestWhite)
-                        .iconDefaultColorRes(R.color.finestWhite)
                         .show("https://github.com/way1989");
                 break;
             default:

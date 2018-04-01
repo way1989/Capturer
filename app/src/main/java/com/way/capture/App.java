@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatDelegate;
 
-import com.bumptech.glide.Glide;
-import com.glidebitmappool.GlideBitmapPool;
 import com.squareup.leakcanary.LeakCanary;
 import com.tencent.bugly.crashreport.CrashReport;
 import com.way.capture.service.ShakeService;
@@ -41,15 +39,14 @@ public class App extends Application {
         WDMSharPre.init(getApplicationContext());
         startService(new Intent(this, ShakeService.class));
 
-        final long maxMemory = Runtime.getRuntime().maxMemory();
-        final int cacheSize = (int) (maxMemory / 8);
-        GlideBitmapPool.initialize(cacheSize); // 1/8 max  memory size
+//        final long maxMemory = Runtime.getRuntime().maxMemory();
+//        final int cacheSize = (int) (maxMemory / 8);
+//        GlideBitmapPool.initialize(cacheSize); // 1/8 max  memory size
     }
 
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
-        Glide.with(this).onTrimMemory(level);
-        GlideBitmapPool.trimMemory(level);
+//        GlideBitmapPool.trimMemory(level);
     }
 }

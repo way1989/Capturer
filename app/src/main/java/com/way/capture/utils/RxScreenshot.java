@@ -15,8 +15,6 @@ import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.util.Log;
 
-import com.glidebitmappool.GlideBitmapPool;
-
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -97,7 +95,7 @@ public class RxScreenshot extends Observable<Bitmap> {
                     ByteBuffer byteBuffer = planes[0].getBuffer();
                     int pixelStride = planes[0].getPixelStride();
                     int rowStride = planes[0].getRowStride() - pixelStride * imageWidth;
-                    Bitmap bitmap = GlideBitmapPool.getBitmap(imageWidth + rowStride / pixelStride, imageHeight,
+                    Bitmap bitmap = Bitmap.createBitmap(imageWidth + rowStride / pixelStride, imageHeight,
                             Bitmap.Config.ARGB_8888);
                     bitmap.copyPixelsFromBuffer(byteBuffer);
                     if (rowStride != 0) {
@@ -117,7 +115,7 @@ public class RxScreenshot extends Observable<Bitmap> {
         }
 
         private Bitmap addBorder(Bitmap bitmap, int width) {
-            Bitmap newBitmap = GlideBitmapPool.getBitmap(width + bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
+            Bitmap newBitmap = Bitmap.createBitmap(width + bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
             Canvas canvas = new Canvas(newBitmap);
             canvas.drawColor(Color.TRANSPARENT);
             canvas.drawBitmap(bitmap, 0.0F, 0.0F, null);

@@ -25,7 +25,6 @@ import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-import com.glidebitmappool.GlideBitmapPool;
 import com.way.capture.R;
 
 
@@ -1112,7 +1111,7 @@ public class CropImageView extends ImageView {
      */
     public Bitmap getCircularBitmap(Bitmap square) {
         if (square == null) return null;
-        Bitmap output = GlideBitmapPool.getBitmap(square.getWidth(), square.getHeight(),
+        Bitmap output = Bitmap.createBitmap(square.getWidth(), square.getHeight(),
                 Bitmap.Config.ARGB_8888);
 
         final Rect rect = new Rect(0, 0, square.getWidth(), square.getHeight());

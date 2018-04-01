@@ -1,7 +1,6 @@
 package com.way.capture.adapter;
 
 import android.support.v4.view.ViewCompat;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -10,7 +9,6 @@ import com.chad.library.adapter.base.BaseViewHolder;
 import com.way.capture.R;
 import com.way.capture.data.DataInfo;
 import com.way.capture.utils.glide.GlideHelper;
-import com.way.capture.widget.RatioImageView;
 
 import java.util.HashSet;
 

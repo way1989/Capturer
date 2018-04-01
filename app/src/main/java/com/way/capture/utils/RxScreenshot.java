@@ -16,11 +16,10 @@ import android.media.projection.MediaProjectionManager;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
+import io.reactivex.android.MainThreadDisposable;
 
 /**
  * Created by way on 2018/3/25.
@@ -54,8 +53,7 @@ public class RxScreenshot extends Observable<Bitmap> {
     }
 
 
-    private static final class Listener implements Disposable, ImageReader.OnImageAvailableListener {
-        private final AtomicBoolean unSubscribed = new AtomicBoolean();
+    private static final class Listener extends MainThreadDisposable implements ImageReader.OnImageAvailableListener {
         private final MediaProjection mProjection;
         private final ImageReader mImageReader;
         private final Observer<? super Bitmap> observer;
@@ -67,18 +65,11 @@ public class RxScreenshot extends Observable<Bitmap> {
         }
 
         @Override
-        public void dispose() {
-            Log.d(TAG, "dispose: screenshot finish...");
-            if (unSubscribed.compareAndSet(false, true)) {
-                mImageReader.setOnImageAvailableListener(null, null);
-                mImageReader.close();
-                mProjection.stop();
-            }
-        }
-
-        @Override
-        public boolean isDisposed() {
-            return unSubscribed.get();
+        protected void onDispose() {
+            Log.d(TAG, "onDispose: screenshot finish...");
+            mImageReader.setOnImageAvailableListener(null, null);
+            mImageReader.close();
+            mProjection.stop();
         }
 
         @Override

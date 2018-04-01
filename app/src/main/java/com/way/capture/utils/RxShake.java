@@ -8,11 +8,9 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import io.reactivex.Observable;
 import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
+import io.reactivex.android.MainThreadDisposable;
 
 public class RxShake extends Observable<Boolean> {
     private static final String TAG = "RxShake";
@@ -36,10 +34,9 @@ public class RxShake extends Observable<Boolean> {
         }
     }
 
-    private static final class Listener implements Disposable, SensorEventListener {
+    private static final class Listener extends MainThreadDisposable implements SensorEventListener {
         private static final int SPEED_SHRERHOLD = 60;// 这个值越大需要越大的力气来摇晃手机
         private static final long UPDATE_INTERVAL_TIME = 50L;//50ms处理一次
-        private final AtomicBoolean unSubscribed = new AtomicBoolean();
         private final Observer<? super Boolean> observer;
         private SensorManager mSensorManager;
         private float mLastX;
@@ -76,7 +73,6 @@ public class RxShake extends Observable<Boolean> {
             double speed = (Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ) / timeInterval) * 100;
             if (speed >= SPEED_SHRERHOLD) {
                 observer.onNext(true);
-                //observer.onComplete();
             }
         }
 
@@ -86,16 +82,10 @@ public class RxShake extends Observable<Boolean> {
         }
 
         @Override
-        public void dispose() {
-            Log.d(TAG, "dispose: shake finish...");
-            if (unSubscribed.compareAndSet(false, true)) {
-                mSensorManager.unregisterListener(this);
-            }
+        protected void onDispose() {
+            Log.d(TAG, "onDispose: shake finish...");
+            mSensorManager.unregisterListener(this);
         }
 
-        @Override
-        public boolean isDisposed() {
-            return unSubscribed.get();
-        }
     }
 }

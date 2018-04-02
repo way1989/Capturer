@@ -37,7 +37,7 @@
         android:maxLines="1"
         android:text="@string/logo_title"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/colorTextTitle"
+        android:textColor="@color/white"
         android:textSize="16sp" />
 
     <TextView
@@ -51,6 +51,6 @@
         android:gravity="center"
         android:maxLines="1"
         android:text="@string/all_rights_reserved"
-        android:textColor="@color/colorTextSubtitle"
+        android:textColor="@color/white_pressed"
         android:textSize="10sp" />
 </RelativeLayout>

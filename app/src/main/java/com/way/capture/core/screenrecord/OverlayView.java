@@ -1,8 +1,5 @@
 package com.way.capture.core.screenrecord;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
@@ -18,10 +15,12 @@ import android.widget.TextView;
 import com.jakewharton.rxbinding2.view.RxView;
 import com.way.capture.R;
 import com.way.capture.fragment.SettingsFragment;
+import com.way.capture.utils.RxCountDown;
 import com.way.capture.utils.ViewUtils;
 
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Consumer;
 
 import static android.graphics.PixelFormat.TRANSLUCENT;
@@ -41,6 +40,7 @@ final class OverlayView extends FrameLayout {
     private View mSwitchButton;
     private View mCloseButton;
     private long mLastFiredTime;
+    private CompositeDisposable mDisposable = new CompositeDisposable();
 
     private OverlayView(Context context, Listener listener) {
         super(context);
@@ -66,6 +66,12 @@ final class OverlayView extends FrameLayout {
         return params;
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mDisposable.clear();
+    }
+
     private void initViews(Context context) {
         inflate(context, R.layout.layout_float_view, this);
 
@@ -73,7 +79,7 @@ final class OverlayView extends FrameLayout {
         mSwitchButton.setSelected(false);
         mCloseButton = findViewById(R.id.screen_record_close);
         mRecordingTimeTextView = findViewById(R.id.start_text);
-        RxView.clicks(mSwitchButton)
+        mDisposable.add(RxView.clicks(mSwitchButton)
                 .throttleFirst(2, TimeUnit.SECONDS)
                 .subscribe(new Consumer<Object>() {
                     @Override
@@ -85,15 +91,15 @@ final class OverlayView extends FrameLayout {
                         }
                         mSwitchButton.setSelected(!mSwitchButton.isSelected());
                     }
-                });
-        RxView.clicks(mCloseButton)
+                }));
+        mDisposable.add(RxView.clicks(mCloseButton)
                 .throttleFirst(2, TimeUnit.SECONDS)
                 .subscribe(new Consumer<Object>() {
                     @Override
                     public void accept(Object o) throws Exception {
                         mListener.onCancelClick();
                     }
-                });
+                }));
     }
 
     void checkCountDown() {
@@ -104,24 +110,17 @@ final class OverlayView extends FrameLayout {
         } else {
             mSwitchButton.setEnabled(false);
             mCloseButton.setEnabled(false);
-            ValueAnimator countDownAnimator = ValueAnimator.ofInt(COUNTDOWN_MAX, 0);
-            countDownAnimator.setDuration(COUNTDOWN_DELAY);
-            countDownAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    final int value = (int) animation.getAnimatedValue();
-                    //Log.d(TAG, "onAnimationUpdate: value = " + value);
-                    mRecordingTimeTextView.setText("  " + value + "  ");
-                }
-            });
-            countDownAnimator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    super.onAnimationEnd(animation);
-                    startRecording();
-                }
-            });
-            countDownAnimator.start();
+            mDisposable.add(RxCountDown.getCountDown(COUNTDOWN_MAX)
+                    .subscribe(new Consumer<Long>() {
+                        @Override
+                        public void accept(Long time) {
+                            if (time == 0L) {
+                                startRecording();
+                            } else {
+                                mRecordingTimeTextView.setText("  " + time + "  ");
+                            }
+                        }
+                    }));
         }
     }
 

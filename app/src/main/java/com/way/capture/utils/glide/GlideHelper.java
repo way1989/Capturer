@@ -10,10 +10,11 @@ import com.bumptech.glide.request.RequestOptions;
 
 public class GlideHelper {
 
-    public static void loadResource(String path, @NonNull ImageView image) {
+    public static void loadResourceGif(String path, @NonNull ImageView image) {
         RequestOptions options = new RequestOptions().fitCenter();
 
         Glide.with(image.getContext())
+                .asGif()
                 .load(path)
                 .apply(options)
                 .into(image);

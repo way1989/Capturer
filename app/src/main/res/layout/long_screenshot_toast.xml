@@ -3,12 +3,12 @@
     android:id="@+id/long_screenshot_title"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/colorPrimary"
+    android:background="@color/colorAccentExtra"
     android:ellipsize="end"
     android:gravity="center"
     android:maxLines="1"
     android:text="@string/long_screenshot_indicator"
     android:textAppearance="?android:attr/textAppearanceMedium"
-    android:textColor="@color/colorTextTitle"
+    android:textColor="@color/white"
     android:translationZ="8dp" />
 

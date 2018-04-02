@@ -3,7 +3,7 @@
                                      xmlns:app="http://schemas.android.com/apk/res-auto"
                                      android:layout_width="match_parent"
                                      android:layout_height="match_parent"
-                                     android:foreground="?selectableItemBackground"
+                                     android:foreground="?android:attr/selectableItemBackground"
                                      app:cardElevation="0.5dp">
 
     <ImageView
@@ -29,7 +29,7 @@
         android:id="@+id/cb_selected"
         android:layout_width="@dimen/size_20"
         android:layout_height="@dimen/size_20"
-        android:layout_gravity="top|right"
+        android:layout_gravity="bottom|end"
         android:layout_margin="4dp"
         android:clickable="false"
         android:contentDescription="@string/app_name"

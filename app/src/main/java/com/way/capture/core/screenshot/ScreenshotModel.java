@@ -45,15 +45,12 @@ import io.reactivex.functions.Function;
 
 public class ScreenshotModel implements ScreenshotContract.Model {
     private static final String TAG = "ScreenshotModel";
-    //    private static final String DISPLAY_NAME = "Screenshot";
     private static final long SCROLL_DURATION = 1000L;
     private static final long WAIT_FOR_SCROLL_TIME = 2000L;
     private static final String SCREENSHOTS_DIR_NAME = "Screenshots";
-    private static final String SCREENSHOT_FILE_NAME_TEMPLATE = "Screenshot_%s.png";
     private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
-    //    private MediaProjection mProjection;
-//    private VirtualDisplay mVirtualDisplay;
-//    private ImageReader mImageReader;
+    private DateFormat mFileFormat = new SimpleDateFormat("'Screenshot_'yyyyMMddHHmmss'.png'", Locale.getDefault());
+    private File mOutputDir;
     private int mLastRotation;
     private int mResultCode;
     private Intent mIntent;
@@ -61,17 +58,18 @@ public class ScreenshotModel implements ScreenshotContract.Model {
     public ScreenshotModel(int resultCode, Intent data) {
         mResultCode = resultCode;
         mIntent = data;
-//        MediaProjectionManager projectionManager = (MediaProjectionManager) App.getContext()
-//                .getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-        //mProjection = projectionManager.getMediaProjection(resultCode, data);
+        File picturesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        mOutputDir = new File(picturesDir, SCREENSHOTS_DIR_NAME);
+        if (!mOutputDir.exists() || !mOutputDir.isDirectory()) {
+            mOutputDir.mkdir();
+        }
     }
 
     @Override
     public Observable<Bitmap> getNewBitmap() {
         Log.d(TAG, "getNewBitmap...");
         mLastRotation = ViewUtils.getRotation();
-        return new RxScreenshot(App.getContext(), mResultCode, mIntent)
-                .subscribeOn(AndroidSchedulers.mainThread());
+        return new RxScreenshot(App.getContext(), mResultCode, mIntent).subscribeOn(AndroidSchedulers.mainThread());
     }
 
     @Override
@@ -106,27 +104,15 @@ public class ScreenshotModel implements ScreenshotContract.Model {
             public void subscribe(ObservableEmitter<Uri> e) throws Exception {
                 OutputStream out = null;
                 try {
-
-                    Context context = App.getContext();
-                    Resources r = context.getResources();
+                    final Context context = App.getContext();
                     final long imageTime = System.currentTimeMillis();
-                    final String imageDate = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(new Date(imageTime));
 
-                    final String imageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, imageDate);
-                    final File screenshotDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                            SCREENSHOTS_DIR_NAME);
-                    final String imageFilePath = new File(screenshotDir, imageFileName).getAbsolutePath();
+                    final String imageFileName = mFileFormat.format(new Date(imageTime));
+
+                    final String imageFilePath = new File(mOutputDir, imageFileName).getAbsolutePath();
 
                     final int imageWidth = bitmap.getWidth();
                     final int imageHeight = bitmap.getHeight();
-
-                    // Create screenshot directory if it doesn't exist
-                    screenshotDir.mkdirs();
-
-                    // media provider uses seconds for DATE_MODIFIED and DATE_ADDED, but
-                    // milliseconds
-                    // for DATE_TAKEN
-                    long dateSeconds = imageTime / 1000;
 
                     // Save
                     out = new FileOutputStream(imageFilePath);
@@ -134,40 +120,10 @@ public class ScreenshotModel implements ScreenshotContract.Model {
                     out.flush();
 
                     // Save the screenshot to the MediaStore
-                    ContentValues values = new ContentValues();
-                    ContentResolver resolver = context.getContentResolver();
-                    values.put(MediaStore.Images.ImageColumns.DATA, imageFilePath);
-                    values.put(MediaStore.Images.ImageColumns.TITLE, imageFileName);
-                    values.put(MediaStore.Images.ImageColumns.DISPLAY_NAME, imageFileName);
-                    values.put(MediaStore.Images.ImageColumns.DATE_TAKEN, imageTime);
-                    values.put(MediaStore.Images.ImageColumns.DATE_ADDED, dateSeconds);
-                    values.put(MediaStore.Images.ImageColumns.DATE_MODIFIED, dateSeconds);
-                    values.put(MediaStore.Images.ImageColumns.MIME_TYPE, "image/png");
-                    values.put(MediaStore.Images.ImageColumns.WIDTH, imageWidth);
-                    values.put(MediaStore.Images.ImageColumns.HEIGHT, imageHeight);
-                    values.put(MediaStore.Images.ImageColumns.SIZE, new File(imageFilePath).length());
-                    Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                    Uri uri = saveToDatabase(context, imageTime, imageFileName, imageFilePath, imageWidth, imageHeight);
 
                     if (uri != null) {
-                        // Create a share intent
-                        String subjectDate = DateFormat.getDateTimeInstance().format(new Date(imageTime));
-                        String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
-                        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-                        sharingIntent.setType("image/png");
-                        sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
-                        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-
-                        Intent chooserIntent = Intent.createChooser(sharingIntent, null);
-                        chooserIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-
-                        notificationBuilder.addAction(R.drawable.ic_menu_share, r.getString(R.string.share),
-                                PendingIntent.getActivity(context, 0, chooserIntent, PendingIntent.FLAG_CANCEL_CURRENT));
-
-                        Intent deleteIntent = new Intent();
-                        deleteIntent.setClass(context, DeleteScreenshot.class);
-                        deleteIntent.putExtra(DeleteScreenshot.SCREENSHOT_URI, uri.toString());
-                        notificationBuilder.addAction(R.drawable.ic_menu_delete, r.getString(R.string.screenshot_delete_action),
-                                PendingIntent.getBroadcast(context, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT));
+                        createNotification(context, imageTime, uri, notificationBuilder);
                         e.onNext(uri);
                         e.onComplete();
                     } else {
@@ -180,15 +136,51 @@ public class ScreenshotModel implements ScreenshotContract.Model {
         });
     }
 
+    private void createNotification(Context context, long imageTime, Uri uri, Notification.Builder notificationBuilder) {
+        Resources r = context.getResources();
+        // Create a share intent
+        String subjectDate = DateFormat.getDateTimeInstance().format(new Date(imageTime));
+        String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
+        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+        sharingIntent.setType("image/png");
+        sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
+        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+
+        Intent chooserIntent = Intent.createChooser(sharingIntent, null);
+        chooserIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        notificationBuilder.addAction(R.drawable.ic_menu_share, r.getString(R.string.share),
+                PendingIntent.getActivity(context, 0, chooserIntent, PendingIntent.FLAG_CANCEL_CURRENT));
+
+        Intent deleteIntent = new Intent();
+        deleteIntent.setClass(context, DeleteScreenshot.class);
+        deleteIntent.putExtra(DeleteScreenshot.SCREENSHOT_URI, uri.toString());
+        notificationBuilder.addAction(R.drawable.ic_menu_delete, r.getString(R.string.screenshot_delete_action),
+                PendingIntent.getBroadcast(context, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT));
+    }
+
+    private Uri saveToDatabase(Context context, long imageTime, String imageFileName, String imageFilePath, int imageWidth, int imageHeight) {
+        // media provider uses seconds for DATE_MODIFIED and DATE_ADDED, but
+        // milliseconds
+        // for DATE_TAKEN
+        final long dateSeconds = imageTime / 1000;
+        ContentValues values = new ContentValues();
+        ContentResolver resolver = context.getContentResolver();
+        values.put(MediaStore.Images.ImageColumns.DATA, imageFilePath);
+        values.put(MediaStore.Images.ImageColumns.TITLE, imageFileName);
+        values.put(MediaStore.Images.ImageColumns.DISPLAY_NAME, imageFileName);
+        values.put(MediaStore.Images.ImageColumns.DATE_TAKEN, imageTime);
+        values.put(MediaStore.Images.ImageColumns.DATE_ADDED, dateSeconds);
+        values.put(MediaStore.Images.ImageColumns.DATE_MODIFIED, dateSeconds);
+        values.put(MediaStore.Images.ImageColumns.MIME_TYPE, "image/png");
+        values.put(MediaStore.Images.ImageColumns.WIDTH, imageWidth);
+        values.put(MediaStore.Images.ImageColumns.HEIGHT, imageHeight);
+        values.put(MediaStore.Images.ImageColumns.SIZE, new File(imageFilePath).length());
+        return resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+    }
+
     @Override
     public void release() {
-//        if (mImageReader != null)
-//            mImageReader.close();
-//        if (mVirtualDisplay != null)
-//            mVirtualDisplay.release();
-//        if (mProjection != null) {
-//            mProjection.stop();
-//        }
     }
 
     private Observable<Boolean> scrollNextScreen(final long duration) {
@@ -207,11 +199,9 @@ public class ScreenshotModel implements ScreenshotContract.Model {
 
     private Bitmap collageLongBitmap(Bitmap oldBitmap, Bitmap newBitmap) {
         if (oldBitmap == null || oldBitmap.isRecycled()) {
-            //throw new NullPointerException("bitmap is null");
             return null;
         }
         if (newBitmap == null || newBitmap.isRecycled()) {
-            //throw new NullPointerException("bitmap is null");
             return null;
         }
 
@@ -220,7 +210,6 @@ public class ScreenshotModel implements ScreenshotContract.Model {
                 .collageLongBitmap(oldBitmap, newBitmap);
 
         if (collageBitmap == null || collageBitmap.isRecycled()) {
-            //throw new NullPointerException("bitmap is null");
             return null;
         }
         return collageBitmap;

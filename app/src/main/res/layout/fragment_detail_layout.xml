@@ -3,12 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ProgressBar
-        android:id="@+id/circleLoading"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_gravity="center" />
-
     <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
         android:id="@+id/detail_image_height_quality"
         android:layout_width="match_parent"
@@ -37,7 +31,7 @@
         android:layout_gravity="bottom|end"
         android:layout_marginBottom="56dp"
         android:layout_marginEnd="24dp"
-        android:backgroundTint="@color/colorPrimary"
+        style="@style/Widget.AppCompat.Button.Borderless"
         android:textColor="@color/colorTextContent"
         android:text="@string/heigh_quality"
         android:visibility="gone" />

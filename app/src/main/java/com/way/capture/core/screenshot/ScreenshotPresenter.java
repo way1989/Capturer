@@ -34,7 +34,6 @@ import com.way.capture.utils.ViewUtils;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
 
-//import com.glidebitmappool.GlideBitmapPool;
 
 
 /**

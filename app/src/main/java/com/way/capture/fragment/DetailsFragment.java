@@ -12,8 +12,8 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -41,8 +41,7 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
     private static final String TAG = "DetailsFragment";
     private static final String ARG_IMAGE_PATH = "arg_image_path";
     private static final String ARG_IMAGE_TYPE = "arg_image_type";
-    @BindView(R.id.circleLoading)
-    ProgressBar mCircleLoading;
+
     @BindView(R.id.detail_image_height_quality)
     SubsamplingScaleImageView mDetailImageHeightQuality;
     @BindView(R.id.detail_image)
@@ -91,6 +90,7 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
                 break;
             case DataInfo.TYPE_SCREEN_GIF:
 //                Glide.clear(mDetailImage);
+                Glide.with(mDetailImage).clear(mDetailImage);
                 GlideHelper.loadResourceBitmap(mPath, mDetailImage);
                 mVideoIndicator.setVisibility(View.VISIBLE);
                 break;
@@ -128,6 +128,12 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
                 ((DetailsActivity) getActivity()).toggleSystemUI();
             }
         });
+        mDetailImageHeightQuality.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((DetailsActivity) getActivity()).toggleSystemUI();
+            }
+        });
 
         boolean isLongImage = isLongImage(mPath);
         mHeightQualityBtn.setVisibility(isLongImage ? View.VISIBLE : View.GONE);
@@ -136,14 +142,12 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
         GlideHelper.loadResourceBitmap(mPath, mDetailImage, new RequestListener<Bitmap>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-                mCircleLoading.setVisibility(View.GONE);
                 startPostEnterTransition();
                 return false;
             }
 
             @Override
             public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                mCircleLoading.setVisibility(View.GONE);
                 startPostEnterTransition();
                 return false;
             }
@@ -182,20 +186,18 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
     }
 
     @OnClick({R.id.video_indicator, R.id.height_quality_btn})
-    public void onClick(View view) {
+    public void onClick(final View view) {
         switch (view.getId()) {
             case R.id.video_indicator:
-                mCircleLoading.setVisibility(View.VISIBLE);
                 if (mType == DataInfo.TYPE_SCREEN_RECORD) {
                     VideoActivity.startVideoActivity(getActivity(), mPath, mDetailImage);
                 } else if (mType == DataInfo.TYPE_SCREEN_GIF) {
                     view.setVisibility(View.GONE);
                     final String path = getArguments().getString(ARG_IMAGE_PATH);
-                    GlideHelper.loadResource(path, mDetailImage);
+                    GlideHelper.loadResourceGif(path, mDetailImage);
                 }
                 break;
             case R.id.height_quality_btn:
-                mCircleLoading.setVisibility(View.VISIBLE);
                 view.setVisibility(View.GONE);
                 mDetailImageHeightQuality.setVisibility(View.VISIBLE);
                 mDetailImage.setTransitionName("");
@@ -206,6 +208,7 @@ public class DetailsFragment extends BaseFragment implements View.OnClickListene
                     @Override
                     public void run() {
                         mDetailImage.setVisibility(View.GONE);
+                        Glide.with(mDetailImage).clear(mDetailImage);
                         //Glide.clear(mDetailImage);
                     }
                 });

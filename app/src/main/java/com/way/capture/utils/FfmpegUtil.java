@@ -6,7 +6,7 @@ import android.util.Log;
  * Created by android on 16-2-3.
  */
 public class FfmpegUtil {
-
+    private static final String TAG = "FfmpegUtil";
     public static final int MAX_GIF_LENGTH = 30;
 
     public static String[] getVideo2gifCommand(long start, long length, int frame,
@@ -25,7 +25,7 @@ public class FfmpegUtil {
         command.append(frame);
         command.append(" ");
         command.append(outPath);
-        Log.i("broncho", "command = " + command.toString());
+        Log.i(TAG, "command = " + command.toString());
         return command.toString().split(" ");
     }
 

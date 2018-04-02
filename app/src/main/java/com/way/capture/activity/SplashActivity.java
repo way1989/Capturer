@@ -56,7 +56,7 @@ public class SplashActivity extends AppCompatActivity {
         //foreMask.setAlpha(0f);//rest the foreMask alpha to 0
         foreMask.animate().alpha(0f);
         final List<Animator> animList = new ArrayList<>();
-        final int toColor = getResources().getColor(R.color.colorPrimaryDark);
+        final int toColor = getResources().getColor(R.color.colorAccentExtra);
         //final int toColor = Color.parseColor("#1F1F1F");
         final android.view.Window window = getWindow();
         ObjectAnimator statusBarColor = ObjectAnimator.ofInt(window,

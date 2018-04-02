@@ -116,6 +116,7 @@ public class ScreenRecordModule implements BaseModule, OverlayView.Listener {
 
         mOverlayView = OverlayView.create(mContext, this);
         mWindowManager.addView(mOverlayView, OverlayView.createLayoutParams(mContext));
+        mIsRunning = true;
     }
 
     @Override
@@ -132,6 +133,7 @@ public class ScreenRecordModule implements BaseModule, OverlayView.Listener {
     @Override
     public void onCancelClick() {
         hideOverlay();
+        mIsRunning = false;
     }
 
     @Override
@@ -173,7 +175,6 @@ public class ScreenRecordModule implements BaseModule, OverlayView.Listener {
         mContext.registerReceiver(mStopActionReceiver, new IntentFilter(Notifications.ACTION_STOP));
 
         mNotificationManager.cancel(SCREENSHOT_NOTIFICATION_ID);
-        mIsRunning = true;
         Log.d(TAG, "Screen recording started.");
     }
 

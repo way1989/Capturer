@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -29,7 +30,7 @@ import io.reactivex.ObservableOnSubscribe;
 public class VideoModel implements VideoContract.Model {
     private static final String TAG = "VideoModel";
     private static final String ZIP_LIBRARY_NAME = "ffmpeg.zip";
-    private static final DateFormat FILE_FORMAT = new SimpleDateFormat("'Gif_'yyyy-MM-dd-HH-mm-ss'.gif'");
+    private static final DateFormat FILE_FORMAT = new SimpleDateFormat("'Gif_'yyyyMMddHHmmss'.gif'", Locale.getDefault());
 
     @Override
     public Observable<Boolean> loadLocalLibrary() {

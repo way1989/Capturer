@@ -28,6 +28,7 @@ import com.way.capture.data.DataInfo;
 import com.way.capture.fragment.DetailsFragment;
 import com.way.capture.fragment.ScreenshotFragment;
 import com.way.capture.utils.AppUtil;
+import com.way.capture.utils.ViewUtils;
 import com.way.capture.widget.DepthPageTransformer;
 
 import java.io.File;
@@ -104,7 +105,7 @@ public class DetailsActivity extends BaseActivity {
     private void setStatusBarColor() {
         final android.view.Window window = getWindow();
         ObjectAnimator animator = ObjectAnimator.ofInt(window,
-                "statusBarColor", window.getStatusBarColor(), Color.BLACK);
+                "statusBarColor", window.getStatusBarColor(), 0x80000000);
         animator.setEvaluator(new ArgbEvaluator());
         animator.setDuration(200L);
         animator.start();
@@ -149,8 +150,10 @@ public class DetailsActivity extends BaseActivity {
     }
 
     private void setupSystemUI() {
-        toolbar.animate().translationY(AppUtil.getStatusBarHeight(getResources())).setInterpolator(new DecelerateInterpolator())
-                .setDuration(0).start();
+        toolbar.animate().translationY(ViewUtils.getStatusBarHeight())
+                .setInterpolator(new DecelerateInterpolator())
+                .setDuration(100)
+                .start();
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                         | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -160,10 +163,15 @@ public class DetailsActivity extends BaseActivity {
                 (new View.OnSystemUiVisibilityChangeListener() {
                     @Override
                     public void onSystemUiVisibilityChange(int visibility) {
-                        if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) showSystemUI();
-                        else hideSystemUI();
+                        if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+                            showSystemUI();
+                        } else {
+                            hideSystemUI();
+                        }
                     }
                 });
+        ViewUtils.setStatusBarStyle(this, true);
+        ViewUtils.setNavigationBarStyle(this, true, true);
     }
 
     public void toggleSystemUI() {
@@ -222,9 +230,7 @@ public class DetailsActivity extends BaseActivity {
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        Glide.get(getApplicationContext()).clearMemory();
-        Glide.get(getApplicationContext()).trimMemory(TRIM_MEMORY_COMPLETE);
-        System.gc();
+        Glide.get(this).onLowMemory();
     }
 
     @Override

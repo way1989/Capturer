@@ -48,7 +48,7 @@
     <string name="screenshot_delete_confirmation">Screenshot deleted.</string>
     <string name="screen_shot">Take Screenshot</string>
     <string name="chathead_content_title">Capturer is running</string>
-    <string name="chathead_content_text">Please shake your device…</string>
+    <string name="chathead_content_text">Try to shake your device or tap me…</string>
     <string name="shipped_ffmpeg_version" translatable="false">n2.4.2</string>
     <string name="video_size_percentage_summary">Videos with higher resolution look sharper</string>
     <string name="countdown_summary">wait three seconds when begin take a screen record</string>
@@ -59,7 +59,7 @@
     <string name="settings_author_title">Author</string>
     <string name="settings_version_title">Version</string>
     <string name="settings_happen_category">Trigger Method</string>
-    <string name="advance_category">Advance settings</string>
+    <string name="advance_category">Recording parameters</string>
     <string name="use_atouch_summary">Shake your device to show main menu</string>
     <string name="boot_auto">Auto Launch</string>
     <string name="boot_auto_summary">Auto launch Capturer after reboot</string>
@@ -212,4 +212,5 @@
     <string name="video_quality_summary">Higher quality means bigger file size</string>
     <string name="video_record_audio">Sound</string>
     <string name="video_record_audio_summary">System sounds or microphone</string>
+    <string name="redo">redo</string>
 </resources>

@@ -48,7 +48,7 @@ public class FreeCropView extends ViewGroup {
     private int mCertainGestureColor;
     private float mGestureStrokeWidth;
     private int mInvalidateExtraBorder = 10;
-    private float mGestureStrokeLengthThreshold = 50.0f;
+    private float mGestureStrokeLengthThreshold;
     // fading out effect
     private boolean mIsFadingOut = false;
     private float mFadingAlpha = 1.0f;
@@ -94,6 +94,7 @@ public class FreeCropView extends ViewGroup {
     private void init() {
         mImageRect = new Rect();
         setWillNotDraw(false);
+        mGestureStrokeLengthThreshold = ViewUtils.dp2px(50);
         mGestureStrokeWidth = ViewUtils.dp2px(2);
         mCertainGestureColor = getResources().getColor(R.color.colorAccentExtra);
         final Paint gesturePaint = mGesturePaint;
@@ -414,7 +415,7 @@ public class FreeCropView extends ViewGroup {
 
     private void touchUp(MotionEvent event, boolean cancel) {
         mIsListeningForGestures = false;
-        if (mListener != null) mListener.onEnd();
+        if (mListener != null) mListener.onEnd(mIsGesturing);
 
         drawStroke = new GestureStroke(mStrokeBuffer);
         clipStroke = new ClipStroke(mImageRect, mStrokeBuffer);
@@ -481,7 +482,7 @@ public class FreeCropView extends ViewGroup {
     public interface OnStateListener {
         public void onStart();
 
-        public void onEnd();
+        public void onEnd(boolean ok);
     }
 
     private class FadeOutRunnable implements Runnable {

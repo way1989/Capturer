@@ -14,6 +14,7 @@ import android.util.Pair;
 public class BitmapCollageUtil {
     private static final String TAG = "BitmapCollageUtil";
     private static final int BASE_LINE_MOVE_NUM = 5;//基线移动次数
+    private static final int BASE_LINE_HEIGHT = 100;//基线每次至少移动的高度
     private static final int COMPARE_LINE_NUM_MAX = 50;//连续50行像素一样，就认为找到了分割线
     private static final int PURE_LINE_DIF_NUM_MAX = 40;
     private static final int COLOR_LINE_DIF_NUM_MAX = 10;
@@ -89,20 +90,15 @@ public class BitmapCollageUtil {
 
     /**
      * @param bitmap       需要寻找的图片
-     * @param screenHeight 屏幕的高度
      * @param offset       偏移量
      * @return 高度
      */
-    private int getNotPureLineHeight(Bitmap bitmap, int screenHeight, int offset) {
+    private int getNotPureLineHeight(Bitmap bitmap, int offset, int length) {
         final int width = bitmap.getWidth();
         final int height = bitmap.getHeight();
 
-        if (height < screenHeight) {
-            return -1;
-        }
-
         final int[] pixels = new int[width];
-        for (int i = offset; i <= (screenHeight - TOP_NOT_COMPARE_HEIGHT); i += 2) {
+        for (int i = offset; i <= (offset + length); i += 2) {
             //将第i行宽度为width的像素点存入数组pixels中
             bitmap.getPixels(pixels, 0, width, 0, height - 1 - i, width, 1);
             if (!isPureColorLine(pixels)) {
@@ -126,17 +122,20 @@ public class BitmapCollageUtil {
 
         //减去底部和顶部不用比较的高度，剩下中间可以用于compare的区域
         final int compareHeight = screenHeight - bottomSameHeight - TOP_NOT_COMPARE_HEIGHT;
+        final int compareCount = Math.max(Math.min(compareHeight % BASE_LINE_HEIGHT, BASE_LINE_MOVE_NUM), 1);
         //每次基线移动的高度
-        final int baseLineReduceHeight = compareHeight / BASE_LINE_MOVE_NUM;
+        final int baseLineReduceHeight = compareHeight / compareCount;
         Log.i(TAG, "compareTwoBitmap..."
                 + ", bottomSameHeight = " + bottomSameHeight
+                + ", compareCount = " + compareCount
                 + ", baseLineReduceHeight = " + baseLineReduceHeight);
 
         //改变first bitmap基线5次，确保找到正确的分割线
-        for (int i = 0; i < BASE_LINE_MOVE_NUM; i++) {
+        for (int i = 0; i < compareCount; i++) {
             //从下往上找到不是纯色的一行作为参考基线
-            final int baseLine = getNotPureLineHeight(firstBitmap, screenHeight, bottomSameHeight + i * baseLineReduceHeight);
+            final int baseLine = getNotPureLineHeight(firstBitmap,bottomSameHeight + i * baseLineReduceHeight, baseLineReduceHeight);
             Log.d(TAG, "compareTwoBitmap: getDividingLinePair count = " + (i + 1) + ", baseLine = " + baseLine);
+            if (baseLine == -1) continue;
             Pair<Integer, Integer> pair = getDividingLinePair(firstBitmap, secondBitmap, baseLine);
             if (pair != null) {
                 Log.d(TAG, "compareTwoBitmap: succeed!!! compare count = " + (i + 1));

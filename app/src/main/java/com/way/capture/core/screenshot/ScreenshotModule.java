@@ -231,10 +231,10 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         if (needCheckAction) {
             switch (mAction) {
                 case ShakeService.Action.ACTION_FREE_CROP:
-                    showFreeCropLayout(removeNavigationBar(bitmap));
+                    showFreeCropLayout(bitmap);
                     return;
                 case ShakeService.Action.ACTION_RECT_CROP:
-                    showRectCropLayout(removeNavigationBar(bitmap));
+                    showRectCropLayout(bitmap);
                     return;
             }
         }
@@ -671,19 +671,28 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
         }
-        final FreeCropView freeCropView = (FreeCropView) mFreeCropDialog.findViewById(R.id.free_crop_view);
+        final FreeCropView freeCropView = mFreeCropDialog.findViewById(R.id.free_crop_view);
         final View confirmBtn = mFreeCropDialog.findViewById(R.id.free_crop_ok_btn);
+        final View toastView = mFreeCropDialog.findViewById(R.id.free_crop_toast);
         freeCropView.setFreeCropBitmap(bitmap);
         freeCropView.setOnStateListener(new FreeCropView.OnStateListener() {
             @Override
             public void onStart() {
                 confirmBtn.setVisibility(View.GONE);
-                mFreeCropDialog.findViewById(R.id.free_crop_toast).setVisibility(View.GONE);
+                toastView.setVisibility(View.GONE);
             }
 
             @Override
-            public void onEnd() {
-                confirmBtn.setVisibility(View.VISIBLE);
+            public void onEnd(boolean ok) {
+                if (ok) {
+                    confirmBtn.setAlpha(0f);
+                    confirmBtn.setVisibility(View.VISIBLE);
+                    confirmBtn.animate().alpha(1f);
+                } else {
+                    toastView.setAlpha(0f);
+                    toastView.setVisibility(View.VISIBLE);
+                    toastView.animate().alpha(1f);
+                }
             }
         });
         confirmBtn.setOnClickListener(new View.OnClickListener() {

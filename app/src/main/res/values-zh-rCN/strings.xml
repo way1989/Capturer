@@ -35,8 +35,8 @@
     <string name="launcher_name">@string/app_name</string>
     <string name="about_menu">关于</string>
     <string name="action_settings">设置</string>
-    <string name="advance_category">高级设置</string>
-    <string name="chathead_content_text">试试摇一摇你的手机…</string>
+    <string name="advance_category">录屏参数</string>
+    <string name="chathead_content_text">摇一摇或点击我启动截屏菜单…</string>
     <string name="chathead_content_title">Capturer正在运行</string>
     <string name="countdown_summary">录屏前倒计时3秒</string>
     <string name="settings_author_title">作者</string>
@@ -44,8 +44,8 @@
     <string name="settings_version_title">版本</string>
     <string name="show_touches_summary">录屏时显示触摸位置</string>
     <string name="use_atouch">摇一摇</string>
-    <string name="use_atouch_summary">摇一摇手机启动主菜单</string>
-    <string name="video_size_percentage_summary">选择录屏文件保存尺寸</string>
+    <string name="use_atouch_summary">关闭后只能通过点击通知栏启动截屏菜单</string>
+    <string name="video_size_percentage_summary">视频的宽高尺寸，越高视频越清晰</string>
     <string name="video_title">视频</string>
     <string name="gif_title">GIF动画</string>
     <string name="boot_auto">开机启动</string>
@@ -103,8 +103,8 @@
     <string name="long_screenshot">截取长图</string>
     <string name="free_screenshot">自由截屏</string>
     <string name="rect_screenshot">区域截屏</string>
-    <string name="free_crop_toast">滑动选取需要截取的部分,点击按钮保存</string>
-    <string name="crop_toast">双击确认选择区域并保存</string>
+    <string name="free_crop_toast">手指滑动圈选需要截取的部分后点击确认即可完成</string>
+    <string name="crop_toast">调整或移动选择区域后双击屏幕即可完成</string>
     <string name="not_enough_storage">设备存储空间不够</string>
     <string name="scroll_screenshot_toast_text">点击屏幕立即结束</string>
     <string name="scroll_screenshot_toast_title">正在长截屏</string>

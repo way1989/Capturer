@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <com.way.capture.widget.freecrop.FreeCropView
         android:id="@+id/free_crop_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
     <Button
         android:id="@+id/free_crop_ok_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="56dp"
         android:layout_marginEnd="24dp"
         android:backgroundTint="@color/colorAccentExtra"
-        android:shadowColor="@android:color/black"
-        android:shadowRadius="1"
         android:text="@android:string/ok"
-        android:textColor="@android:color/white"
-        android:visibility="gone"/>
+        android:textColor="@color/white"
+        android:visibility="gone" />
 
     <FrameLayout
         android:id="@+id/free_crop_toast"
@@ -32,17 +30,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginEnd="24dp"
-            android:layout_marginStart="24dp"
-            android:drawablePadding="8dp"
-            android:drawableTop="@drawable/ic_touch_app_white"
+            android:drawableTop="@drawable/ic_gesture_white_48dp"
+            android:drawablePadding="16dp"
             android:gravity="center"
-            android:shadowColor="@android:color/black"
-            android:shadowRadius="2"
+            android:paddingEnd="24dp"
+            android:paddingStart="24dp"
             android:text="@string/free_crop_toast"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white"/>
+            android:textColor="@color/white" />
     </FrameLayout>
-
-
 </FrameLayout>

@@ -31,9 +31,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     public static final String VIDEO_AUDIO_KEY = "key_record_audio";
     public static final String VIDEO_STOP_METHOD_KEY = "key_video_stop_method";
     public static final String SHOW_COUNTDOWN_KEY = "key_three_second_countdown";
-    public static final String SHOW_TOUCHES_KEY = "key_show_touches";
     public static final String SHAKE_KEY = "key_use_atouch";
-    public static final String BOOT_AUTO_KEY = "key_boot_atuo";
     public static final String SCREENSHOT_SOUND = "key_screenshot_sound";
     public static final String LONG_SCREENSHOT_AUTO = "key_long_screenshot_auto";
     private static final String VERSION_KEY = "key_version";
@@ -53,12 +51,9 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         } catch (final PackageManager.NameNotFoundException e) {
             findPreference(VERSION_KEY).setSummary("?");
         }
-        ListPreference sizeListPreference = (ListPreference) findPreference(VIDEO_SIZE_KEY);
-        sizeListPreference.setSummary(sizeListPreference.getEntry());
-        if (AppUtil.isMarshmallow()) {
-            PreferenceCategory preferenceScreen = (PreferenceCategory) findPreference("key_advance_category");
-            preferenceScreen.removePreference(findPreference(SHOW_TOUCHES_KEY));
-        }
+//        ListPreference sizeListPreference = (ListPreference) findPreference(VIDEO_SIZE_KEY);
+//        sizeListPreference.setSummary(sizeListPreference.getEntry());
+
         if (!ScrollUtils.isDeviceRoot()) {
             PreferenceCategory preferenceScreen = (PreferenceCategory) findPreference("key_advance_category");
             preferenceScreen.removePreference(findPreference(LONG_SCREENSHOT_AUTO));
@@ -71,11 +66,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         String key = preference.getKey();
         switch (key) {
             case SHAKE_KEY:
-                SwitchPreference switchPreference = (SwitchPreference) preference;
-                if (switchPreference.isChecked())
-                    mContext.startService(new Intent(mContext, ShakeService.class));
-                else
-                    mContext.stopService(new Intent(mContext, ShakeService.class));
                 break;
             case "key_version":
                 //if(true) throw new NullPointerException("test");
@@ -97,8 +87,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         switch (key) {
             case VIDEO_SIZE_KEY:
-                ListPreference listPreference = (ListPreference) findPreference(key);
-                listPreference.setSummary(listPreference.getEntry());
+//                ListPreference listPreference = (ListPreference) findPreference(key);
+//                listPreference.setSummary(listPreference.getEntry());
                 break;
         }
     }

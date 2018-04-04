@@ -35,7 +35,7 @@ public class RxShake extends Observable<Boolean> {
     }
 
     private static final class Listener extends MainThreadDisposable implements SensorEventListener {
-        private static final int SPEED_SHRERHOLD = 60;// 这个值越大需要越大的力气来摇晃手机
+        private static final int SPEED_THRESHOLD = 60;// 这个值越大需要越大的力气来摇晃手机
         private static final long UPDATE_INTERVAL_TIME = 50L;//50ms处理一次
         private final Observer<? super Boolean> observer;
         private SensorManager mSensorManager;
@@ -71,7 +71,7 @@ public class RxShake extends Observable<Boolean> {
             mLastZ = z;
 
             double speed = (Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ) / timeInterval) * 100;
-            if (speed >= SPEED_SHRERHOLD) {
+            if (speed >= SPEED_THRESHOLD) {
                 observer.onNext(true);
             }
         }

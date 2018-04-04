@@ -16,6 +16,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -27,6 +28,7 @@ import com.way.capture.core.BaseModule;
 import com.way.capture.core.LauncherActivity;
 import com.way.capture.core.screenrecord.ScreenRecordModule;
 import com.way.capture.core.screenshot.ScreenshotModule;
+import com.way.capture.fragment.SettingsFragment;
 import com.way.capture.utils.AppUtil;
 import com.way.capture.utils.RxSchedulers;
 import com.way.capture.utils.RxScreenshot;
@@ -36,7 +38,7 @@ import com.way.capture.widget.FloatMenuDialog;
 import java.lang.ref.WeakReference;
 
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.observers.DisposableObserver;
+import io.reactivex.functions.Consumer;
 
 
 /**
@@ -47,7 +49,7 @@ public class ShakeService extends Service {
 
     private static final int NOTIFICATION_ID = 9083150;
     private static final int DELAY_ONCLICK_MESSAGE = 0x120;
-    private static final long DELAY_TIME = 400L;
+    private static final long DELAY_TIME = 600L;
     private static final String EXTRA_RESULT_CODE = "result-code";
     private static final String EXTRA_DATA = "data";
     private Vibrator mVibrator;
@@ -114,26 +116,16 @@ public class ShakeService extends Service {
                 Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
         startForeground(NOTIFICATION_ID, createNotification());
         mSubscriptions = new CompositeDisposable();
-        DisposableObserver<Boolean> observer = new DisposableObserver<Boolean>() {
-            @Override
-            public void onNext(Boolean shake) {
-                if (shake) {
-                    showDialog();
-                }
-            }
-
-            @Override
-            public void onError(Throwable e) {
-
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        };
-        new RxShake(getApplication()).compose(RxSchedulers.<Boolean>io_main()).subscribe(observer);
-        mSubscriptions.add(observer);
+        mSubscriptions.add(new RxShake(getApplication()).compose(RxSchedulers.<Boolean>io_main())
+                .subscribe(new Consumer<Boolean>() {
+                    @Override
+                    public void accept(Boolean shake) {
+                        if (shake && PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                                .getBoolean(SettingsFragment.SHAKE_KEY, true)) {
+                            showDialog();
+                        }
+                    }
+                }));
     }
 
     @Override

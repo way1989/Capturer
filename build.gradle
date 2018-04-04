@@ -33,6 +33,7 @@ ext {
     compileSdkVersion = 27
 
     // App dependencies
+    constraintVersion = '1.0.2'
     supportLibraryVersion = '27.1.0'
     junitVersion = '4.12'
     espressoVersion = '2.2.2'

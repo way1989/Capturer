@@ -25,11 +25,13 @@ import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.way.capture.R;
 import com.way.capture.base.BaseActivity;
 import com.way.capture.utils.AppUtil;
 import com.way.capture.utils.FfmpegUtil;
+import com.way.capture.utils.ViewUtils;
 import com.way.capture.widget.FastVideoView;
 import com.way.capture.widget.trim.ControllerOverlay;
 import com.way.capture.widget.trim.TrimControllerOverlay;
@@ -44,7 +46,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
     private static final String TAG = "VideoActivity";
     private static final String ARG_IMAGE_PATH = "arg_image_path";
     private ProgressDialog mProgressDialog;
-    private FastVideoView mVideoView;
+    private VideoView mVideoView;
     private Handler mHandler = new Handler();
     private TrimControllerOverlay mController;
     private boolean mIsInProgressCheck = false;
@@ -81,7 +83,6 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
     protected void onDestroy() {
         super.onDestroy();
         if (mVideoView != null) {
-            mVideoView.setSurfaceTextureListener(null);
             mVideoView.setOnCompletionListener(null);
         }
     }
@@ -107,7 +108,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
     }
 
     private void initToolbar() {
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -129,7 +130,7 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
     private void setStatusBarColor() {
         final android.view.Window window = getWindow();
         ObjectAnimator animator = ObjectAnimator.ofInt(window,
-                "statusBarColor", window.getStatusBarColor(), Color.BLACK);
+                "statusBarColor", window.getStatusBarColor(), 0x80000000);
         animator.setEvaluator(new ArgbEvaluator());
         animator.setDuration(200L);
         animator.start();
@@ -390,7 +391,6 @@ public class VideoActivity extends BaseActivity implements MediaPlayer.OnComplet
                             | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
             mController.setPaddingRelative(0, 0, 0, AppUtil.getNavBarHeight(getApplicationContext()));
         }
-
         // mController.show();
         mToolbar.animate().translationY(AppUtil.getStatusBarHeight(getResources()))
                 .setInterpolator(new DecelerateInterpolator()).setDuration(240);

@@ -7,6 +7,7 @@ import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.media.MediaMetadataRetriever;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -25,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.List;
 import java.util.Locale;
 
 public class AppUtil {
@@ -299,6 +301,15 @@ public class AppUtil {
         context.startActivity(chooserIntent);
     }
 
+    public static void deleteMultipleScreenshot(Context context, List<DataInfo> dataInfos) {
+        String path[] = new String[dataInfos.size()];
+        for (int i = 0; i < dataInfos.size(); i++) {
+            DataInfo dataInfo = dataInfos.get(i);
+            new File(dataInfo.path).delete();
+            path[i] = dataInfo.path;
+        }
+        MediaScannerConnection.scanFile(context, path, null, null);
+    }
 
     public static boolean hasAvailableSpace() {
         StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());

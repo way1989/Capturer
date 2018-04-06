@@ -11,6 +11,7 @@ import com.way.capture.data.DataInfo;
 import com.way.capture.utils.glide.GlideHelper;
 
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * Created by android on 16-2-1.
@@ -26,9 +27,9 @@ public class ScreenshotAdapter extends BaseQuickAdapter<DataInfo, BaseViewHolder
         mSelected = new HashSet<>();
     }
 
-    public void removeItem(int pos) {
-        mData.remove(pos);
-        notifyItemChanged(pos);
+    public void removeMulData(List<DataInfo> dataInfos) {
+        mData.removeAll(dataInfos);
+        notifyDataSetChanged();
     }
 
     public void clearData() {

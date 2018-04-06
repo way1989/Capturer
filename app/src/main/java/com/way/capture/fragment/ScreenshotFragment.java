@@ -5,8 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
+import me.bakumon.statuslayoutmanager.library.OnStatusChildClickListener;
 import me.bakumon.statuslayoutmanager.library.StatusLayoutManager;
 
 /**
@@ -57,6 +58,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
     private boolean mIsDetailsActivityStarted;
     private int mType;
     private boolean hasLoadData;
+    private ScreenshotPresenter mScreenshotPresenter;
 
     public static BaseFragment newInstance(int type) {
         Bundle args = new Bundle();
@@ -160,9 +162,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
     protected void initWidget(View root) {
         super.initWidget(root);
 
-        final StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(4,
-                StaggeredGridLayoutManager.VERTICAL);
-//        GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 4);
+        GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 4);
         mRecyclerView.addItemDecoration(new SpaceGridItemDecoration(ViewUtils.dp2px(1)));
         mRecyclerView.setLayoutManager(layoutManager);
         mAdapter = new ScreenshotAdapter(R.layout.item_screenshot, mType);
@@ -170,8 +170,24 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
         mRecyclerView.setAdapter(mAdapter);
 
         mStatusLayoutManager = new StatusLayoutManager.Builder(mRecyclerView)
-                .setDefaultEmptyClickViewVisible(false)
-                .setDefaultErrorClickViewVisible(false)
+                .setOnStatusChildClickListener(new OnStatusChildClickListener() {
+                    @Override
+                    public void onEmptyChildClick(View view) {
+                        mStatusLayoutManager.showLoadingLayout();
+                        mScreenshotPresenter.getData(mType);
+                    }
+
+                    @Override
+                    public void onErrorChildClick(View view) {
+                        mStatusLayoutManager.showLoadingLayout();
+                        mScreenshotPresenter.getData(mType);
+                    }
+
+                    @Override
+                    public void onCustomerChildClick(View view) {
+
+                    }
+                })
                 .setDefaultLayoutsBackgroundColor(getResources().getColor(R.color.colorPrimary))
                 .build();
         mStatusLayoutManager.showLoadingLayout();
@@ -181,6 +197,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
                 if (mCab != null && mCab.isActive()) {
                     mAdapter.toggleSelection(position);
+                    mCab.setTitleRes(R.string.cab_title_x, mAdapter.getCountSelected());
                 } else {
                     ImageView imageView = view.findViewById(R.id.iv_image);
                     if (!mIsDetailsActivityStarted) {
@@ -237,13 +254,15 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
             }
         }).withMode(DragSelectionProcessor.Mode.Simple);
         mDragSelectTouchListener = new DragSelectTouchListener()
-                .withSelectListener(dragSelectionProcessor);
+                .withSelectListener(dragSelectionProcessor)
+                .withBottomOffset(-ViewUtils.getNavigationBarHeight());
         mRecyclerView.addOnItemTouchListener(mDragSelectTouchListener);
     }
 
     @Override
     protected void initData() {
         super.initData();
+        mScreenshotPresenter = new ScreenshotPresenter(this);
        /* RxBus.getInstance().toObservable(RxEvent.NewPathEvent.class)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -269,7 +288,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
 
     private void loadData() {
         if (isAdded() && getUserVisibleHint() && !hasLoadData) {
-            new ScreenshotPresenter(this).getData(mType);
+            mScreenshotPresenter.getData(mType);
             hasLoadData = true;
         }
     }
@@ -284,10 +303,17 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
         HashSet<Integer> selections = mAdapter.getSelection();
         switch (item.getItemId()) {
             case R.id.image_delete:
+                List<DataInfo> dataInfos = new ArrayList<>();
                 for (int index : selections) {
-                    mAdapter.removeItem(index);
+                    dataInfos.add(mAdapter.getItem(index));
                 }
+                mAdapter.removeMulData(dataInfos);
+                mAdapter.deselectAll();
+                AppUtil.deleteMultipleScreenshot(App.getContext(), dataInfos);// TODO: 2018/4/6 should in thread!!
                 exitCab();
+                if (mAdapter.getItemCount() < 1) {
+                    mStatusLayoutManager.showEmptyLayout();
+                }
                 break;
             case R.id.image_share:
                 String[] paths = new String[selections.size()];
@@ -295,6 +321,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
                     paths[i] = mAdapter.getItem(i).path;
                 }
                 AppUtil.shareMultipleScreenshot(App.getContext(), paths, mType);
+                mAdapter.deselectAll();
                 break;
             case R.id.image_select_all:
                 if (!item.isChecked()) {

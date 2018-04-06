@@ -74,7 +74,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     private ImageView mScreenshotView;
     private ImageView mScreenshotFlash;
     private TextView mLongScreenshotToast;
-    private View mLongScreenshotCover;
+    private ViewGroup mLongScreenshotCover;
     private ValueAnimator mScreenshotAnimation;
     private ValueAnimator mExitScreenshotAnimation;
     private Context mContext;
@@ -153,7 +153,6 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         mLongScreenshotBtn = mRootView.findViewById(R.id.scroll_screenshot_btn);
         mLongScreenshotBtn.setOnClickListener(this);
 
-//        mBackgroundView = mRootView.findViewById(R.id.global_screenshot_background);
         mScreenshotView = mRootView.findViewById(R.id.global_screenshot);
         mScreenshotFlash = mRootView.findViewById(R.id.global_screenshot_flash);
     }
@@ -166,64 +165,6 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         dismissLongScreenshotToast();
         mPresenter.release();
         mIsRunning = false;
-    }
-
-    private Bitmap resizeBitmap(Bitmap bitmap, float scale) {
-        Log.i(TAG, "resizeBitmap....");
-        if (bitmap == null || bitmap.isRecycled())
-            return null;
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-
-        Matrix matrix = new Matrix();
-        matrix.postScale(scale, scale);
-
-        return Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-    }
-
-
-    private int getNavigationBarWidth() {
-        Resources resources = mContext.getResources();
-        int resourceId = resources.getIdentifier("navigation_bar_width", "dimen", "android");
-        if (resourceId > 0) {
-            return resources.getDimensionPixelSize(resourceId);
-        }
-        return 0;
-
-    }
-
-    private int getNavigationBarHeight() {
-        Resources resources = mContext.getResources();
-        int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            return resources.getDimensionPixelSize(resourceId);
-        }
-        return 0;
-    }
-
-    private Bitmap removeNavigationBar(Bitmap bitmap) {
-        boolean hasNavigationBar = ViewUtils.isNavigationBarShow();
-        if (!hasNavigationBar)
-            return bitmap;
-
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-
-        if (height > width) {//竖屏情况
-            int navigationHeight = getNavigationBarHeight();
-            if (navigationHeight == 0)
-                return bitmap;
-            return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
-                    bitmap.getHeight() - navigationHeight);
-        }
-
-        //横屏
-        int navigationWidth = getNavigationBarWidth();
-        if (navigationWidth == 0)
-            return bitmap;
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth() - navigationWidth,
-                bitmap.getHeight());
-
     }
 
     @Override
@@ -239,20 +180,17 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
             }
         }
         // Add the view for the animation
-        if (longScreenshot) {
-            int heightPixels = ViewUtils.getHeight();
-            int count = bitmap.getHeight() / heightPixels;
-            count = Math.max(1, Math.min(5, count));
-            if (count > 1) bitmap = resizeBitmap(bitmap, 1.00f / count);
-            Log.i(TAG, "mScreenBitmap.getHeight() = " + bitmap.getHeight()
-                    + ", mDisplayMetrics.heightPixels = " + heightPixels
-                    + ", count = " + count + ", 1.00f / count = " + (1.00f / count));
-        }
+        final int heightPixels = ViewUtils.getHeight();
+        final float scale = Math.min(0.8f, (float) heightPixels / bitmap.getHeight());
+        Log.i(TAG, "bitmap.getHeight() = " + bitmap.getHeight()
+                + ", mDisplayMetrics.heightPixels = " + heightPixels
+                + ", scale = " + scale);
+        final Bitmap resizeBitmap = ViewUtils.resizeBitmap(bitmap, scale);
 
         // Optimizations
-        bitmap.setHasAlpha(false);
-        bitmap.prepareToDraw();
-        mScreenshotView.setImageBitmap(bitmap);
+        resizeBitmap.setHasAlpha(false);
+        resizeBitmap.prepareToDraw();
+        mScreenshotView.setImageBitmap(resizeBitmap);
 
         mRootView.requestFocus();
 
@@ -324,7 +262,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
 
     private void clearFloatAnim() {
         if (mFloatAnim != null && mFloatAnim.isRunning())
-            mFloatAnim.end();
+            mFloatAnim.cancel();
     }
 
     @Override
@@ -358,7 +296,6 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
             }
             clearFloatAnim();
         } else {
-
             if (!mKeyguardManager.isKeyguardLocked() || !mKeyguardManager.isKeyguardSecure()) {
                 mLongScreenshotBtn.animate().alpha(1);
             }
@@ -412,13 +349,14 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         switch (v.getId()) {
             case R.id.scroll_screenshot_btn:
                 mLongScreenshotBtn.setVisibility(View.GONE);
-                showLongScreenshotToast();
+                addCover();
+                addToast();
                 removeScreenshotView();
                 takeLongScreenshot();
                 break;
             case R.id.long_screenshot_title:
                 Log.i(TAG, "onClick... toast_dialog_bg_container");
-                enableDialogTouchFlag(false);
+                updateLongScreenshotView(false);
                 mPresenter.takeLongScreenshot(mIsAutoLongScreenshot);
                 break;
             case R.id.long_screenshot_indicator_root:
@@ -431,9 +369,9 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
 
     private void takeLongScreenshot() {
         if (mIsAutoLongScreenshot) {
-            mPresenter.takeLongScreenshot(mIsAutoLongScreenshot);
+            mPresenter.takeLongScreenshot(true);
         } else {
-            enableDialogTouchFlag(true);
+            updateLongScreenshotView(true);
         }
     }
 
@@ -447,20 +385,9 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
         return true;
     }
 
-    private void enableDialogTouchFlag(boolean enable) {
-        TextView title = mLongScreenshotToast.findViewById(R.id.long_screenshot_title);
-        if (enable) {
-            title.setText(R.string.long_screenshot_indicator);
-            mLongScreenshotCover.findViewById(R.id.long_screenshot_indicator).setVisibility(View.VISIBLE);
-        } else {
-            title.setText(R.string.long_screenshot_progressing);
-            mLongScreenshotCover.findViewById(R.id.long_screenshot_indicator).setVisibility(View.GONE);
-        }
-    }
-
-    private void showLongScreenshotToast() {
-        addCover();
-        addToast();
+    private void updateLongScreenshotView(boolean isShowToast) {
+        mLongScreenshotToast.setText(isShowToast ? R.string.long_screenshot_indicator : R.string.long_screenshot_progressing);
+        mLongScreenshotCover.setVisibility(isShowToast ? View.VISIBLE : View.GONE);
     }
 
     private void dismissLongScreenshotToast() {
@@ -475,9 +402,7 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
     }
 
     private void addCover() {
-        mLongScreenshotCover = mLayoutInflater.inflate(R.layout.long_screenshot_indicator, null);
-        mLongScreenshotCover.setOnClickListener(this);
-        //mLongScreenshotCover.setBackgroundColor(Color.parseColor("#80ff0000"));
+        mLongScreenshotCover = (ViewGroup) mLayoutInflater.inflate(R.layout.long_screenshot_indicator, null);
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 0,
                 ViewUtils.getFloatType(),
@@ -494,10 +419,13 @@ public class ScreenshotModule implements BaseModule, ScreenshotContract.View, Sw
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
-            mLongScreenshotCover.setOnClickListener(null);
+        } else {
+            int screenShowWidth = ViewUtils.getWidth();
+            layoutParams.width = screenShowWidth - 24;//leave some space for swipe
+            mLongScreenshotCover.setBackgroundColor(Color.TRANSPARENT);
+            mLongScreenshotCover.setOnClickListener(this);
+            mLongScreenshotCover.removeAllViews();
         }
-        int screenShowWidth = ViewUtils.getWidth();
-        layoutParams.width = screenShowWidth - 24;//leave some space for swipe
         layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED;
         mWindowManager.addView(mLongScreenshotCover, layoutParams);
     }

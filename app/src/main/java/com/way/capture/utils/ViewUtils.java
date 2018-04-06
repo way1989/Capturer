@@ -4,12 +4,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.View;
@@ -137,6 +140,42 @@ public final class ViewUtils {
     public static boolean isLandscape(Context context) {
         return context.getResources().getConfiguration()
                 .orientation == Configuration.ORIENTATION_LANDSCAPE;
+    }
+
+    public static Bitmap removeNavigationBar(Bitmap bitmap) {
+        boolean hasNavigationBar = ViewUtils.isNavigationBarShow();
+        if (!hasNavigationBar)
+            return bitmap;
+
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+
+        int navigationSize = ViewUtils.getNavigationBarHeight();
+        if (navigationSize == 0)
+            return bitmap;
+        //竖屏
+        if (height > width) {
+            return Bitmap.createBitmap(bitmap, 0, 0, width,
+                    height - navigationSize);
+        }
+
+        //横屏
+        return Bitmap.createBitmap(bitmap, 0, 0, width - navigationSize,
+                height);
+
+    }
+
+
+    public static Bitmap resizeBitmap(Bitmap bitmap, float scale) {
+        if (bitmap == null || bitmap.isRecycled())
+            return null;
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+
+        Matrix matrix = new Matrix();
+        matrix.postScale(scale, scale);
+
+        return Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
     }
 
     public static void setStatusBarStyle(@NonNull Activity activity, boolean onlyDarkStatusBar) {

@@ -287,7 +287,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
     }
 
     private void loadData() {
-        if (isAdded() && getUserVisibleHint() && !hasLoadData) {
+        if (isAdded() && getUserVisibleHint() && !hasLoadData && mScreenshotPresenter != null) {
             mScreenshotPresenter.getData(mType);
             hasLoadData = true;
         }

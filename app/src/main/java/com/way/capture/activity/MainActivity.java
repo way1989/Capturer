@@ -156,7 +156,7 @@ public class MainActivity extends BaseActivity {
                 recreate();
                 return true;
             case R.id.action_help:
-                new FinestWebView.Builder(MainActivity.this)
+                new FinestWebView.Builder(App.getContext())
                         .titleDefault(getString(R.string.help))
                         .show("https://way1989.github.io/2016/05/15/help/CapturerHelp");
                 return true;

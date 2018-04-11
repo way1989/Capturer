@@ -15,6 +15,7 @@ import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 
 import com.thefinestartist.finestwebview.FinestWebView;
+import com.way.capture.App;
 import com.way.capture.R;
 import com.way.capture.service.ShakeService;
 import com.way.capture.utils.AppUtil;
@@ -72,7 +73,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 //                FIRUtils.checkForUpdate(getActivity(), true);
                 break;
             case "about_author":
-                new FinestWebView.Builder(getActivity())
+                new FinestWebView.Builder(App.getContext())
                         .titleDefault(getString(R.string.settings_self_title))
                         .show("https://github.com/way1989");
                 break;

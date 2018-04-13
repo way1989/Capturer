@@ -45,8 +45,7 @@ public abstract class BaseFragment extends RxFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (mRoot != null) {
             ViewGroup parent = (ViewGroup) mRoot.getParent();
             if (parent != null)

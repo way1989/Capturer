@@ -25,7 +25,10 @@ import com.bumptech.glide.Glide;
 import com.way.capture.R;
 import com.way.capture.base.BaseActivity;
 import com.way.capture.data.DataInfo;
+import com.way.capture.fragment.DetailsBaseFragment;
 import com.way.capture.fragment.DetailsFragment;
+import com.way.capture.fragment.DetailsGifFragment;
+import com.way.capture.fragment.DetailsRecordFragment;
 import com.way.capture.fragment.ScreenshotFragment;
 import com.way.capture.utils.AppUtil;
 import com.way.capture.utils.ViewUtils;
@@ -40,7 +43,7 @@ import java.util.Map;
 public class DetailsActivity extends BaseActivity {
     private static final String TAG = "DetailsActivity";
     private static final String STATE_CURRENT_PAGE_POSITION = "state_current_page_position";
-    private DetailsFragment mCurrentDetailsFragment;
+    private DetailsBaseFragment mCurrentDetailsFragment;
     private int mCurrentPosition;
     private int mStartingPosition;
     private boolean mIsReturning;
@@ -224,6 +227,9 @@ public class DetailsActivity extends BaseActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_info, menu);
+        if (mType != DataInfo.TYPE_SCREEN_RECORD) {
+            menu.findItem(R.id.video_edit).setVisible(false);
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -241,9 +247,9 @@ public class DetailsActivity extends BaseActivity {
             case android.R.id.home:
                 finishAfterTransition();
                 break;
-            /*case R.id.image_delete:
-
-                break;*/
+            case R.id.video_edit:
+                VideoActivity.startVideoActivity(this, path, null);
+                break;
             case R.id.image_info:
                 AppUtil.showDetails(this, path, mType);
                 break;
@@ -271,13 +277,18 @@ public class DetailsActivity extends BaseActivity {
 
         @Override
         public Fragment getItem(int position) {
-            return DetailsFragment.newInstance(mType, mDatas.get(position).path);
+            if (mType == DataInfo.TYPE_SCREEN_RECORD) {
+                return DetailsRecordFragment.newInstance(mDatas.get(position));
+            } else if (mType == DataInfo.TYPE_SCREEN_GIF) {
+                return DetailsGifFragment.newInstance(mDatas.get(position));
+            }
+            return DetailsFragment.newInstance(mDatas.get(position));
         }
 
         @Override
         public void setPrimaryItem(ViewGroup container, int position, Object object) {
             super.setPrimaryItem(container, position, object);
-            mCurrentDetailsFragment = (DetailsFragment) object;
+            mCurrentDetailsFragment = (DetailsBaseFragment) object;
         }
 
         @Override

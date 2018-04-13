@@ -243,7 +243,7 @@ public class ScreenshotFragment extends BaseScreenshotFragment implements
                     if (mCab == null) {
                         mCab = new MaterialCab((AppCompatActivity) getActivity(), R.id.cab_stub)
                                 .setBackgroundColor(getResources().getColor(R.color.colorAccentExtra))
-                                .setMenu(R.menu.menu_screenshot_item)
+                                .setMenu(R.menu.menu_drag_selection)
                                 .setCloseDrawableRes(R.drawable.ic_clear)
                                 .start(ScreenshotFragment.this);
                     }

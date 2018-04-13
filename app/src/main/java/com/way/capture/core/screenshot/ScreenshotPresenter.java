@@ -35,7 +35,6 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
 
 
-
 /**
  * Created by android on 16-8-19.
  */

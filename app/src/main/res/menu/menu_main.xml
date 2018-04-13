@@ -4,7 +4,7 @@
     tools:context=".activity.MainActivity">
     <item
         android:id="@+id/action_night_mode"
-        android:icon="@drawable/ic_mode_day"
+        android:icon="@drawable/ic_brightness_day"
         android:title="@string/nav_night_mode"
         app:showAsAction="never" />
     <item

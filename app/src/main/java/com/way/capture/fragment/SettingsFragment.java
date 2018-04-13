@@ -1,24 +1,19 @@
 package com.way.capture.fragment;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
-import android.preference.SwitchPreference;
 
 import com.thefinestartist.finestwebview.FinestWebView;
 import com.way.capture.App;
 import com.way.capture.R;
-import com.way.capture.service.ShakeService;
-import com.way.capture.utils.AppUtil;
 import com.way.capture.utils.ScrollUtils;
 //import com.way.firupgrade.FIRUtils;
 

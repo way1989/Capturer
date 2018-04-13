@@ -89,8 +89,8 @@ public class BitmapCollageUtil {
     }
 
     /**
-     * @param bitmap       需要寻找的图片
-     * @param offset       偏移量
+     * @param bitmap 需要寻找的图片
+     * @param offset 偏移量
      * @return 高度
      */
     private int getNotPureLineHeight(Bitmap bitmap, int offset, int length) {
@@ -133,7 +133,7 @@ public class BitmapCollageUtil {
         //改变first bitmap基线5次，确保找到正确的分割线
         for (int i = 0; i < compareCount; i++) {
             //从下往上找到不是纯色的一行作为参考基线
-            final int baseLine = getNotPureLineHeight(firstBitmap,bottomSameHeight + i * baseLineReduceHeight, baseLineReduceHeight);
+            final int baseLine = getNotPureLineHeight(firstBitmap, bottomSameHeight + i * baseLineReduceHeight, baseLineReduceHeight);
             Log.d(TAG, "compareTwoBitmap: getDividingLinePair count = " + (i + 1) + ", baseLine = " + baseLine);
             if (baseLine == -1) continue;
             Pair<Integer, Integer> pair = getDividingLinePair(firstBitmap, secondBitmap, baseLine);

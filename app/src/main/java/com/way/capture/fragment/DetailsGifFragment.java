@@ -18,7 +18,6 @@ import com.way.capture.data.DataInfo;
 import com.way.capture.utils.glide.GlideHelper;
 
 import butterknife.BindView;
-import cn.jzvd.JZVideoPlayerStandard;
 
 public class DetailsGifFragment extends DetailsBaseFragment {
     private static final String TAG = "DetailsRecordFragment";

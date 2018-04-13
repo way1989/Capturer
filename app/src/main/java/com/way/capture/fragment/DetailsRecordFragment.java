@@ -49,6 +49,12 @@ public class DetailsRecordFragment extends DetailsBaseFragment {
         super.initData();
         mDetailImage.setTransitionName(mDataInfo.path);
         mDetailImage.fullscreenButton.setVisibility(View.GONE);
+        mDetailImage.backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().onBackPressed();
+            }
+        });
         mDetailImage.textureViewContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

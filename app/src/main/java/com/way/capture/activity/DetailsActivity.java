@@ -3,7 +3,6 @@ package com.way.capture.activity;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -226,7 +225,7 @@ public class DetailsActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_info, menu);
+        getMenuInflater().inflate(R.menu.menu_details, menu);
         if (mType != DataInfo.TYPE_SCREEN_RECORD) {
             menu.findItem(R.id.video_edit).setVisible(false);
         }
